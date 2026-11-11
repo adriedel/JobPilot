@@ -1,13 +1,31 @@
-name: QA
+name: E2E Tests
+
+# Playwright-Tests gegen den lokal gebauten Demo-Modus (ohne Backend).
+# Läuft im offiziellen Playwright-Container → Screenshots identisch zu
+# `npm run test:visual:update` (Version muss zu @playwright/test passen).
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: ["main", "staging"]
+    paths:
+      - "JobPilot/frontend/**"
+      - ".github/workflows/qa.yml"
   pull_request:
+    paths:
+      - "JobPilot/frontend/**"
+      - ".github/workflows/qa.yml"
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  frontend-quality:
+  e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.0-noble
+      options: --ipc=host
     defaults:
       run:
         working-directory: JobPilot/frontend
@@ -26,14 +44,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Check Playwright version matches container
+        run: |
+          v=$(node -p "require('@playwright/test/package.json').version")
+          test "$v" = "1.65.0" || { echo "::error::@playwright/test ist $v, Container ist 1.65.0 – qa.yml & staging-e2e.yml anpassen"; exit 1; }
 
-      - name: Build
-        run: npm run build
+      - name: Run Playwright tests
+        env:
+          HOME: /root # von Playwright für Container-Jobs empfohlen
+        run: npx playwright test
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: E2E tests
-        run: npm run test:e2e
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: JobPilot/frontend/playwright-report/
+          retention-days: 14

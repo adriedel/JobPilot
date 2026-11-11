@@ -73,6 +73,18 @@ const configuredOrigins = [
 ];
 const allowedOrigins = new Set(configuredOrigins.filter(Boolean));
 
+// Optional (nur Staging): Regex für wechselnde Origins, z.B. Vercel-Preview-URLs
+//   FRONTEND_ORIGIN_REGEX=^https://jobpilot-[a-z0-9-]+-adriedel\.vercel\.app$
+// Auf Produktion NICHT setzen.
+let allowedOriginPattern = null;
+if (process.env.FRONTEND_ORIGIN_REGEX) {
+  try {
+    allowedOriginPattern = new RegExp(process.env.FRONTEND_ORIGIN_REGEX);
+  } catch (error) {
+    console.error("Ungültige FRONTEND_ORIGIN_REGEX:", error.message);
+  }
+}
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -82,7 +94,11 @@ app.use(
       const isLocalhostOrigin =
         /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
-      if (isLocalhostOrigin || allowedOrigins.has(origin)) {
+      if (
+        isLocalhostOrigin ||
+        allowedOrigins.has(origin) ||
+        allowedOriginPattern?.test(origin)
+      ) {
         return callback(null, true);
       }
 
