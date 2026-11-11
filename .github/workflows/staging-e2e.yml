@@ -16,7 +16,7 @@ on:
       url:
         description: "URL, gegen die getestet wird"
         required: true
-        default: "https://staging.bewerbungstracker.com"
+        default: "https://jobpilot-git-staging-adriedels-projects.vercel.app"
 
 jobs:
   smoke:
