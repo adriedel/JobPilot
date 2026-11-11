@@ -39,6 +39,37 @@ test.describe("Landing Hero @smoke", () => {
     await expect(light(page)).toHaveCSS("transition-duration", "0s");
   });
 
+  test("liegt am Handy halbtransparent hinter Headline und Text", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openLanding(page);
+    const visual = page.locator(".landing-hero-visual");
+
+    await expect(visual).toHaveCSS("position", "absolute");
+    await expect(visual).toHaveCSS("opacity", "0.3");
+    await expect(visual).toHaveCSS("pointer-events", "none");
+
+    // Text liegt darüber und beginnt oben im Hero (Flieger nimmt keinen Platz ein)
+    const content = page.locator(".landing-hero-content");
+    await expect(content).toHaveCSS("z-index", "1");
+    const [heroBox, contentBox] = await Promise.all([
+      page.locator(".landing-hero").boundingBox(),
+      content.boundingBox(),
+    ]);
+    expect(contentBox.y - heroBox.y).toBeLessThan(80);
+
+    // Buttons bleiben klickbar
+    await page.getByRole("link", { name: "Funktionen ansehen" }).click();
+    await expect(page).toHaveURL(/#funktionen$/);
+  });
+
+  test("steht auf dem Desktop unverändert neben dem Text", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await openLanding(page);
+    const visual = page.locator(".landing-hero-visual");
+    await expect(visual).toHaveCSS("position", "static");
+    await expect(visual).toHaveCSS("opacity", "1");
+  });
+
   test("beide Varianten sind geladen und haben feste Maße", async ({ page }) => {
     await openLanding(page);
     for (const img of [light(page), dark(page)]) {

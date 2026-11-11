@@ -701,6 +701,29 @@ a.landing-cta-secondary {
   .landing-hero-content {
     text-align: center;
     align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Papierflieger liegt am Handy/Tablet halbtransparent hinter Headline
+     und Text, statt als eigener Block unter den Buttons */
+  .landing-hero {
+    position: relative;
+  }
+
+  .landing-hero-visual {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .landing-hero-art {
+    max-width: 380px;
   }
 
   .landing-hero-description {
