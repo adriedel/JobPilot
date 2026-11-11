@@ -102,7 +102,7 @@ Environment Variables:
 | `JWT_SECRET` | **neuer** zufälliger Wert (nicht der von Produktion!) |
 | `FRONTEND_URL` | `https://staging.bewerbungstracker.com` (für Links in E-Mails) |
 | `FRONTEND_URLS` | `https://staging.bewerbungstracker.com` |
-| `FRONTEND_ORIGIN_REGEX` | `^https://jobpilot-[a-z0-9-]+-<vercel-team>\.vercel\.app$` (erlaubt PR-Previews; `<vercel-team>` aus einer Preview-URL ablesen) |
+| `FRONTEND_ORIGIN_REGEX` | `^https://jobpilot-[a-z0-9-]+-adriedels-projects\.vercel\.app$` (erlaubt PR-Previews) |
 | `RESEND_API_KEY`, `FROM_EMAIL` | wie Produktion (damit Registrierung/Passwort-Reset testbar sind) |
 | `CLOUDINARY_*` | wie Produktion (oder eigener Cloudinary-Account) |
 
@@ -143,9 +143,9 @@ Dieser Account wird von den automatischen Smoke-Tests benutzt.
 | Secret | `E2E_USER_PASSWORD` | Passwort des Test-Accounts |
 | Secret | `VERCEL_AUTOMATION_BYPASS_SECRET` | nur falls Deployment Protection aktiv |
 
-> Der automatische Trigger von `staging-e2e.yml` wird erst aktiv, wenn der Workflow auf `main` liegt
-> (GitHub liest `deployment_status`-Workflows immer aus dem Default-Branch).
-> Vorher manuell testen: *Actions → Staging Smoke Tests → Run workflow*.
+> `staging-e2e.yml` startet automatisch nach jedem Vercel-Deployment, das nicht Produktion ist.
+> Manuell gegen eine beliebige URL: *Actions → Staging Smoke Tests → Run workflow*.
+> Landet der Test auf `vercel.com/login`, ist die Deployment Protection noch aktiv (siehe Schritt 4.3).
 
 ---
 

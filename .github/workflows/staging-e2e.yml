@@ -4,9 +4,6 @@ name: Staging Smoke Tests
 # und testet genau diese URL (inkl. echtem Staging-Backend).
 # Kann auch manuell mit beliebiger URL gestartet werden (Actions → Run workflow).
 #
-# Hinweis: "deployment_status"-Workflows werden immer aus dem Default-Branch (main)
-# gelesen – der automatische Trigger ist also erst nach dem Merge nach main aktiv.
-#
 # Benötigt (Settings → Secrets and variables → Actions):
 #   Variables: STAGING_API_URL                 z.B. https://jobpilot-backend-staging.onrender.com
 #   Secrets:   E2E_USER_EMAIL, E2E_USER_PASSWORD  (Test-Account auf Staging, optional)
