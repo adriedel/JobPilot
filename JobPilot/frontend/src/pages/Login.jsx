@@ -17,6 +17,7 @@ function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const resetSuccess = searchParams.get("reset") === "success";
+  const sessionExpired = searchParams.get("session") === "expired";
 
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
@@ -111,6 +112,12 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <h2>Anmelden</h2>
+
+          {sessionExpired && (
+            <div className="error-message session-expired-message" role="status">
+              Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.
+            </div>
+          )}
 
           {resetSuccess && (
             <div className="success-message">

@@ -6,6 +6,75 @@ const DEMO_USER = {
   name: "Demo-Zugang",
 };
 
+// ==================== SESSION ====================
+
+// Codes, mit denen das Backend (authMiddleware) eine beendete Sitzung meldet
+const SESSION_ERROR_CODES = ["TOKEN_MISSING", "TOKEN_INVALID", "TOKEN_EXPIRED"];
+// Ältere Backends senden noch keinen Code – dann an der Meldung erkennen
+const SESSION_ERROR_MESSAGES = [
+  "Token abgelaufen - bitte neu einloggen",
+  "Kein Token - Zugriff verweigert",
+];
+
+export const SESSION_EXPIRED_PATH = "/login?session=expired";
+
+/** Ablaufzeitpunkt (ms) aus dem JWT lesen, ohne es zu verifizieren. null = unbekannt. */
+export function getTokenExpiry(token) {
+  if (!token) return null;
+  try {
+    const part = token.split(".")[1];
+    const base64 = part.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    const { exp } = JSON.parse(atob(padded));
+    return typeof exp === "number" ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isTokenExpired(token) {
+  const expiry = getTokenExpiry(token);
+  return expiry !== null && expiry <= Date.now();
+}
+
+export function clearSession() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+}
+
+/** Sitzung beenden und mit Hinweis zum Login schicken. */
+export function endExpiredSession() {
+  clearSession();
+  if (window.location.pathname !== "/login") {
+    window.location.replace(SESSION_EXPIRED_PATH);
+  }
+}
+
+/**
+ * fetch für geschützte Endpunkte: meldet der Server eine abgelaufene oder
+ * ungültige Sitzung, wird automatisch abgemeldet. Andere 401-Fälle (z. B.
+ * falsches aktuelles Passwort) werden normal an den Aufrufer zurückgegeben.
+ */
+export async function authFetch(url, options) {
+  const response = await fetch(url, options);
+
+  if (!DEMO_MODE && response.status === 401) {
+    const data = await response
+      .clone()
+      .json()
+      .catch(() => ({}));
+    if (
+      SESSION_ERROR_CODES.includes(data.code) ||
+      SESSION_ERROR_MESSAGES.includes(data.error)
+    ) {
+      endExpiredSession();
+      throw new Error("Sitzung abgelaufen");
+    }
+  }
+
+  return response;
+}
+
 // Register
 export async function register(email, password, name) {
   const response = await fetch(`${API_URL}/auth/register`, {
@@ -59,7 +128,7 @@ export async function getCurrentUser() {
     throw new Error("Nicht eingeloggt");
   }
 
-  const response = await fetch(`${API_URL}/auth/me`, {
+  const response = await authFetch(`${API_URL}/auth/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -83,7 +152,8 @@ export function logout() {
 
 // Check if logged in
 export function isAuthenticated() {
-  return DEMO_MODE || !!localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+  return DEMO_MODE || (!!token && !isTokenExpired(token));
 }
 
 // Get token
@@ -107,7 +177,7 @@ async function parseJSON(response) {
 // Update profile name
 export async function updateProfile(name) {
   const token = getToken();
-  const response = await fetch(`${API_URL}/auth/profile`, {
+  const response = await authFetch(`${API_URL}/auth/profile`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -125,7 +195,7 @@ export async function uploadProfileImage(file) {
   const token = getToken();
   const formData = new FormData();
   formData.append("image", file);
-  const response = await fetch(`${API_URL}/auth/profile/image`, {
+  const response = await authFetch(`${API_URL}/auth/profile/image`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
@@ -138,7 +208,7 @@ export async function uploadProfileImage(file) {
 // Change email
 export async function changeEmail(email) {
   const token = getToken();
-  const response = await fetch(`${API_URL}/auth/profile/email`, {
+  const response = await authFetch(`${API_URL}/auth/profile/email`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -154,7 +224,7 @@ export async function changeEmail(email) {
 // Change password
 export async function changePassword(currentPassword, newPassword) {
   const token = getToken();
-  const response = await fetch(`${API_URL}/auth/profile/password`, {
+  const response = await authFetch(`${API_URL}/auth/profile/password`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -170,7 +240,7 @@ export async function changePassword(currentPassword, newPassword) {
 // Update avatar config (null = reset to seed-based auto avatar)
 export async function updateAvatarConfig(config) {
   const token = getToken();
-  const response = await fetch(`${API_URL}/auth/profile/avatar-config`, {
+  const response = await authFetch(`${API_URL}/auth/profile/avatar-config`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -186,7 +256,7 @@ export async function updateAvatarConfig(config) {
 // Delete profile image
 export async function deleteProfileImage() {
   const token = getToken();
-  const response = await fetch(`${API_URL}/auth/profile/image`, {
+  const response = await authFetch(`${API_URL}/auth/profile/image`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -199,7 +269,7 @@ export async function deleteProfileImage() {
 
 export async function getAdminUsers() {
   const token = getToken();
-  const response = await fetch(`${API_URL}/admin/users`, {
+  const response = await authFetch(`${API_URL}/admin/users`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const data = await parseJSON(response);
@@ -209,7 +279,7 @@ export async function getAdminUsers() {
 
 export async function updateUserRole(userId, role) {
   const token = getToken();
-  const response = await fetch(`${API_URL}/admin/users/${userId}/role`, {
+  const response = await authFetch(`${API_URL}/admin/users/${userId}/role`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({ role }),
@@ -221,7 +291,7 @@ export async function updateUserRole(userId, role) {
 
 export async function deleteAdminUser(userId) {
   const token = getToken();
-  const response = await fetch(`${API_URL}/admin/users/${userId}`, {
+  const response = await authFetch(`${API_URL}/admin/users/${userId}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
