@@ -15,6 +15,7 @@ import QuickAdd from "./pages/QuickAdd";
 import BookmarkletInstall from "./pages/BookmarkletInstall";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminPage from "./pages/AdminPage";
+import PreviewPage from "./pages/PreviewPage";
 import { DEMO_MODE } from "./utils/constants";
 import "./index.css";
 
@@ -72,6 +73,9 @@ export function Root() {
         {/* Bookmarklet Routes */}
         <Route path="/quick-add" element={<QuickAdd />} />
         <Route path="/bookmarklet" element={<BookmarkletInstall />} />
+
+        {/* Dashboard-Vorschau für die Landing Page (läuft im iframe) */}
+        <Route path="/preview" element={<PreviewPage />} />
 
         {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />

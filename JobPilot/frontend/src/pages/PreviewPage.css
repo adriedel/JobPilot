@@ -1,0 +1,20 @@
+/* Vorschau-Seite im iframe: keine Scrollbalken, nicht auswählbar */
+html:has(.preview-page),
+html:has(.preview-page) body {
+  overflow: hidden;
+}
+
+.preview-page {
+  user-select: none;
+}
+
+.preview-page .app {
+  min-height: 0;
+}
+
+/* Auf dem Handy direkt zu den Bewerbungskarten: Statistik & Suche ausblenden */
+@media (max-width: 600px) {
+  .preview-page .stat-cards {
+    display: none;
+  }
+}
