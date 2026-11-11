@@ -9,6 +9,7 @@ import TrendingIcon from "../assets/icons/trending.svg?react";
 import CalendarIcon from "../assets/icons/calendar.svg?react";
 import PlanIcon from "../assets/icons/plan.svg?react";
 import { isAuthenticated } from "../services/auth";
+import AppPreview from "../components/AppPreview/AppPreview";
 
 function LandingPage({ onEnterApp }) {
   const navigate = useNavigate();
@@ -169,6 +170,9 @@ function LandingPage({ onEnterApp }) {
           </div>
         </div>
       </section>
+
+      {/* App-Vorschau */}
+      <AppPreview darkMode={darkMode} />
 
       {/* Stats Section */}
       <section className="landing-stats">
