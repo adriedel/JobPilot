@@ -66,7 +66,8 @@ Dev-Ops/
 ├── .github/
 │   └── workflows/
 │       ├── jobpilot-ci.yml   # Lint, Build, Docker-Images (+ Push zu GHCR)
-│       └── qa.yml            # Lint, Build, Playwright-E2E-Tests
+│       ├── qa.yml            # Playwright-E2E- & Screenshot-Tests (Demo-Modus)
+│       └── staging-e2e.yml   # Smoke-Tests gegen Vercel-Preview/Staging
 └── JobPilot/
     ├── docker-compose.yml
     ├── backend/
@@ -270,7 +271,7 @@ Die Benutzeroberfläche ist über `i18next`/`react-i18next` vollständig auf Deu
 
 ## 🔄 CI/CD-Pipeline
 
-Für das Projekt sind zwei GitHub-Actions-Workflows eingerichtet:
+Für das Projekt sind drei GitHub-Actions-Workflows eingerichtet:
 
 ### `jobpilot-ci.yml`
 
@@ -284,9 +285,13 @@ Für das Projekt sind zwei GitHub-Actions-Workflows eingerichtet:
 
 ### `qa.yml`
 
-Läuft bei jedem Push auf `main`/`master` sowie bei Pull Requests: installiert die Frontend-Dependencies, lintet, baut das Frontend und führt anschließend Playwright-E2E-Tests (`npm run test:e2e`) aus.
+Läuft bei Push auf `main`/`staging` sowie bei Pull Requests: baut das Frontend im Demo-Modus und führt die Playwright-Tests (Funktion, Smoke, Screenshot-Vergleich; Desktop + Handy) im offiziellen Playwright-Container aus. Der HTML-Report wird als Artifact hochgeladen.
 
-> **Hinweis:** Die End-to-End-Testsuite befindet sich aktuell im Aufbau; der `test:e2e`-Skript-Eintrag und die zugehörigen Playwright-Tests sind im Frontend-`package.json` noch zu ergänzen, damit der `qa.yml`-Workflow erfolgreich durchläuft.
+### `staging-e2e.yml`
+
+Startet automatisch, sobald Vercel ein Preview-/Staging-Deployment fertig hat, und führt die `@smoke`-Tests gegen genau diese URL aus (inkl. echtem Staging-Backend). Manuell über *Actions → Run workflow* mit beliebiger URL startbar.
+
+Details zu Tests und Testumgebung: [JobPilot/TESTING.md](JobPilot/TESTING.md)
 
 Damit werden zentrale DevOps-Schritte wie **Build, Qualitätssicherung und Bereitstellung der Laufzeitumgebung** in strukturierter Form automatisiert abgedeckt.
 
