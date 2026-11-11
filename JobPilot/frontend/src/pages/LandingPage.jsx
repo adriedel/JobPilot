@@ -4,12 +4,117 @@ import "./LandingPage.css";
 import BriefcaseIcon from "../assets/icons/briefcase-white.svg?react";
 import SunIcon from "../assets/icons/sun.svg?react";
 import MoonIcon from "../assets/icons/moon.svg?react";
-import CheckIcon from "../assets/icons/check.svg?react";
-import TrendingIcon from "../assets/icons/trending.svg?react";
-import CalendarIcon from "../assets/icons/calendar.svg?react";
 import PlanIcon from "../assets/icons/plan.svg?react";
+import PersonIcon from "../assets/icons/person-2.svg?react";
+import TrendingIcon from "../assets/icons/trending.svg?react";
+import PinIcon from "../assets/icons/pin.svg?react";
 import { isAuthenticated } from "../services/auth";
 import AppPreview from "../components/AppPreview/AppPreview";
+
+// Nur Funktionen, die die App wirklich hat
+const FEATURES = [
+  {
+    icon: PlanIcon,
+    title: "Status-Tracking",
+    description:
+      "Von „In Planung“ bis „Angenommen“: Du siehst auf einen Blick, wo jede Bewerbung steht.",
+    demo: (
+      <div className="landing-mini-pills">
+        <span className="landing-mini-pill status-beworben">Beworben</span>
+        <span className="landing-mini-pill status-stufe_weiter">Stufe weiter</span>
+        <span className="landing-mini-pill status-angenommen">Angenommen</span>
+        <span className="landing-mini-pill status-abgelehnt">Abgelehnt</span>
+      </div>
+    ),
+  },
+  {
+    icon: PersonIcon,
+    title: "Notizen & Kontakte",
+    description:
+      "Ansprechperson, Gehalt und Notizen direkt an der Bewerbung – genau dort, wo du sie vor dem Gespräch brauchst.",
+    demo: (
+      <div className="landing-mini-note">
+        <strong>Lisa Müller</strong> · Portfolio verschickt, Rückmeldung
+        nächste Woche
+      </div>
+    ),
+  },
+  {
+    icon: TrendingIcon,
+    title: "Statistiken",
+    description:
+      "Wie viele Bewerbungen laufen, wie viele kommen weiter? Du erkennst, was funktioniert.",
+    demo: (
+      <div className="landing-mini-stats">
+        <span>
+          <strong>12</strong> Gesamt
+        </span>
+        <span>
+          <strong>4</strong> Stufe weiter
+        </span>
+        <span>
+          <strong>1</strong> Angenommen
+        </span>
+      </div>
+    ),
+  },
+  {
+    icon: PinIcon,
+    title: "Bookmarklet & PDF-Export",
+    description:
+      "Stellenanzeigen mit einem Klick aus dem Jobportal übernehmen und alle Bewerbungen als PDF exportieren.",
+    demo: (
+      <div className="landing-mini-pills">
+        <span className="landing-mini-chip">+ Aus Jobportal übernehmen</span>
+        <span className="landing-mini-chip">PDF-Export</span>
+      </div>
+    ),
+  },
+];
+
+const STEPS = [
+  {
+    title: "Konto anlegen",
+    description: "Kostenlos registrieren, ohne Installation. JobPilot läuft im Browser.",
+  },
+  {
+    title: "Bewerbungen eintragen",
+    description:
+      "Unternehmen, Stelle und Datum – Kontakte und Notizen ergänzt du, wann du willst.",
+  },
+  {
+    title: "Status aktuell halten",
+    description:
+      "Status ändern, Termine notieren und den Fortschritt in der Übersicht verfolgen.",
+  },
+];
+
+const FAQ = [
+  {
+    question: "Ist JobPilot wirklich kostenlos?",
+    answer: "Ja. Du kannst alle Funktionen kostenlos nutzen.",
+  },
+  {
+    question: "Muss ich etwas installieren?",
+    answer:
+      "Nein. JobPilot läuft im Browser – am Rechner und auf dem Handy. Das Bookmarklet zum Übernehmen von Stellenanzeigen ist optional.",
+  },
+  {
+    question: "Gibt es JobPilot auch auf Englisch?",
+    answer: "Ja. Du kannst jederzeit zwischen Deutsch und Englisch wechseln.",
+  },
+  {
+    question: "Kann ich mein Konto löschen?",
+    answer:
+      "Ja. Schreib uns kurz, dann löschen wir dein Konto mit allen Bewerbungen.",
+  },
+];
+
+const NAV_LINKS = [
+  { href: "#funktionen", label: "Funktionen" },
+  { href: "#so-funktionierts", label: "So funktioniert's" },
+  { href: "#faq", label: "FAQ" },
+];
 
 function LandingPage({ onEnterApp }) {
   const navigate = useNavigate();
@@ -50,33 +155,6 @@ function LandingPage({ onEnterApp }) {
     navigate(isAuthenticated() ? "/dashboard" : "/register");
   };
 
-  const features = [
-    {
-      icon: <PlanIcon className="feature-icon" />,
-      title: "Alles im Blick",
-      description:
-        "Verwalten Sie alle Ihre Bewerbungen an einem zentralen Ort. Keine verlorenen E-Mails oder vergessenen Termine mehr.",
-    },
-    {
-      icon: <TrendingIcon className="feature-icon" />,
-      title: "Status-Tracking",
-      description:
-        "Verfolgen Sie den Fortschritt jeder Bewerbung - von der Einreichung bis zur finalen Entscheidung.",
-    },
-    {
-      icon: <CalendarIcon className="feature-icon" />,
-      title: "Statistiken",
-      description:
-        "Erhalten Sie einen klaren Überblick über Ihre Bewerbungsaktivitäten mit aussagekräftigen Statistiken.",
-    },
-  ];
-
-  const stats = [
-    { value: "100%", label: "Kostenlos" },
-    { value: "5+", label: "Status-Kategorien" },
-    { value: "24/7", label: "Verfügbar" },
-  ];
-
   return (
     <div className="landing-page">
       {/* Navigation */}
@@ -87,6 +165,14 @@ function LandingPage({ onEnterApp }) {
               <BriefcaseIcon className="landing-logo-svg" aria-hidden="true" />
             </div>
             <span className="landing-logo-text">JobPilot</span>
+          </div>
+
+          <div className="landing-nav-links">
+            {NAV_LINKS.map((link) => (
+              <a key={link.href} href={link.href}>
+                {link.label}
+              </a>
+            ))}
           </div>
 
           <div className="landing-nav-top-actions">
@@ -124,26 +210,21 @@ function LandingPage({ onEnterApp }) {
       {/* Hero Section */}
       <section className="landing-hero">
         <div className="landing-hero-content">
-          <div className="landing-hero-badge">
-            <CheckIcon className="badge-icon" />
-            <span>Kostenlos und einfach zu nutzen</span>
-          </div>
           <h1 className="landing-hero-title">
-            Dein Bewerbungsprozess.
-            <br />
-            <span className="landing-hero-highlight">Organisiert.</span>
+            Dein Bewerbungsprozess{" "}
+            <span className="landing-hero-highlight">organisiert</span>
           </h1>
           <p className="landing-hero-description">
-            JobPilot hilft dir, den Überblick über all deine Bewerbungen zu
-            behalten. Tracke Status, Termine und Notizen - alles an einem Ort.
+            Status, Termine, Notizen und Kontakte zu jeder Bewerbung – an einem
+            Ort. Damit du weißt, wo du stehst. Kostenlos, direkt im Browser.
           </p>
           <div className="landing-hero-actions">
             <button className="landing-cta-primary" onClick={handleEnterApp}>
-              Kostenlos starten
+              Kostenlos starten <span aria-hidden="true">→</span>
             </button>
-            <button className="landing-cta-secondary" onClick={handleLogin}>
-              Zum Login
-            </button>
+            <a className="landing-cta-secondary" href="#funktionen">
+              Funktionen ansehen
+            </a>
           </div>
         </div>
 
@@ -174,54 +255,83 @@ function LandingPage({ onEnterApp }) {
       {/* App-Vorschau */}
       <AppPreview darkMode={darkMode} />
 
-      {/* Stats Section */}
-      <section className="landing-stats">
-        <div className="landing-stats-content">
-          {stats.map((stat, index) => (
-            <div key={index} className="landing-stat-item">
-              <span className="landing-stat-value">{stat.value}</span>
-              <span className="landing-stat-label">{stat.label}</span>
-            </div>
-          ))}
+      {/* Funktionen */}
+      <section className="landing-section landing-features" id="funktionen">
+        <div className="landing-section-content">
+          <p className="landing-eyebrow">Funktionen</p>
+          <h2 className="landing-section-title">
+            Alles, was eine Bewerbung braucht, ohne Ballast
+          </h2>
+          <p className="landing-section-subtitle">
+            Schluss mit Excel-Listen, Notizzetteln und Suchen im Postfach.
+          </p>
+
+          <div className="landing-features-grid">
+            {FEATURES.map(({ icon, title, description, demo }) => {
+              const Icon = icon;
+              return (
+                <article key={title} className="landing-feature-card">
+                  <Icon className="landing-feature-icon" aria-hidden="true" />
+                  <h3 className="landing-feature-title">{title}</h3>
+                  <p className="landing-feature-description">{description}</p>
+                  <div className="landing-feature-demo" aria-hidden="true">
+                    {demo}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="landing-features">
-        <div className="landing-features-content">
-          <div className="landing-features-header">
-            <h2 className="landing-features-title">Alles was du brauchst</h2>
-            <p className="landing-features-subtitle">
-              Einfache Tools, um deinen Bewerbungsprozess zu optimieren
-            </p>
-          </div>
+      {/* So funktioniert's */}
+      <section className="landing-section landing-steps" id="so-funktionierts">
+        <div className="landing-section-content">
+          <p className="landing-eyebrow">So funktioniert's</p>
+          <h2 className="landing-section-title">In drei Schritten startklar</h2>
 
-          <div className="landing-features-grid">
-            {features.map((feature, index) => (
-              <div key={index} className="landing-feature-card">
-                <div className="landing-feature-icon">{feature.icon}</div>
-                <h3 className="landing-feature-title">{feature.title}</h3>
-                <p className="landing-feature-description">
-                  {feature.description}
-                </p>
-              </div>
+          <ol className="landing-steps-grid">
+            {STEPS.map((step, index) => (
+              <li key={step.title} className="landing-step">
+                <span className="landing-step-number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 className="landing-step-title">{step.title}</h3>
+                <p className="landing-step-description">{step.description}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="landing-section landing-faq" id="faq">
+        <div className="landing-section-content landing-faq-content">
+          <p className="landing-eyebrow">FAQ</p>
+          <h2 className="landing-section-title">Häufige Fragen</h2>
+
+          <div className="landing-faq-list">
+            {FAQ.map((item, index) => (
+              <details key={item.question} open={index === 0}>
+                <summary>{item.question}</summary>
+                <p>{item.answer}</p>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA */}
       <section className="landing-cta-section">
-        <div className="landing-cta-content">
-          <h2 className="landing-cta-title">
-            Bereit, deine Bewerbungen zu organisieren?
-          </h2>
-          <p className="landing-cta-description">
-            Starte jetzt kostenlos und behalte den Überblick über all deine
-            Karrierechancen.
-          </p>
+        <div className="landing-cta-box">
+          <div>
+            <h2 className="landing-cta-title">Bereit für mehr Überblick?</h2>
+            <p className="landing-cta-description">
+              Starte kostenlos und behalte deine Bewerbungen im Griff.
+            </p>
+          </div>
           <button className="landing-cta-button" onClick={handleEnterApp}>
-            Jetzt loslegen
+            Jetzt kostenlos starten
           </button>
         </div>
       </section>
@@ -229,14 +339,19 @@ function LandingPage({ onEnterApp }) {
       {/* Footer */}
       <footer className="landing-footer">
         <div className="landing-footer-content">
-          <div className="landing-footer-logo">
-            <div className="landing-logo-icon small">
-              <BriefcaseIcon className="landing-logo-svg" aria-hidden="true" />
+          <div className="landing-footer-brand">
+            <div className="landing-footer-logo">
+              <div className="landing-logo-icon small">
+                <BriefcaseIcon className="landing-logo-svg" aria-hidden="true" />
+              </div>
+              <span className="landing-logo-text">JobPilot</span>
             </div>
-            <span className="landing-logo-text">JobPilot</span>
+            <p className="landing-footer-text">
+              Dein persönlicher Bewerbungstracker
+            </p>
           </div>
-          <p className="landing-footer-text">
-            Dein persönlicher Bewerbungstracker
+          <p className="landing-footer-copy">
+            © {new Date().getFullYear()} JobPilot
           </p>
         </div>
       </footer>
