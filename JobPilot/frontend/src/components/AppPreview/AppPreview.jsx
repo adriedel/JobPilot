@@ -57,7 +57,7 @@ function AppPreview({ darkMode }) {
 
   return (
     <section className="app-preview">
-      <h2 className="app-preview-title">So sieht dein Dashboard aus</h2>
+      <h2 className="app-preview-title">So könnte dein Dashboard aussehen</h2>
 
       <div
         className="app-preview-window"
