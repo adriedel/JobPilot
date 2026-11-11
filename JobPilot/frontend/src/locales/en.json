@@ -219,5 +219,73 @@
     "passwordChangeSuccess": "Password changed successfully"
   },
   "language": "English",
-  "darkMode": "Dark Mode"
+  "darkMode": "Dark Mode",
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "faq": "FAQ",
+      "login": "Log in",
+      "register": "Sign up"
+    },
+    "hero": {
+      "title": "Your job search,",
+      "highlight": "organized",
+      "description": "Status, dates, notes and contacts for every application – in one place. So you always know where you stand. Free, right in your browser.",
+      "start": "Get started for free",
+      "seeFeatures": "See features",
+      "hasAccount": "Already have an account?",
+      "login": "Log in"
+    },
+    "preview": {
+      "title": "This is what your dashboard looks like",
+      "label": "Preview of the JobPilot dashboard"
+    },
+    "features": {
+      "eyebrow": "Features",
+      "title": "Everything an application needs, nothing it doesn't",
+      "subtitle": "No more spreadsheets, sticky notes and digging through your inbox.",
+      "statusTitle": "Status tracking",
+      "statusText": "From “In Planning” to “Accepted”: see at a glance where every application stands.",
+      "notesTitle": "Notes & contacts",
+      "notesText": "Contact person, salary and notes right on the application – exactly where you need them before the interview.",
+      "notesDemo": "Portfolio sent, reply expected next week",
+      "statsTitle": "Statistics",
+      "statsText": "How many applications are open, how many move on? You see what works.",
+      "toolsTitle": "Bookmarklet & PDF export",
+      "toolsText": "Save job ads from job boards with one click and export all your applications as a PDF.",
+      "toolsDemoBookmarklet": "+ Save from job board",
+      "toolsDemoPdf": "PDF export"
+    },
+    "steps": {
+      "eyebrow": "How it works",
+      "title": "Ready in three steps",
+      "accountTitle": "Create an account",
+      "accountText": "Sign up for free, nothing to install. JobPilot runs in your browser.",
+      "addTitle": "Add your applications",
+      "addText": "Company, position and date – add contacts and notes whenever you like.",
+      "trackTitle": "Keep the status up to date",
+      "trackText": "Change the status, note dates and follow your progress in the overview."
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Frequently asked questions",
+      "freeQ": "Is JobPilot really free?",
+      "freeA": "Yes. You can use all features for free.",
+      "installQ": "Do I need to install anything?",
+      "installA": "No. JobPilot runs in your browser – on your computer and on your phone. The bookmarklet for saving job ads is optional.",
+      "languageQ": "Is JobPilot also available in German?",
+      "languageA": "Yes. You can switch between English and German at any time.",
+      "deleteQ": "Can I delete my account?",
+      "deleteA": "Yes. Send us a short message and we'll delete your account along with all applications."
+    },
+    "cta": {
+      "title": "Ready for a clearer overview?",
+      "description": "Start for free and keep your applications under control.",
+      "button": "Start for free now"
+    },
+    "footer": {
+      "tagline": "Your personal application tracker"
+    }
+  }
 }
