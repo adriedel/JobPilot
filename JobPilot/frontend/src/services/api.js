@@ -1,5 +1,5 @@
 import { API_URL, DEMO_MODE } from "../utils/constants";
-import { getToken } from "./auth";
+import { getToken, authFetch } from "./auth";
 import { notifyBewerbungenChanged } from "../utils/syncBus";
 
 const DEMO_STORAGE_KEY = "jobpilot-demo-bewerbungen";
@@ -114,7 +114,7 @@ export async function getAll(status = null) {
     ? `${API_URL}/bewerbungen?status=${status}`
     : `${API_URL}/bewerbungen`;
 
-  const response = await fetch(url, {
+  const response = await authFetch(url, {
     headers: getHeaders(),
   });
 
@@ -140,7 +140,7 @@ export async function getById(id) {
     return item;
   }
 
-  const response = await fetch(`${API_URL}/bewerbungen/${id}`, {
+  const response = await authFetch(`${API_URL}/bewerbungen/${id}`, {
     headers: getHeaders(),
   });
 
@@ -166,7 +166,7 @@ export async function create(bewerbung) {
     return { id: newItem.id, message: "Demo-Bewerbung erstellt" };
   }
 
-  const response = await fetch(`${API_URL}/bewerbungen`, {
+  const response = await authFetch(`${API_URL}/bewerbungen`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(bewerbung),
@@ -197,7 +197,7 @@ export async function update(id, bewerbung) {
     return { message: "Demo-Bewerbung aktualisiert" };
   }
 
-  const response = await fetch(`${API_URL}/bewerbungen/${id}`, {
+  const response = await authFetch(`${API_URL}/bewerbungen/${id}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(bewerbung),
@@ -226,7 +226,7 @@ export async function deleteBewerbung(id) {
     return { message: "Demo-Bewerbung gelöscht" };
   }
 
-  const response = await fetch(`${API_URL}/bewerbungen/${id}`, {
+  const response = await authFetch(`${API_URL}/bewerbungen/${id}`, {
     method: "DELETE",
     headers: getHeaders(),
   });
@@ -247,7 +247,7 @@ export async function getStats() {
     return buildDemoStats(readDemoData());
   }
 
-  const response = await fetch(`${API_URL}/statistiken`, {
+  const response = await authFetch(`${API_URL}/statistiken`, {
     headers: getHeaders(),
   });
 
