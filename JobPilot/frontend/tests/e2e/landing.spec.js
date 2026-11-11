@@ -51,6 +51,73 @@ test.describe("Landing Hero @smoke", () => {
   });
 });
 
+test.describe("Landing Aufbau @smoke", () => {
+  test("Hero ohne Badge und Statistik-Band, zwei Aktionen", async ({ page }) => {
+    await openLanding(page);
+    await expect(page.locator(".landing-hero-title")).toHaveText(
+      "Dein Bewerbungsprozess organisiert",
+    );
+    await expect(page.locator(".landing-hero-badge")).toHaveCount(0);
+    await expect(page.locator(".landing-stats")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Kostenlos starten/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Funktionen ansehen" })).toBeVisible();
+  });
+
+  test("Funktionen zeigen nur echte Features", async ({ page }) => {
+    await openLanding(page);
+    await expect(page.locator("#funktionen .landing-feature-title")).toHaveText([
+      "Status-Tracking",
+      "Notizen & Kontakte",
+      "Statistiken",
+      "Bookmarklet & PDF-Export",
+    ]);
+    await expect(page.getByText(/Erinnerung/i)).toHaveCount(0);
+  });
+
+  test("drei Schritte zum Start", async ({ page }) => {
+    await openLanding(page);
+    await expect(page.locator("#so-funktionierts .landing-step-title")).toHaveText([
+      "Konto anlegen",
+      "Bewerbungen eintragen",
+      "Status aktuell halten",
+    ]);
+  });
+
+  test("FAQ lässt sich aufklappen", async ({ page }) => {
+    await openLanding(page);
+    const items = page.locator("#faq details");
+    await expect(items).toHaveCount(4);
+    await expect(items.first()).toHaveAttribute("open", "");
+
+    const deleteQuestion = items.filter({ hasText: "Kann ich mein Konto löschen?" });
+    await expect(deleteQuestion.locator("p")).toBeHidden();
+    await deleteQuestion.locator("summary").click();
+    await expect(deleteQuestion.locator("p")).toBeVisible();
+    await expect(page.getByText("Wo werden meine Daten gespeichert?")).toHaveCount(0);
+  });
+
+  test("Navigation springt zu den Abschnitten", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Links sind auf kleinen Bildschirmen ausgeblendet");
+    await openLanding(page);
+    for (const [name, id] of [
+      ["Funktionen", "funktionen"],
+      ["So funktioniert's", "so-funktionierts"],
+      ["FAQ", "faq"],
+    ]) {
+      await page.locator(".landing-nav-links").getByRole("link", { name }).click();
+      await expect(page).toHaveURL(new RegExp(`#${id}$`));
+      await expect(page.locator(`#${id}`)).toBeInViewport();
+    }
+  });
+
+  test("CTA-Box am Ende", async ({ page }) => {
+    await openLanding(page);
+    const cta = page.locator(".landing-cta-box");
+    await expect(cta.getByRole("heading", { name: "Bereit für mehr Überblick?" })).toBeVisible();
+    await expect(cta.getByRole("button", { name: "Jetzt kostenlos starten" })).toBeVisible();
+  });
+});
+
 test.describe("Landing App-Vorschau @smoke", () => {
   const preview = (page) => page.locator(".app-preview");
 
