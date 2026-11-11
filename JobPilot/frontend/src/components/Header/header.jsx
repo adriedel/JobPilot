@@ -10,6 +10,7 @@ import BriefcaseIcon from "../../assets/icons/briefcase-white.svg?react";
 import LogoutIcon from "../../assets/icons/logout.svg?react";
 import ExternalIcon from "../../assets/icons/external.svg?react";
 import LogoutConfirmModal from "../LogoutConfirmModal/LogoutConfirmModal";
+import LanguageToggle from "../LanguageToggle/LanguageToggle";
 
 function getInitials(name) {
   if (!name) return "?";
@@ -86,7 +87,7 @@ function UserAvatar({ user, size = 36 }) {
 function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user }) {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const headerRef = useRef(null);
   const userMenuRef = useRef(null);
@@ -114,11 +115,6 @@ function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user })
   const handleLogoutConfirm = () => {
     setIsLogoutModalOpen(false);
     logout();
-  };
-
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "de" ? "en" : "de";
-    i18n.changeLanguage(newLang);
   };
 
   const goToProfile = () => {
@@ -204,29 +200,7 @@ function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user })
             </button>
           </div>
 
-          <button
-            className="language-toggle"
-            onClick={toggleLanguage}
-            title={
-              i18n.language === "de"
-                ? "Switch to English"
-                : "Zu Deutsch wechseln"
-            }
-            aria-label={
-              i18n.language === "de" ? "Switch to English" : "Switch to German"
-            }
-          >
-            <img
-              src={
-                i18n.language === "de"
-                  ? "/flags/flag-for-germany.svg"
-                  : "/flags/flag-for-united-kingdom.svg"
-              }
-              alt={i18n.language === "de" ? "Deutsch" : "English"}
-              className="language-flag"
-            />
-            <span className="language-code">{i18n.language.toUpperCase()}</span>
-          </button>
+          <LanguageToggle />
 
           <button className="btn-new-bewerbung" onClick={onNewBewerbung}>
             <span className="btn-plus">+</span> {t("buttons.newApplication")}
