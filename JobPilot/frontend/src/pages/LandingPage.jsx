@@ -253,7 +253,7 @@ function LandingPage({ onEnterApp }) {
       </section>
 
       {/* App-Vorschau */}
-      <AppPreview darkMode={darkMode} />
+      <AppPreview />
 
       {/* Funktionen */}
       <section className="landing-section landing-features" id="funktionen">

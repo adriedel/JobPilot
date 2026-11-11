@@ -173,6 +173,7 @@ test.describe("Landing Aufbau @smoke", () => {
 
 test.describe("Landing App-Vorschau @smoke", () => {
   const preview = (page) => page.locator(".app-preview");
+  const frame = (page) => page.frameLocator(".app-preview-frame");
 
   test("zeigt das Dashboard mit den Demo-Bewerbungen im Fenster", async ({ page }) => {
     await openLanding(page);
@@ -182,22 +183,43 @@ test.describe("Landing App-Vorschau @smoke", () => {
       preview(page).getByRole("img", { name: "Vorschau des JobPilot-Dashboards" }),
     ).toBeVisible();
 
-    const cards = preview(page).locator(".bewerbung-card");
+    const cards = frame(page).locator(".bewerbung-card");
     await expect(cards).toHaveCount(3);
     for (const firma of ["SAP", "adidas", "BMW Group"]) {
       await expect(cards.filter({ hasText: firma })).toHaveCount(1);
     }
   });
 
+  test("zeigt auf Tablets das Desktop-Layout", async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await openLanding(page);
+    // Im iframe ist das Dashboard 1260px breit → alle 7 Statistik-Karten in einer Zeile
+    const tops = await frame(page)
+      .locator(".stat-card")
+      .evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+    expect(tops).toHaveLength(7);
+    expect(new Set(tops).size).toBe(1);
+  });
+
   test("ist nicht bedienbar", async ({ page }) => {
     await openLanding(page);
-    const content = preview(page).locator(".app-preview-content");
-    await expect(content).toHaveAttribute("inert", "");
+    const iframe = preview(page).locator(".app-preview-frame");
+    await expect(iframe).toHaveAttribute("tabindex", "-1");
+    await expect(iframe).toHaveCSS("pointer-events", "none");
+    await expect(frame(page).locator(".preview-page")).toHaveAttribute("inert", "");
 
     // Klick auf die Position eines Kartenmenüs darf nichts öffnen
-    const box = await content.locator(".card-menu-button").first().boundingBox();
+    const box = await frame(page).locator(".card-menu-button").first().boundingBox();
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-    await expect(preview(page).locator(".dropdown-item")).toHaveCount(0);
+    await expect(frame(page).locator(".dropdown-item")).toHaveCount(0);
+  });
+
+  test("folgt dem Dark Mode der Landing Page", async ({ page }) => {
+    await openLanding(page);
+    const html = frame(page).locator("html");
+    await expect(html).not.toHaveClass(/dark-mode/);
+    await page.getByRole("button", { name: "Dark mode" }).click();
+    await expect(html).toHaveClass(/dark-mode/);
   });
 
   test("richtet sich beim Hovern auf und hebt sich an", async ({ page, isMobile }) => {
@@ -226,12 +248,15 @@ test.describe("Landing App-Vorschau @smoke", () => {
     await expect(preview(page).locator(".app-preview-window")).toHaveCSS("transform", "none");
   });
 
-  test("erzeugt keine horizontale Scrollleiste", async ({ page }) => {
-    await openLanding(page);
-    await expect(preview(page)).toBeVisible();
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - window.innerWidth,
-    );
-    expect(overflow).toBeLessThanOrEqual(0);
-  });
+  for (const width of [390, 768, 1024, 1440]) {
+    test(`erzeugt bei ${width}px keine horizontale Scrollleiste`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openLanding(page);
+      await expect(preview(page)).toBeVisible();
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+  }
 });

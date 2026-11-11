@@ -1,39 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-import Header from "../Header/header";
-import StatCards from "../StatCards/StatCards";
-import SearchBar from "../SearchBar/SearchBar";
-import BewerbungsCard from "../BewerbungsCard/BewerbungsCard";
-import { DEMO_SEED_DATA, buildDemoStats } from "../../services/api";
 import "./AppPreview.css";
 
-const noop = () => {};
-const PREVIEW_ITEMS = DEMO_SEED_DATA.slice(0, 3);
-const PREVIEW_STATS = buildDemoStats(PREVIEW_ITEMS);
-const PREVIEW_USER = { name: "Alex Berger", email: "alex@example.com" };
-
-// Breite, in der das Dashboard auf dem Desktop gerendert wird (= max-width von .app)
-const DASHBOARD_WIDTH = 1260;
-// Ab dieser Viewport-Breite zeigt die Vorschau das Desktop-Layout verkleinert
-const DESKTOP_MIN_VIEWPORT = 1024;
+// Breite, in der das Dashboard im iframe gerendert wird (= max-width von .app)
+const DESIGN_WIDTH = 1260;
+// Sichtbare Höhe des Dashboards im Fenster (unten weich ausgeblendet)
+const DESIGN_HEIGHT = 760;
+// Darunter zeigt die Vorschau das echte Handy-Layout statt verkleinertem Desktop
+const PHONE_MAX_WIDTH = 600;
 
 /**
- * Berechnet den Zoom-Faktor, damit das Dashboard in voller Desktop-Breite
- * ins Fenster passt. Unter DESKTOP_MIN_VIEWPORT bleibt es beim normalen
- * (mobilen/Tablet-)Layout ohne Zoom.
+ * Größe des iframes: ab PHONE_MAX_WIDTH wird das Dashboard in Desktop-Breite
+ * gerendert und auf die Fensterbreite skaliert, darunter in Fensterbreite
+ * (Handy-Layout) ohne Skalierung.
  */
-function usePreviewZoom(ref) {
-  const [zoom, setZoom] = useState(null);
+function usePreviewSize(ref) {
+  const [size, setSize] = useState(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
 
     const update = () => {
-      if (window.innerWidth < DESKTOP_MIN_VIEWPORT) {
-        setZoom(null);
-        return;
-      }
-      setZoom(Math.min(1, el.clientWidth / DASHBOARD_WIDTH));
+      const width = el.clientWidth;
+      setSize(
+        width < PHONE_MAX_WIDTH
+          ? { width, scale: 1 }
+          : { width: DESIGN_WIDTH, scale: Math.min(1, width / DESIGN_WIDTH) },
+      );
     };
 
     update();
@@ -42,22 +35,22 @@ function usePreviewZoom(ref) {
     return () => observer.disconnect();
   }, [ref]);
 
-  return zoom;
+  return size;
 }
 
 /**
  * Vorschau des echten Dashboards im Browserfenster (Landing Page).
- * Nutzt dieselben Komponenten wie die App mit den Demo-Daten, ist aber über
- * `inert` weder klick- noch fokussierbar und für Screenreader ein Bild.
+ * Das Dashboard läuft in einem iframe (/preview) mit eigener Breite, damit die
+ * Komponenten auch auf Tablets ihr Desktop-Layout zeigen. Der iframe ist weder
+ * klick- noch fokussierbar; für Screenreader ist das Fenster ein Bild.
  */
-function AppPreview({ darkMode }) {
-  const contentRef = useRef(null);
-  const zoom = usePreviewZoom(contentRef);
-  const appStyle = zoom === null ? undefined : { width: DASHBOARD_WIDTH, zoom };
+function AppPreview() {
+  const viewportRef = useRef(null);
+  const size = usePreviewSize(viewportRef);
 
   return (
     <section className="app-preview">
-      <h2 className="app-preview-title">So könnte dein Dashboard aussehen</h2>
+      <h2 className="app-preview-title">So sieht dein Dashboard aus</h2>
 
       <div
         className="app-preview-window"
@@ -74,45 +67,24 @@ function AppPreview({ darkMode }) {
         </div>
 
         <div
-          className="app-preview-content"
-          ref={contentRef}
-          inert
-          aria-hidden="true"
+          className="app-preview-viewport"
+          ref={viewportRef}
+          style={size ? { height: DESIGN_HEIGHT * size.scale } : undefined}
         >
-          <section className="app" style={appStyle}>
-            <Header
-              darkMode={darkMode}
-              toggleDarkMode={noop}
-              onNewBewerbung={noop}
-              onExportPdf={noop}
-              user={PREVIEW_USER}
-              onUserUpdate={noop}
+          {size && (
+            <iframe
+              className="app-preview-frame"
+              src="/preview"
+              title="Vorschau des JobPilot-Dashboards"
+              tabIndex={-1}
+              aria-hidden="true"
+              style={{
+                width: size.width,
+                height: DESIGN_HEIGHT,
+                transform: `scale(${size.scale})`,
+              }}
             />
-            <div className="stat-cards">
-              <StatCards stats={PREVIEW_STATS} />
-              <SearchBar
-                searchQuery=""
-                onSearchChange={noop}
-                filterStatus="alle"
-                onFilterChange={noop}
-                sortBy="datum"
-                onSortByChange={noop}
-                sortDirection="desc"
-                onToggleSortDirection={noop}
-              />
-            </div>
-            <section className="bewerbungen-grid">
-              {PREVIEW_ITEMS.map((bewerbung) => (
-                <BewerbungsCard
-                  key={bewerbung.id}
-                  bewerbung={bewerbung}
-                  onEdit={noop}
-                  onDelete={noop}
-                  onStatusChange={noop}
-                />
-              ))}
-            </section>
-          </section>
+          )}
         </div>
       </div>
     </section>

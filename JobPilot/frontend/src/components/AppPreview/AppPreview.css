@@ -92,15 +92,14 @@
   color: var(--text-muted);
 }
 
-/* Inhalt: echtes Dashboard, Höhe begrenzt und unten ausgeblendet */
-.app-preview-content {
+/* Inhalt: echtes Dashboard im iframe, Höhe begrenzt und unten ausgeblendet */
+.app-preview-viewport {
   position: relative;
-  max-height: 720px;
+  height: 760px;
   overflow: hidden;
-  user-select: none;
 }
 
-.app-preview-content::after {
+.app-preview-viewport::after {
   content: "";
   position: absolute;
   left: 0;
@@ -111,8 +110,13 @@
   pointer-events: none;
 }
 
-.app-preview-content .app {
-  min-height: 0;
+.app-preview-frame {
+  display: block;
+  border: 0;
+  transform-origin: 0 0;
+  background: var(--bg-app);
+  /* nicht bedienbar – Hover geht ans Fenster (Aufricht-Effekt) */
+  pointer-events: none;
 }
 
 @media (max-width: 600px) {
@@ -122,14 +126,5 @@
 
   .app-preview-title {
     margin-bottom: 24px;
-  }
-
-  .app-preview-content {
-    max-height: 760px;
-  }
-
-  /* Auf dem Handy direkt zu den Bewerbungskarten: Statistik & Suche ausblenden */
-  .app-preview-content .stat-cards {
-    display: none;
   }
 }
