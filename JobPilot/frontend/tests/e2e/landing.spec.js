@@ -110,6 +110,17 @@ test.describe("Landing Aufbau @smoke", () => {
     }
   });
 
+  for (const width of [320, 360, 375]) {
+    test(`kein seitliches Scrollen auf ${width}px breiten Handys`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 740 });
+      await openLanding(page);
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+  }
+
   test("CTA-Box am Ende", async ({ page }) => {
     await openLanding(page);
     const cta = page.locator(".landing-cta-box");

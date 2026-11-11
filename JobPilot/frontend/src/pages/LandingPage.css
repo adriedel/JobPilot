@@ -683,7 +683,9 @@ a.landing-cta-secondary {
   }
 
   .landing-hero {
-    grid-template-columns: 1fr;
+    /* minmax(0, …): die Spalte darf nie breiter als der Bildschirm werden,
+       auch wenn ein langes Wort ("Bewerbungsprozess") mehr Platz bräuchte */
+    grid-template-columns: minmax(0, 1fr);
     padding: 60px 24px;
     gap: 48px;
   }
@@ -780,6 +782,13 @@ a.landing-cta-secondary {
 
   .landing-hero {
     padding: 40px 16px;
+  }
+
+  /* Headline skaliert mit der Bildschirmbreite, damit "Bewerbungsprozess"
+     auch auf 320px-Handys in eine Zeile passt */
+  .landing-hero-title {
+    font-size: clamp(1.75rem, 9vw, 2.5rem);
+    overflow-wrap: break-word;
   }
 
   .landing-hero-actions {
