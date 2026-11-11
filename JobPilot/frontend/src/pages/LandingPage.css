@@ -242,157 +242,38 @@
   justify-content: center;
 }
 
-.landing-preview-card {
+.landing-hero-art {
+  position: relative;
   width: 100%;
-  max-width: 480px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
+  max-width: 560px;
 }
 
-.preview-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  background: var(--bg-hover);
-  border-bottom: 1px solid var(--border);
+.landing-hero-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: opacity 0.4s ease;
 }
 
-.preview-dots {
-  display: flex;
-  gap: 6px;
+/* Dunkle Variante liegt deckungsgleich über der hellen */
+.landing-hero-illustration--dark {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.dark-mode .landing-hero-illustration--light {
+  opacity: 0;
 }
 
-.dot.red {
-  background: #ef4444;
+.dark-mode .landing-hero-illustration--dark {
+  opacity: 1;
 }
 
-.dot.yellow {
-  background: #f59e0b;
-}
-
-.dot.green {
-  background: #10b981;
-}
-
-.preview-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.preview-content {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.preview-stat-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.preview-stat {
-  padding: 12px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.preview-stat.blue {
-  background: var(--status-beworben-bg);
-  border: 1px solid var(--status-beworben-border);
-}
-
-.preview-stat.yellow {
-  background: var(--status-stufe_weiter-bg);
-  border: 1px solid var(--status-stufe_weiter-border);
-}
-
-.preview-stat.green {
-  background: var(--status-angenommen-bg);
-  border: 1px solid var(--status-angenommen-border);
-}
-
-.preview-stat-value {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.preview-stat-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.preview-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.mini-card {
-  padding: 14px 16px;
-  background: var(--bg-app);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.mini-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.mini-card-company {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.mini-card-status {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-
-.mini-card-status.accepted {
-  background: var(--status-angenommen-bg);
-  color: var(--status-angenommen-accent);
-}
-
-.mini-card-status.progress {
-  background: var(--status-stufe_weiter-bg);
-  color: var(--status-stufe_weiter-accent);
-}
-
-.mini-card-status.applied {
-  background: var(--status-beworben-bg);
-  color: var(--status-beworben-accent);
-}
-
-.mini-card-position {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-illustration {
+    transition: none;
+  }
 }
 
 /* ── Stats Section ── */
@@ -737,20 +618,6 @@
   .landing-cta-secondary {
     width: 100%;
     text-align: center;
-  }
-
-  .landing-preview-card {
-    max-width: 100%;
-  }
-
-  .preview-stat-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .preview-stat {
-    flex-direction: row;
-    justify-content: space-between;
   }
 
   .landing-stats-content {

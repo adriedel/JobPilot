@@ -147,58 +147,25 @@ function LandingPage({ onEnterApp }) {
         </div>
 
         <div className="landing-hero-visual">
-          <div className="landing-preview-card">
-            <div className="preview-header">
-              <div className="preview-dots">
-                <span className="dot red"></span>
-                <span className="dot yellow"></span>
-                <span className="dot green"></span>
-              </div>
-              <span className="preview-title">Meine Bewerbungen</span>
-            </div>
-            <div className="preview-content">
-              <div className="preview-stat-row">
-                <div className="preview-stat blue">
-                  <span className="preview-stat-value">12</span>
-                  <span className="preview-stat-label">Beworben</span>
-                </div>
-                <div className="preview-stat yellow">
-                  <span className="preview-stat-value">5</span>
-                  <span className="preview-stat-label">Stufe weiter</span>
-                </div>
-                <div className="preview-stat green">
-                  <span className="preview-stat-value">3</span>
-                  <span className="preview-stat-label">Angenommen</span>
-                </div>
-              </div>
-              <div className="preview-cards">
-                <div className="mini-card">
-                  <div className="mini-card-header">
-                    <span className="mini-card-company">Google</span>
-                    <span className="mini-card-status accepted">
-                      Angenommen
-                    </span>
-                  </div>
-                  <span className="mini-card-position">Frontend Developer</span>
-                </div>
-                <div className="mini-card">
-                  <div className="mini-card-header">
-                    <span className="mini-card-company">Microsoft</span>
-                    <span className="mini-card-status progress">
-                      Stufe weiter
-                    </span>
-                  </div>
-                  <span className="mini-card-position">Software Engineer</span>
-                </div>
-                <div className="mini-card">
-                  <div className="mini-card-header">
-                    <span className="mini-card-company">Apple</span>
-                    <span className="mini-card-status applied">Beworben</span>
-                  </div>
-                  <span className="mini-card-position">UX Designer</span>
-                </div>
-              </div>
-            </div>
+          {/* Beide Varianten liegen übereinander und blenden mit dem
+              Dark Mode ineinander über (siehe .landing-hero-art in der CSS) */}
+          <div className="landing-hero-art">
+            <img
+              className="landing-hero-illustration landing-hero-illustration--light"
+              src="/paperplane-light.svg"
+              width="560"
+              height="480"
+              alt=""
+              aria-hidden={darkMode}
+            />
+            <img
+              className="landing-hero-illustration landing-hero-illustration--dark"
+              src="/paperplane-dark.svg"
+              width="560"
+              height="480"
+              alt=""
+              aria-hidden={!darkMode}
+            />
           </div>
         </div>
       </section>
