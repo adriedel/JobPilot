@@ -111,6 +111,29 @@ test.describe("Landing Aufbau @smoke", () => {
     await expect(page).toHaveURL(/\/login$/);
   });
 
+  test("Sprache lässt sich auf Englisch umstellen", async ({ page }) => {
+    await openLanding(page);
+    await page.locator(".landing-nav .language-toggle").click();
+
+    await expect(page.locator(".landing-hero-title")).toHaveText("Your job search, organized");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.locator("#funktionen .landing-feature-title")).toHaveText([
+      "Status tracking",
+      "Notes & contacts",
+      "Statistics",
+      "Bookmarklet & PDF export",
+    ]);
+    await expect(page.locator(".landing-cta-box h2")).toHaveText("Ready for a clearer overview?");
+    // Vorschau im iframe zieht mit
+    await expect(
+      page.frameLocator(".app-preview-frame").locator(".header-title"),
+    ).toHaveText("Application Tracker");
+
+    // Auswahl bleibt nach dem Neuladen erhalten
+    await page.reload();
+    await expect(page.locator(".landing-hero-title")).toHaveText("Your job search, organized");
+  });
+
   test("Funktionen zeigen nur echte Features", async ({ page }) => {
     await openLanding(page);
     await expect(page.locator("#funktionen .landing-feature-title")).toHaveText([

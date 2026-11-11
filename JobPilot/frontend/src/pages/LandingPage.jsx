@@ -11,6 +11,7 @@ import TrendingIcon from "../assets/icons/trending.svg?react";
 import PinIcon from "../assets/icons/pin.svg?react";
 import { isAuthenticated } from "../services/auth";
 import AppPreview from "../components/AppPreview/AppPreview";
+import LanguageToggle from "../components/LanguageToggle/LanguageToggle";
 
 // Nur Funktionen, die die App wirklich hat
 function getFeatures(t) {
@@ -184,6 +185,7 @@ function LandingPage({ onEnterApp }) {
                 <MoonIcon className="theme-icon" aria-hidden="true" />
               </button>
             </div>
+            <LanguageToggle />
           </div>
 
           <div className="landing-nav-right">
