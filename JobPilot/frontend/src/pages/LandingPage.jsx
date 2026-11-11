@@ -147,13 +147,26 @@ function LandingPage({ onEnterApp }) {
         </div>
 
         <div className="landing-hero-visual">
-          <img
-            className="landing-hero-illustration"
-            src={darkMode ? "/paperplane-dark.svg" : "/paperplane-light.svg"}
-            width="560"
-            height="480"
-            alt=""
-          />
+          {/* Beide Varianten liegen übereinander und blenden mit dem
+              Dark Mode ineinander über (siehe .landing-hero-art in der CSS) */}
+          <div className="landing-hero-art">
+            <img
+              className="landing-hero-illustration landing-hero-illustration--light"
+              src="/paperplane-light.svg"
+              width="560"
+              height="480"
+              alt=""
+              aria-hidden={darkMode}
+            />
+            <img
+              className="landing-hero-illustration landing-hero-illustration--dark"
+              src="/paperplane-dark.svg"
+              width="560"
+              height="480"
+              alt=""
+              aria-hidden={!darkMode}
+            />
+          </div>
         </div>
       </section>
 

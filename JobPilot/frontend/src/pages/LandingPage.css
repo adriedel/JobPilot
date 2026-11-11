@@ -242,11 +242,38 @@
   justify-content: center;
 }
 
+.landing-hero-art {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+}
+
 .landing-hero-illustration {
   display: block;
   width: 100%;
-  max-width: 560px;
   height: auto;
+  transition: opacity 0.4s ease;
+}
+
+/* Dunkle Variante liegt deckungsgleich über der hellen */
+.landing-hero-illustration--dark {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.dark-mode .landing-hero-illustration--light {
+  opacity: 0;
+}
+
+.dark-mode .landing-hero-illustration--dark {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-illustration {
+    transition: none;
+  }
 }
 
 /* ── Stats Section ── */
