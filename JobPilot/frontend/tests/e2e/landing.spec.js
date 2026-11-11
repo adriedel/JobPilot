@@ -94,6 +94,23 @@ test.describe("Landing Aufbau @smoke", () => {
     await expect(page.getByRole("link", { name: "Funktionen ansehen" })).toBeVisible();
   });
 
+  test("Login-Hinweis steht unter den beiden Buttons", async ({ page }) => {
+    await openLanding(page);
+    const hint = page.locator(".landing-hero-login");
+    await expect(hint).toHaveText("Schon ein Konto? Anmelden");
+
+    // eigene Zeile unterhalb der Buttons, nicht Teil der Button-Zeile
+    await expect(page.locator(".landing-hero-actions .landing-hero-login")).toHaveCount(0);
+    const [actions, hintBox] = await Promise.all([
+      page.locator(".landing-hero-actions").boundingBox(),
+      hint.boundingBox(),
+    ]);
+    expect(hintBox.y).toBeGreaterThanOrEqual(actions.y + actions.height);
+
+    await hint.getByRole("link", { name: "Anmelden" }).click();
+    await expect(page).toHaveURL(/\/login$/);
+  });
+
   test("Funktionen zeigen nur echte Features", async ({ page }) => {
     await openLanding(page);
     await expect(page.locator("#funktionen .landing-feature-title")).toHaveText([
