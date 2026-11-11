@@ -50,3 +50,68 @@ test.describe("Landing Hero @smoke", () => {
     }
   });
 });
+
+test.describe("Landing App-Vorschau @smoke", () => {
+  const preview = (page) => page.locator(".app-preview");
+
+  test("zeigt das Dashboard mit den Demo-Bewerbungen im Fenster", async ({ page }) => {
+    await openLanding(page);
+    await expect(preview(page)).toBeVisible();
+    await expect(preview(page).locator(".app-preview-url")).toHaveText("bewerbungstracker.com");
+    await expect(
+      preview(page).getByRole("img", { name: "Vorschau des JobPilot-Dashboards" }),
+    ).toBeVisible();
+
+    const cards = preview(page).locator(".bewerbung-card");
+    await expect(cards).toHaveCount(3);
+    for (const firma of ["SAP", "adidas", "BMW Group"]) {
+      await expect(cards.filter({ hasText: firma })).toHaveCount(1);
+    }
+  });
+
+  test("ist nicht bedienbar", async ({ page }) => {
+    await openLanding(page);
+    const content = preview(page).locator(".app-preview-content");
+    await expect(content).toHaveAttribute("inert", "");
+
+    // Klick auf die Position eines Kartenmenüs darf nichts öffnen
+    const box = await content.locator(".card-menu-button").first().boundingBox();
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(preview(page).locator(".dropdown-item")).toHaveCount(0);
+  });
+
+  test("richtet sich beim Hovern auf und hebt sich an", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Hover-Effekt nur auf Geräten mit Maus");
+    await openLanding(page);
+    const win = preview(page).locator(".app-preview-window");
+
+    // Ruhezustand: gekippt (3D-Matrix)
+    await expect(win).toHaveCSS("transform", /^matrix3d\(/);
+
+    await win.hover();
+    // Aufgerichtet und 8px angehoben: reine 2D-Verschiebung
+    await expect(win).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, -8)");
+  });
+
+  test("bleibt bei reduzierter Bewegung gerade", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Hover-Effekt nur auf Geräten mit Maus");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await openLanding(page);
+    await expect(preview(page).locator(".app-preview-window")).toHaveCSS("transform", "none");
+  });
+
+  test("bleibt auf Touch-Geräten gerade", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "nur im mobilen Projekt");
+    await openLanding(page);
+    await expect(preview(page).locator(".app-preview-window")).toHaveCSS("transform", "none");
+  });
+
+  test("erzeugt keine horizontale Scrollleiste", async ({ page }) => {
+    await openLanding(page);
+    await expect(preview(page)).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+});
