@@ -13,6 +13,18 @@ import { test, expect } from "./fixtures";
 const isExternal = !!process.env.PLAYWRIGHT_BASE_URL;
 
 test.describe("Smoke @smoke", () => {
+  // Häufigster Fehler gegen Vercel-Previews: Deployment Protection leitet auf
+  // den Vercel-Login um. Dann klar sagen, was los ist, statt "#root not found".
+  test.afterEach(async ({ page }) => {
+    if (new URL(page.url()).hostname === "vercel.com") {
+      throw new Error(
+        "Umleitung auf vercel.com/login – Vercel Deployment Protection ist aktiv. " +
+          "Entweder für Previews deaktivieren oder VERCEL_AUTOMATION_BYPASS_SECRET " +
+          "als GitHub-Secret setzen (siehe JobPilot/TESTING.md, Schritt 4).",
+      );
+    }
+  });
+
   test("Startseite lädt ohne Fehler", async ({ page }) => {
     const response = await page.goto("/");
     expect(response?.ok()).toBeTruthy();
