@@ -289,6 +289,24 @@ a.landing-cta-secondary {
   text-decoration: none;
 }
 
+/* Ruhiger Login-Hinweis unter den Hero-Buttons */
+.landing-hero-login {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.landing-hero-login a {
+  color: var(--link-color);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.landing-hero-login a:hover {
+  color: var(--link-hover-color);
+}
+
 /* ── Abschnitte (gemeinsamer Aufbau) ── */
 .landing-section {
   padding: 96px 24px;

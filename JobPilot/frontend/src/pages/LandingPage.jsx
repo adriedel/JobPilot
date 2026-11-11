@@ -21,7 +21,9 @@ const FEATURES = [
     demo: (
       <div className="landing-mini-pills">
         <span className="landing-mini-pill status-beworben">Beworben</span>
-        <span className="landing-mini-pill status-stufe_weiter">Stufe weiter</span>
+        <span className="landing-mini-pill status-stufe_weiter">
+          Stufe weiter
+        </span>
         <span className="landing-mini-pill status-angenommen">Angenommen</span>
         <span className="landing-mini-pill status-abgelehnt">Abgelehnt</span>
       </div>
@@ -34,8 +36,8 @@ const FEATURES = [
       "Ansprechperson, Gehalt und Notizen direkt an der Bewerbung – genau dort, wo du sie vor dem Gespräch brauchst.",
     demo: (
       <div className="landing-mini-note">
-        <strong>Lisa Müller</strong> · Portfolio verschickt, Rückmeldung
-        nächste Woche
+        <strong>Lisa Müller</strong> · Portfolio verschickt, Rückmeldung nächste
+        Woche
       </div>
     ),
   },
@@ -75,7 +77,8 @@ const FEATURES = [
 const STEPS = [
   {
     title: "Konto anlegen",
-    description: "Kostenlos registrieren, ohne Installation. JobPilot läuft im Browser.",
+    description:
+      "Kostenlos registrieren, ohne Installation. JobPilot läuft im Browser.",
   },
   {
     title: "Bewerbungen eintragen",
@@ -226,6 +229,18 @@ function LandingPage({ onEnterApp }) {
               Funktionen ansehen
             </a>
           </div>
+          <p className="landing-hero-login">
+            Schon ein Konto?{" "}
+            <a
+              href="/login"
+              onClick={(event) => {
+                event.preventDefault();
+                handleLogin();
+              }}
+            >
+              Anmelden
+            </a>
+          </p>
         </div>
 
         <div className="landing-hero-visual">
@@ -342,7 +357,10 @@ function LandingPage({ onEnterApp }) {
           <div className="landing-footer-brand">
             <div className="landing-footer-logo">
               <div className="landing-logo-icon small">
-                <BriefcaseIcon className="landing-logo-svg" aria-hidden="true" />
+                <BriefcaseIcon
+                  className="landing-logo-svg"
+                  aria-hidden="true"
+                />
               </div>
               <span className="landing-logo-text">JobPilot</span>
             </div>
