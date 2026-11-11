@@ -579,6 +579,18 @@ app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, 
 
 pool
   .initDB()
+  .then(async () => {
+    // Nur Staging: Test-Accounts & Beispieldaten anlegen (siehe seed.js)
+    //   SEED_DEMO_DATA=true   → anlegen, falls nicht vorhanden
+    //   SEED_DEMO_DATA=reset  → bei jedem Start auf Ausgangszustand zurücksetzen
+    const seedMode = process.env.SEED_DEMO_DATA;
+    if (seedMode === "true" || seedMode === "reset") {
+      const { seedDemoData } = require("./seed");
+      await seedDemoData(pool, { reset: seedMode === "reset" }).catch((error) =>
+        console.error("[seed] Fehler beim Anlegen der Testdaten:", error),
+      );
+    }
+  })
   .catch((error) => {
     console.error("Fehler bei der Datenbankinitialisierung:", error);
   })

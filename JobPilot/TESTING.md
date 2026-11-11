@@ -32,7 +32,7 @@ npm run test:e2e:report     # letzten HTML-Report öffnen
 Gegen eine laufende Umgebung (nur `@smoke`-Tests):
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://staging.bewerbungstracker.com npm run test:e2e
+PLAYWRIGHT_BASE_URL=https://jobpilot-git-staging-adriedels-projects.vercel.app npm run test:e2e
 ```
 
 > **Windows/macOS:** Die Screenshot-Tests (`@visual`) werden dort automatisch übersprungen, weil
@@ -127,10 +127,32 @@ Im bestehenden Vercel-Projekt:
 
 Nach Änderungen an Env-Variablen einmal neu deployen (Push auf `staging` oder *Redeploy*).
 
-### 5. Test-Account auf Staging
+### 5. Test-Accounts & Beispieldaten auf Staging
 
-Auf der Staging-URL einen Account registrieren (z.B. `e2e@deine-domain.de`), E-Mail bestätigen.
-Dieser Account wird von den automatischen Smoke-Tests benutzt.
+Das Staging-Backend legt Test-Accounts automatisch beim Start an (`backend/seed.js`).
+Dafür im Render-Staging-Service zwei Env-Variablen setzen:
+
+| Variable | Wert |
+|---|---|
+| `SEED_DEMO_DATA` | `true` |
+| `SEED_PASSWORD` | Passwort für alle Test-Accounts (mind. 8 Zeichen) |
+
+| Account | Inhalt | Wofür |
+|---|---|---|
+| `demo@jobpilot.test` | 12 Bewerbungen, alle Status, 3 Währungen | normales Durchklicken, Filter, PDF-Export |
+| `leer@jobpilot.test` | keine Bewerbungen | Empty State, erste Bewerbung anlegen |
+| `admin@jobpilot.test` | Rolle **admin**, 2 Bewerbungen | Admin-Seite |
+| `e2e@jobpilot.test` | keine Bewerbungen | automatische Smoke-Tests (nicht von Hand benutzen) |
+
+Alle Accounts sind bereits verifiziert, es werden keine E-Mails verschickt.
+
+- **Bestehende Daten bleiben erhalten:** Accounts werden nur angelegt, wenn sie fehlen, Bewerbungen nur,
+  wenn der Account leer ist. Was beim Testen geändert wird, bleibt also.
+- **Zurücksetzen:** `SEED_DEMO_DATA` auf `reset` stellen → Render startet neu und setzt die vier
+  Accounts (Passwort, Rolle, Bewerbungen) auf den Ausgangszustand. **Danach wieder auf `true` stellen**,
+  sonst wird bei jedem Neustart (auch nach dem Aufwachen der Free-Instanz) zurückgesetzt.
+- Eigene, normal registrierte Accounts werden nie angefasst.
+- **Auf Produktion niemals setzen.**
 
 ### 6. GitHub – Secrets & Variablen
 
@@ -139,8 +161,8 @@ Dieser Account wird von den automatischen Smoke-Tests benutzt.
 | Typ | Name | Wert |
 |---|---|---|
 | Variable | `STAGING_API_URL` | `https://jobpilot-backend-staging.onrender.com` |
-| Secret | `E2E_USER_EMAIL` | Test-Account aus Schritt 5 |
-| Secret | `E2E_USER_PASSWORD` | Passwort des Test-Accounts |
+| Secret | `E2E_USER_EMAIL` | `e2e@jobpilot.test` |
+| Secret | `E2E_USER_PASSWORD` | derselbe Wert wie `SEED_PASSWORD` in Render |
 | Secret | `VERCEL_AUTOMATION_BYPASS_SECRET` | nur falls Deployment Protection aktiv |
 
 > `staging-e2e.yml` startet automatisch nach jedem Vercel-Deployment, das nicht Produktion ist.
