@@ -121,6 +121,17 @@ test.describe("Landing Aufbau @smoke", () => {
     });
   }
 
+  test("Navigations-Links scrollen weich", async ({ page }) => {
+    await openLanding(page);
+    await expect(page.locator("html")).toHaveCSS("scroll-behavior", "smooth");
+  });
+
+  test("ohne weiches Scrollen bei reduzierter Bewegung", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await openLanding(page);
+    await expect(page.locator("html")).toHaveCSS("scroll-behavior", "auto");
+  });
+
   test("CTA-Box am Ende", async ({ page }) => {
     await openLanding(page);
     const cta = page.locator(".landing-cta-box");

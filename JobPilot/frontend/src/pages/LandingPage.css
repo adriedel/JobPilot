@@ -253,6 +253,14 @@
   }
 }
 
+/* Weiches Scrollen zu den Abschnitten – nur auf der Landing Page und nur,
+   wenn keine reduzierte Bewegung gewünscht ist */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing-page) {
+    scroll-behavior: smooth;
+  }
+}
+
 /* ── Nav-Links (Anker zu den Abschnitten) ── */
 .landing-nav-links {
   display: flex;
