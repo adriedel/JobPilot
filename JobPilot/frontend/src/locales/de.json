@@ -219,5 +219,73 @@
     "passwordChangeSuccess": "Passwort erfolgreich geändert"
   },
   "language": "Deutsch",
-  "darkMode": "Dunkler Modus"
+  "darkMode": "Dunkler Modus",
+  "landing": {
+    "nav": {
+      "features": "Funktionen",
+      "howItWorks": "So funktioniert's",
+      "faq": "FAQ",
+      "login": "Anmelden",
+      "register": "Registrieren"
+    },
+    "hero": {
+      "title": "Dein Bewerbungsprozess",
+      "highlight": "organisiert",
+      "description": "Status, Termine, Notizen und Kontakte zu jeder Bewerbung – an einem Ort. Damit du weißt, wo du stehst. Kostenlos, direkt im Browser.",
+      "start": "Kostenlos starten",
+      "seeFeatures": "Funktionen ansehen",
+      "hasAccount": "Schon ein Konto?",
+      "login": "Anmelden"
+    },
+    "preview": {
+      "title": "So sieht dein Dashboard aus",
+      "label": "Vorschau des JobPilot-Dashboards"
+    },
+    "features": {
+      "eyebrow": "Funktionen",
+      "title": "Alles, was eine Bewerbung braucht, ohne Ballast",
+      "subtitle": "Schluss mit Excel-Listen, Notizzetteln und Suchen im Postfach.",
+      "statusTitle": "Status-Tracking",
+      "statusText": "Von „In Planung“ bis „Angenommen“: Du siehst auf einen Blick, wo jede Bewerbung steht.",
+      "notesTitle": "Notizen & Kontakte",
+      "notesText": "Ansprechperson, Gehalt und Notizen direkt an der Bewerbung – genau dort, wo du sie vor dem Gespräch brauchst.",
+      "notesDemo": "Portfolio verschickt, Rückmeldung nächste Woche",
+      "statsTitle": "Statistiken",
+      "statsText": "Wie viele Bewerbungen laufen, wie viele kommen weiter? Du erkennst, was funktioniert.",
+      "toolsTitle": "Bookmarklet & PDF-Export",
+      "toolsText": "Stellenanzeigen mit einem Klick aus dem Jobportal übernehmen und alle Bewerbungen als PDF exportieren.",
+      "toolsDemoBookmarklet": "+ Aus Jobportal übernehmen",
+      "toolsDemoPdf": "PDF-Export"
+    },
+    "steps": {
+      "eyebrow": "So funktioniert's",
+      "title": "In drei Schritten startklar",
+      "accountTitle": "Konto anlegen",
+      "accountText": "Kostenlos registrieren, ohne Installation. JobPilot läuft im Browser.",
+      "addTitle": "Bewerbungen eintragen",
+      "addText": "Unternehmen, Stelle und Datum – Kontakte und Notizen ergänzt du, wann du willst.",
+      "trackTitle": "Status aktuell halten",
+      "trackText": "Status ändern, Termine notieren und den Fortschritt in der Übersicht verfolgen."
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Häufige Fragen",
+      "freeQ": "Ist JobPilot wirklich kostenlos?",
+      "freeA": "Ja. Du kannst alle Funktionen kostenlos nutzen.",
+      "installQ": "Muss ich etwas installieren?",
+      "installA": "Nein. JobPilot läuft im Browser – am Rechner und auf dem Handy. Das Bookmarklet zum Übernehmen von Stellenanzeigen ist optional.",
+      "languageQ": "Gibt es JobPilot auch auf Englisch?",
+      "languageA": "Ja. Du kannst jederzeit zwischen Deutsch und Englisch wechseln.",
+      "deleteQ": "Kann ich mein Konto löschen?",
+      "deleteA": "Ja. Schreib uns kurz, dann löschen wir dein Konto mit allen Bewerbungen."
+    },
+    "cta": {
+      "title": "Bereit für mehr Überblick?",
+      "description": "Starte kostenlos und behalte deine Bewerbungen im Griff.",
+      "button": "Jetzt kostenlos starten"
+    },
+    "footer": {
+      "tagline": "Dein persönlicher Bewerbungstracker"
+    }
+  }
 }

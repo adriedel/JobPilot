@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./AppPreview.css";
 
 // Breite, in der das Dashboard im iframe gerendert wird (= max-width von .app)
@@ -45,17 +46,18 @@ function usePreviewSize(ref) {
  * klick- noch fokussierbar; für Screenreader ist das Fenster ein Bild.
  */
 function AppPreview() {
+  const { t } = useTranslation();
   const viewportRef = useRef(null);
   const size = usePreviewSize(viewportRef);
 
   return (
     <section className="app-preview">
-      <h2 className="app-preview-title">So sieht dein Dashboard aus</h2>
+      <h2 className="app-preview-title">{t("landing.preview.title")}</h2>
 
       <div
         className="app-preview-window"
         role="img"
-        aria-label="Vorschau des JobPilot-Dashboards"
+        aria-label={t("landing.preview.label")}
       >
         <div className="app-preview-titlebar" aria-hidden="true">
           <span className="app-preview-dots">
@@ -75,7 +77,7 @@ function AppPreview() {
             <iframe
               className="app-preview-frame"
               src="/preview"
-              title="Vorschau des JobPilot-Dashboards"
+              title={t("landing.preview.label")}
               tabIndex={-1}
               aria-hidden="true"
               style={{

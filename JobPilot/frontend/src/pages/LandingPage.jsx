@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./LandingPage.css";
 import BriefcaseIcon from "../assets/icons/briefcase-white.svg?react";
 import SunIcon from "../assets/icons/sun.svg?react";
@@ -10,116 +11,103 @@ import TrendingIcon from "../assets/icons/trending.svg?react";
 import PinIcon from "../assets/icons/pin.svg?react";
 import { isAuthenticated } from "../services/auth";
 import AppPreview from "../components/AppPreview/AppPreview";
+import LanguageToggle from "../components/LanguageToggle/LanguageToggle";
 
 // Nur Funktionen, die die App wirklich hat
-const FEATURES = [
-  {
-    icon: PlanIcon,
-    title: "Status-Tracking",
-    description:
-      "Von „In Planung“ bis „Angenommen“: Du siehst auf einen Blick, wo jede Bewerbung steht.",
-    demo: (
-      <div className="landing-mini-pills">
-        <span className="landing-mini-pill status-beworben">Beworben</span>
-        <span className="landing-mini-pill status-stufe_weiter">
-          Stufe weiter
-        </span>
-        <span className="landing-mini-pill status-angenommen">Angenommen</span>
-        <span className="landing-mini-pill status-abgelehnt">Abgelehnt</span>
-      </div>
-    ),
-  },
-  {
-    icon: PersonIcon,
-    title: "Notizen & Kontakte",
-    description:
-      "Ansprechperson, Gehalt und Notizen direkt an der Bewerbung – genau dort, wo du sie vor dem Gespräch brauchst.",
-    demo: (
-      <div className="landing-mini-note">
-        <strong>Lisa Müller</strong> · Portfolio verschickt, Rückmeldung nächste
-        Woche
-      </div>
-    ),
-  },
-  {
-    icon: TrendingIcon,
-    title: "Statistiken",
-    description:
-      "Wie viele Bewerbungen laufen, wie viele kommen weiter? Du erkennst, was funktioniert.",
-    demo: (
-      <div className="landing-mini-stats">
-        <span>
-          <strong>12</strong> Gesamt
-        </span>
-        <span>
-          <strong>4</strong> Stufe weiter
-        </span>
-        <span>
-          <strong>1</strong> Angenommen
-        </span>
-      </div>
-    ),
-  },
-  {
-    icon: PinIcon,
-    title: "Bookmarklet & PDF-Export",
-    description:
-      "Stellenanzeigen mit einem Klick aus dem Jobportal übernehmen und alle Bewerbungen als PDF exportieren.",
-    demo: (
-      <div className="landing-mini-pills">
-        <span className="landing-mini-chip">+ Aus Jobportal übernehmen</span>
-        <span className="landing-mini-chip">PDF-Export</span>
-      </div>
-    ),
-  },
-];
+function getFeatures(t) {
+  return [
+    {
+      icon: PlanIcon,
+      title: t("landing.features.statusTitle"),
+      description: t("landing.features.statusText"),
+      demo: (
+        <div className="landing-mini-pills">
+          <span className="landing-mini-pill status-beworben">
+            {t("status.beworben")}
+          </span>
+          <span className="landing-mini-pill status-stufe_weiter">
+            {t("status.stufe_weiter")}
+          </span>
+          <span className="landing-mini-pill status-angenommen">
+            {t("status.angenommen")}
+          </span>
+          <span className="landing-mini-pill status-abgelehnt">
+            {t("status.abgelehnt")}
+          </span>
+        </div>
+      ),
+    },
+    {
+      icon: PersonIcon,
+      title: t("landing.features.notesTitle"),
+      description: t("landing.features.notesText"),
+      demo: (
+        <div className="landing-mini-note">
+          <strong>Lisa Müller</strong> · {t("landing.features.notesDemo")}
+        </div>
+      ),
+    },
+    {
+      icon: TrendingIcon,
+      title: t("landing.features.statsTitle"),
+      description: t("landing.features.statsText"),
+      demo: (
+        <div className="landing-mini-stats">
+          <span>
+            <strong>12</strong> {t("statCards.total")}
+          </span>
+          <span>
+            <strong>4</strong> {t("status.stufe_weiter")}
+          </span>
+          <span>
+            <strong>1</strong> {t("status.angenommen")}
+          </span>
+        </div>
+      ),
+    },
+    {
+      icon: PinIcon,
+      title: t("landing.features.toolsTitle"),
+      description: t("landing.features.toolsText"),
+      demo: (
+        <div className="landing-mini-pills">
+          <span className="landing-mini-chip">
+            {t("landing.features.toolsDemoBookmarklet")}
+          </span>
+          <span className="landing-mini-chip">
+            {t("landing.features.toolsDemoPdf")}
+          </span>
+        </div>
+      ),
+    },
+  ];
+}
 
-const STEPS = [
-  {
-    title: "Konto anlegen",
-    description:
-      "Kostenlos registrieren, ohne Installation. JobPilot läuft im Browser.",
-  },
-  {
-    title: "Bewerbungen eintragen",
-    description:
-      "Unternehmen, Stelle und Datum – Kontakte und Notizen ergänzt du, wann du willst.",
-  },
-  {
-    title: "Status aktuell halten",
-    description:
-      "Status ändern, Termine notieren und den Fortschritt in der Übersicht verfolgen.",
-  },
-];
+function getSteps(t) {
+  return [
+    { title: t("landing.steps.accountTitle"), description: t("landing.steps.accountText") },
+    { title: t("landing.steps.addTitle"), description: t("landing.steps.addText") },
+    { title: t("landing.steps.trackTitle"), description: t("landing.steps.trackText") },
+  ];
+}
 
-const FAQ = [
-  {
-    question: "Ist JobPilot wirklich kostenlos?",
-    answer: "Ja. Du kannst alle Funktionen kostenlos nutzen.",
-  },
-  {
-    question: "Muss ich etwas installieren?",
-    answer:
-      "Nein. JobPilot läuft im Browser – am Rechner und auf dem Handy. Das Bookmarklet zum Übernehmen von Stellenanzeigen ist optional.",
-  },
-  {
-    question: "Gibt es JobPilot auch auf Englisch?",
-    answer: "Ja. Du kannst jederzeit zwischen Deutsch und Englisch wechseln.",
-  },
-  {
-    question: "Kann ich mein Konto löschen?",
-    answer:
-      "Ja. Schreib uns kurz, dann löschen wir dein Konto mit allen Bewerbungen.",
-  },
-];
+function getFaq(t) {
+  return ["free", "install", "language", "delete"].map((key) => ({
+    question: t(`landing.faq.${key}Q`),
+    answer: t(`landing.faq.${key}A`),
+  }));
+}
 
-const NAV_LINKS = [
-  { href: "#funktionen", label: "Funktionen" },
-  { href: "#so-funktionierts", label: "So funktioniert's" },
-  { href: "#faq", label: "FAQ" },
-];
+function getNavLinks(t) {
+  return [
+    { href: "#funktionen", label: t("landing.nav.features") },
+    { href: "#so-funktionierts", label: t("landing.nav.howItWorks") },
+    { href: "#faq", label: t("landing.nav.faq") },
+  ];
+}
 
 function LandingPage({ onEnterApp }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("darkMode");
@@ -171,7 +159,7 @@ function LandingPage({ onEnterApp }) {
           </div>
 
           <div className="landing-nav-links">
-            {NAV_LINKS.map((link) => (
+            {getNavLinks(t).map((link) => (
               <a key={link.href} href={link.href}>
                 {link.label}
               </a>
@@ -197,14 +185,15 @@ function LandingPage({ onEnterApp }) {
                 <MoonIcon className="theme-icon" aria-hidden="true" />
               </button>
             </div>
+            <LanguageToggle />
           </div>
 
           <div className="landing-nav-right">
             <button className="landing-nav-login" onClick={handleLogin}>
-              Anmelden
+              {t("landing.nav.login")}
             </button>
             <button className="landing-cta-nav" onClick={handleRegister}>
-              Registrieren
+              {t("landing.nav.register")}
             </button>
           </div>
         </div>
@@ -214,23 +203,24 @@ function LandingPage({ onEnterApp }) {
       <section className="landing-hero">
         <div className="landing-hero-content">
           <h1 className="landing-hero-title">
-            Dein Bewerbungsprozess{" "}
-            <span className="landing-hero-highlight">organisiert</span>
+            {t("landing.hero.title")}{" "}
+            <span className="landing-hero-highlight">
+              {t("landing.hero.highlight")}
+            </span>
           </h1>
           <p className="landing-hero-description">
-            Status, Termine, Notizen und Kontakte zu jeder Bewerbung – an einem
-            Ort. Damit du weißt, wo du stehst. Kostenlos, direkt im Browser.
+            {t("landing.hero.description")}
           </p>
           <div className="landing-hero-actions">
             <button className="landing-cta-primary" onClick={handleEnterApp}>
-              Kostenlos starten <span aria-hidden="true">→</span>
+              {t("landing.hero.start")} <span aria-hidden="true">→</span>
             </button>
             <a className="landing-cta-secondary" href="#funktionen">
-              Funktionen ansehen
+              {t("landing.hero.seeFeatures")}
             </a>
           </div>
           <p className="landing-hero-login">
-            Schon ein Konto?{" "}
+            {t("landing.hero.hasAccount")}{" "}
             <a
               href="/login"
               onClick={(event) => {
@@ -238,7 +228,7 @@ function LandingPage({ onEnterApp }) {
                 handleLogin();
               }}
             >
-              Anmelden
+              {t("landing.hero.login")}
             </a>
           </p>
         </div>
@@ -273,16 +263,14 @@ function LandingPage({ onEnterApp }) {
       {/* Funktionen */}
       <section className="landing-section landing-features" id="funktionen">
         <div className="landing-section-content">
-          <p className="landing-eyebrow">Funktionen</p>
-          <h2 className="landing-section-title">
-            Alles, was eine Bewerbung braucht, ohne Ballast
-          </h2>
+          <p className="landing-eyebrow">{t("landing.features.eyebrow")}</p>
+          <h2 className="landing-section-title">{t("landing.features.title")}</h2>
           <p className="landing-section-subtitle">
-            Schluss mit Excel-Listen, Notizzetteln und Suchen im Postfach.
+            {t("landing.features.subtitle")}
           </p>
 
           <div className="landing-features-grid">
-            {FEATURES.map(({ icon, title, description, demo }) => {
+            {getFeatures(t).map(({ icon, title, description, demo }) => {
               const Icon = icon;
               return (
                 <article key={title} className="landing-feature-card">
@@ -302,11 +290,11 @@ function LandingPage({ onEnterApp }) {
       {/* So funktioniert's */}
       <section className="landing-section landing-steps" id="so-funktionierts">
         <div className="landing-section-content">
-          <p className="landing-eyebrow">So funktioniert's</p>
-          <h2 className="landing-section-title">In drei Schritten startklar</h2>
+          <p className="landing-eyebrow">{t("landing.steps.eyebrow")}</p>
+          <h2 className="landing-section-title">{t("landing.steps.title")}</h2>
 
           <ol className="landing-steps-grid">
-            {STEPS.map((step, index) => (
+            {getSteps(t).map((step, index) => (
               <li key={step.title} className="landing-step">
                 <span className="landing-step-number">
                   {String(index + 1).padStart(2, "0")}
@@ -322,11 +310,11 @@ function LandingPage({ onEnterApp }) {
       {/* FAQ */}
       <section className="landing-section landing-faq" id="faq">
         <div className="landing-section-content landing-faq-content">
-          <p className="landing-eyebrow">FAQ</p>
-          <h2 className="landing-section-title">Häufige Fragen</h2>
+          <p className="landing-eyebrow">{t("landing.faq.eyebrow")}</p>
+          <h2 className="landing-section-title">{t("landing.faq.title")}</h2>
 
           <div className="landing-faq-list">
-            {FAQ.map((item, index) => (
+            {getFaq(t).map((item, index) => (
               <details key={item.question} open={index === 0}>
                 <summary>{item.question}</summary>
                 <p>{item.answer}</p>
@@ -340,13 +328,13 @@ function LandingPage({ onEnterApp }) {
       <section className="landing-cta-section">
         <div className="landing-cta-box">
           <div>
-            <h2 className="landing-cta-title">Bereit für mehr Überblick?</h2>
+            <h2 className="landing-cta-title">{t("landing.cta.title")}</h2>
             <p className="landing-cta-description">
-              Starte kostenlos und behalte deine Bewerbungen im Griff.
+              {t("landing.cta.description")}
             </p>
           </div>
           <button className="landing-cta-button" onClick={handleEnterApp}>
-            Jetzt kostenlos starten
+            {t("landing.cta.button")}
           </button>
         </div>
       </section>
@@ -364,9 +352,7 @@ function LandingPage({ onEnterApp }) {
               </div>
               <span className="landing-logo-text">JobPilot</span>
             </div>
-            <p className="landing-footer-text">
-              Dein persönlicher Bewerbungstracker
-            </p>
+            <p className="landing-footer-text">{t("landing.footer.tagline")}</p>
           </div>
           <p className="landing-footer-copy">
             © {new Date().getFullYear()} JobPilot
