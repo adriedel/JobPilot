@@ -3,7 +3,7 @@ import { getToken } from "./auth";
 import { notifyBewerbungenChanged } from "../utils/syncBus";
 
 const DEMO_STORAGE_KEY = "jobpilot-demo-bewerbungen";
-const DEMO_SEED_DATA = [
+export const DEMO_SEED_DATA = [
   {
     id: 1,
     position: "Frontend Developer",
@@ -75,7 +75,7 @@ function writeDemoData(items) {
   return clone(items);
 }
 
-function buildDemoStats(items) {
+export function buildDemoStats(items) {
   return items.reduce(
     (accumulator, item) => {
       accumulator[item.status] = (accumulator[item.status] || 0) + 1;
