@@ -117,7 +117,11 @@
     "openListing": "Stellenanzeige öffnen",
     "noSalary": "Keine Angabe",
     "startOn": "Start am ",
-    "possibleStart": "Möglicher Start "
+    "possibleStart": "Möglicher Start ",
+    "note": "Notiz",
+    "historyCount_one": "Verlauf · {{count}} Eintrag",
+    "historyCount_other": "Verlauf · {{count}} Einträge",
+    "historyOpen": "Verlauf öffnen"
   },
   "applicationMethod": {
     "initiativbewerbung": "Initiativbewerbung",
@@ -286,6 +290,27 @@
     },
     "footer": {
       "tagline": "Dein persönlicher Bewerbungstracker"
+    }
+  },
+  "verlauf": {
+    "title": "Verlauf",
+    "close": "Verlauf schließen",
+    "addUpdate": "Update hinzufügen",
+    "placeholder": "Was ist passiert? Zum Beispiel: Telefonat mit HR, Rückmeldung bis Freitag",
+    "date": "Datum",
+    "today": "heute",
+    "save": "Speichern",
+    "saving": "Speichert …",
+    "empty": "Noch keine Einträge. Status-Änderungen landen hier automatisch.",
+    "loadError": "Verlauf konnte nicht geladen werden.",
+    "saveError": "Eintrag konnte nicht gespeichert werden.",
+    "deleteEntry": "Eintrag löschen",
+    "statusChanged": "Status geändert: {{from}} → {{to}}",
+    "types": {
+      "notiz": "Notiz",
+      "gespraech": "Gespräch",
+      "mail": "Mail",
+      "status": "Status"
     }
   }
 }

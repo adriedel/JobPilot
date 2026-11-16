@@ -117,7 +117,11 @@
     "openListing": "Open Job Posting",
     "noSalary": "Not specified",
     "startOn": "Start on ",
-    "possibleStart": "Possible start "
+    "possibleStart": "Possible start ",
+    "note": "Note",
+    "historyCount_one": "History · {{count}} entry",
+    "historyCount_other": "History · {{count}} entries",
+    "historyOpen": "Open history"
   },
   "applicationMethod": {
     "initiativbewerbung": "Unsolicited Application",
@@ -286,6 +290,27 @@
     },
     "footer": {
       "tagline": "Your personal application tracker"
+    }
+  },
+  "verlauf": {
+    "title": "History",
+    "close": "Close history",
+    "addUpdate": "Add update",
+    "placeholder": "What happened? For example: call with HR, feedback by Friday",
+    "date": "Date",
+    "today": "today",
+    "save": "Save",
+    "saving": "Saving …",
+    "empty": "No entries yet. Status changes show up here automatically.",
+    "loadError": "Could not load the history.",
+    "saveError": "Could not save the entry.",
+    "deleteEntry": "Delete entry",
+    "statusChanged": "Status changed: {{from}} → {{to}}",
+    "types": {
+      "notiz": "Note",
+      "gespraech": "Call",
+      "mail": "Mail",
+      "status": "Status"
     }
   }
 }
