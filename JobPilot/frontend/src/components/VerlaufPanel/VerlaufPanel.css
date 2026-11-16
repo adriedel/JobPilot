@@ -451,6 +451,36 @@
   overflow-wrap: anywhere;
 }
 
+/* ── Anfangsnotiz: Startpunkt der Timeline ── */
+.verlauf-entry-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.verlauf-pin {
+  width: 12px;
+  height: 12px;
+}
+
+.verlauf-entry--initial .verlauf-dot {
+  background: var(--bg-surface);
+  border: 2px solid var(--link-color);
+  box-sizing: border-box;
+}
+
+.verlauf-entry--initial .verlauf-entry-type {
+  color: var(--link-color);
+  font-weight: 600;
+}
+
+.verlauf-entry--initial .verlauf-entry-text {
+  margin-top: 5px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-hover);
+}
+
 /* ── Schmale Screens: Overlay von rechts ── */
 @media (max-width: 999px) {
   .verlauf-backdrop {

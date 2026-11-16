@@ -23,6 +23,7 @@ import PersonIcon from "../../assets/icons/person-2.svg?react";
 import ExternalIcon from "../../assets/icons/external.svg?react";
 import BuildingIcon from "../../assets/icons/building-1-line.svg?react";
 import GehaltIcon from "../../assets/icons/cash-coin.svg?react";
+import PinIcon from "../../assets/icons/pin.svg?react";
 
 function isHttpUrl(value) {
   if (!value) return false;
@@ -234,7 +235,8 @@ function BewerbungsCard({
       {bewerbung.notizen && (
         <div className="card-notes-wrap">
           {noteDay(bewerbung) && (
-            <span className="card-entry-meta">
+            <span className="card-entry-meta card-initial-note-meta">
+              <PinIcon className="card-initial-note-icon" aria-hidden="true" />
               {formatShortDate(noteDay(bewerbung), i18n.language)}
               {" · "}
               {t("card.note")}

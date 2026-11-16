@@ -118,7 +118,7 @@
     "noSalary": "Keine Angabe",
     "startOn": "Start am ",
     "possibleStart": "Möglicher Start ",
-    "note": "Notiz",
+    "note": "Anfangsnotiz",
     "historyCount_one": "Verlauf · {{count}} Eintrag",
     "historyCount_other": "Verlauf · {{count}} Einträge",
     "addUpdate": "Update hinzufügen"
@@ -323,6 +323,7 @@
     "scopeAllHint": "Gespeichert für alle Bewerbungen",
     "removeReason": "Grund entfernen",
     "apply": "Übernehmen",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "initialNote": "Anfangsnotiz"
   }
 }

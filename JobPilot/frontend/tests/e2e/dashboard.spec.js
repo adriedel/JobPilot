@@ -115,7 +115,7 @@ test.describe("Dashboard @demo", () => {
     // Nur Notiz, sonst nichts passiert → kein Verlauf-Link
     await expect(card.locator(".card-history-link")).toHaveCount(0);
     // Anfangs-Notiz ohne gespeicherten Zeitstempel → Bewerbungsdatum
-    await expect(card.locator(".card-notes-wrap").first()).toContainText("15.03.2026 · Notiz");
+    await expect(card.locator(".card-notes-wrap").first()).toContainText("15.03.2026 · Anfangsnotiz");
 
     await openCardMenu(page, "Frontend Developer");
     await page.locator(".dropdown-item", { hasText: "Stufe weiter" }).click();
@@ -131,7 +131,7 @@ test.describe("Dashboard @demo", () => {
     await expect(panel).toContainText("Frontend Developer");
     await expect(entries).toHaveCount(2);
     // Die ursprüngliche Notiz steht mit Datum ganz unten
-    await expect(entries.last()).toContainText("Notiz");
+    await expect(entries.last()).toContainText("Anfangsnotiz");
     await expect(entries.last()).toContainText("Portfolio bereits verschickt");
 
     await panel.getByRole("radio", { name: "Gespräch" }).click();
@@ -226,7 +226,7 @@ test.describe("Dashboard @demo", () => {
     await page.locator(".modal .btn-submit").click();
 
     const notes = cards(page).filter({ hasText: "UX Designer" }).locator(".card-notes-wrap").first();
-    await expect(notes).toContainText("15.04.2026 · Notiz");
+    await expect(notes).toContainText("15.04.2026 · Anfangsnotiz");
     await expect(notes).toContainText("Zweites Gespräch am Montag");
   });
 

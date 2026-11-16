@@ -19,6 +19,7 @@ import {
   buildTimeline,
 } from "../../utils/verlauf";
 import TrashIcon from "../../assets/icons/trash.svg?react";
+import PinIcon from "../../assets/icons/pin.svg?react";
 
 // Wofür ein eigener Grund gilt: nur dieser Eintrag, diese Bewerbung, alle
 const REASON_SCOPES = ["once", "bewerbung", "alle"];
@@ -426,14 +427,22 @@ function VerlaufPanel({ bewerbung, onClose, onChanged }) {
           ) : (
             <ol className="verlauf-timeline">
               {timeline.map((entry) => (
-                <li key={entry.id} className="verlauf-entry">
+                <li
+                  key={entry.id}
+                  className={`verlauf-entry ${entry.isNote ? "verlauf-entry--initial" : ""}`}
+                >
                   <span className="verlauf-dot" aria-hidden="true" />
                   <div className="verlauf-entry-body">
                     <div className="verlauf-entry-meta">
                       <time dateTime={entry.datum}>
                         {formatShortDate(entry.datum, i18n.language)}
                       </time>
-                      <span>{entryTypeLabel(entry, t)}</span>
+                      <span className="verlauf-entry-type">
+                        {entry.isNote && (
+                          <PinIcon className="verlauf-pin" aria-hidden="true" />
+                        )}
+                        {entryTypeLabel(entry, t)}
+                      </span>
                       {/* Die Notiz der Bewerbung wird über "Bearbeiten" gepflegt */}
                       {!entry.isNote && (
                         <button

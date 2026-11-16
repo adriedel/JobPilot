@@ -86,6 +86,7 @@ export const MAX_REASON_LENGTH = 40;
 
 /** Typ-Bezeichnung eines Eintrags ("Gespräch", "Status" oder eigener Grund). */
 export function entryTypeLabel(entry, t) {
+  if (entry.isNote) return t("verlauf.initialNote");
   if (entry.typ === "custom") return entry.typ_label;
   return t(`verlauf.types.${entry.typ}`);
 }
