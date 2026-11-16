@@ -295,13 +295,21 @@ app.put("/api/auth/profile/avatar-config", authenticateToken, async (req, res) =
 // ==================== BEWERBUNGEN ROUTES (PROTECTED) ====================
 
 // Verlauf: manuell anlegbare Typen ("status" wird nur automatisch erzeugt)
-const MANUAL_UPDATE_TYPES = ["notiz", "gespraech", "mail"];
-const UPDATE_SELECT_FIELDS = `u.id, u.typ, u.text, u.status_von, u.status_nach,
+const MANUAL_UPDATE_TYPES = ["notiz", "gespraech", "mail", "custom"];
+const MAX_TYP_LABEL_LENGTH = 40;
+const UPDATE_SELECT_FIELDS = `u.id, u.typ, u.typ_label, u.text, u.status_von, u.status_nach,
   to_char(u.datum, 'YYYY-MM-DD') AS datum, u.created_at`;
-const UPDATE_JSON_FIELDS = `'id', u.id, 'typ', u.typ, 'text', u.text,
+const UPDATE_JSON_FIELDS = `'id', u.id, 'typ', u.typ, 'typ_label', u.typ_label, 'text', u.text,
   'status_von', u.status_von, 'status_nach', u.status_nach,
   'datum', to_char(u.datum, 'YYYY-MM-DD')`;
 const UPDATE_ORDER = "u.datum DESC, u.created_at DESC, u.id DESC";
+
+/** Gibt das getrimmte Label zurück oder null, wenn es ungültig ist. */
+function normalizeTypLabel(value) {
+  if (typeof value !== "string") return null;
+  const label = value.trim().replace(/\s+/g, " ");
+  return label && label.length <= MAX_TYP_LABEL_LENGTH ? label : null;
+}
 
 function isIsoDate(value) {
   return (
@@ -561,6 +569,12 @@ app.post("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => 
   if (!text) {
     return res.status(400).json({ error: "Text ist erforderlich" });
   }
+  const typLabel = typ === "custom" ? normalizeTypLabel(req.body.typ_label) : null;
+  if (typ === "custom" && !typLabel) {
+    return res.status(400).json({
+      error: `Eigener Grund (typ_label) ist erforderlich, max. ${MAX_TYP_LABEL_LENGTH} Zeichen`,
+    });
+  }
   if (datum !== undefined && datum !== null && datum !== "" && !isIsoDate(datum)) {
     return res.status(400).json({ error: "Datum muss im Format YYYY-MM-DD sein" });
   }
@@ -571,12 +585,92 @@ app.post("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => 
     }
 
     const result = await pool.query(
-      `INSERT INTO bewerbung_updates AS u (bewerbung_id, typ, text, datum)
-       VALUES ($1, $2, $3, COALESCE($4::date, CURRENT_DATE))
+      `INSERT INTO bewerbung_updates AS u (bewerbung_id, typ, typ_label, text, datum)
+       VALUES ($1, $2, $3, $4, COALESCE($5::date, CURRENT_DATE))
        RETURNING ${UPDATE_SELECT_FIELDS}`,
-      [id, typ, text, datum || null],
+      [id, typ, typLabel, text, datum || null],
     );
     res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET gespeicherte eigene Update-Gründe für eine Bewerbung
+// (alle globalen + die nur für diese Bewerbung)
+app.get("/api/bewerbungen/:id/update-typen", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!(await findOwnBewerbung(pool, id, req.userId))) {
+      return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+    }
+
+    const result = await pool.query(
+      `SELECT id, label, bewerbung_id
+       FROM update_typen
+       WHERE user_id = $1 AND (bewerbung_id IS NULL OR bewerbung_id = $2)
+       ORDER BY created_at, id`,
+      [req.userId, id],
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST eigenen Update-Grund speichern
+// bewerbung_id gesetzt → nur für diese Bewerbung, sonst für alle
+app.post("/api/update-typen", authenticateToken, async (req, res) => {
+  const label = normalizeTypLabel(req.body.label);
+  const bewerbungId = req.body.bewerbung_id ?? null;
+
+  if (!label) {
+    return res
+      .status(400)
+      .json({ error: `Label ist erforderlich, max. ${MAX_TYP_LABEL_LENGTH} Zeichen` });
+  }
+
+  try {
+    if (bewerbungId !== null && !(await findOwnBewerbung(pool, bewerbungId, req.userId))) {
+      return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+    }
+
+    const inserted = await pool.query(
+      `INSERT INTO update_typen (user_id, bewerbung_id, label)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, (COALESCE(bewerbung_id, 0)), (lower(label))) DO NOTHING
+       RETURNING id, label, bewerbung_id`,
+      [req.userId, bewerbungId, label],
+    );
+    if (inserted.rows[0]) {
+      return res.status(201).json(inserted.rows[0]);
+    }
+
+    // Gibt es schon → bestehenden Eintrag zurückgeben
+    const existing = await pool.query(
+      `SELECT id, label, bewerbung_id FROM update_typen
+       WHERE user_id = $1 AND COALESCE(bewerbung_id, 0) = COALESCE($2::int, 0)
+         AND lower(label) = lower($3)`,
+      [req.userId, bewerbungId, label],
+    );
+    res.json(existing.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE gespeicherten Update-Grund (bestehende Verlaufseinträge bleiben)
+app.delete("/api/update-typen/:typId", authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "DELETE FROM update_typen WHERE id = $1 AND user_id = $2",
+      [req.params.typId, req.userId],
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Grund nicht gefunden" });
+    }
+    res.json({ message: "Grund gelöscht" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

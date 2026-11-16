@@ -81,6 +81,26 @@ async function initDB() {
   await pool.query(
     `CREATE INDEX IF NOT EXISTS idx_bewerbung_updates_bewerbung_id ON bewerbung_updates(bewerbung_id)`,
   );
+  // Eigener Update-Grund (typ = 'custom'), z.B. "Absage per Telefon"
+  await pool.query(
+    `ALTER TABLE bewerbung_updates ADD COLUMN IF NOT EXISTS typ_label TEXT`,
+  );
+
+  // Gespeicherte eigene Update-Gründe:
+  // bewerbung_id NULL = für alle Bewerbungen, sonst nur für diese eine
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS update_typen (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      bewerbung_id INTEGER REFERENCES bewerbungen(id) ON DELETE CASCADE,
+      label TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await pool.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_update_typen_unique
+     ON update_typen (user_id, (COALESCE(bewerbung_id, 0)), (lower(label)))`,
+  );
   await pool.query(
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_url TEXT`,
   );
