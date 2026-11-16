@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./BewerbungsCard.css";
 import { STATUS } from "../../utils/constants";
+import { formatShortDate, describeEntry } from "../../utils/verlauf";
 import DeleteConfirmModal from "../DeleteConfirmModal/DeleteConfirmModal";
 import BeworbenIcon from "../../assets/icons/paperplane-applied.svg?react";
 import StufeWeiterIcon from "../../assets/icons/arrow-step-further.svg?react";
@@ -28,10 +29,19 @@ function isHttpUrl(value) {
   }
 }
 
-function BewerbungsCard({ bewerbung, onEdit, onDelete, onStatusChange }) {
+function BewerbungsCard({
+  bewerbung,
+  onEdit,
+  onDelete,
+  onStatusChange,
+  onOpenVerlauf,
+  isVerlaufOpen = false,
+}) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { t, i18n } = useTranslation();
+  const letzterEintrag = bewerbung.letzter_eintrag;
+  const verlaufAnzahl = bewerbung.verlauf_anzahl || 0;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -106,7 +116,10 @@ function BewerbungsCard({ bewerbung, onEdit, onDelete, onStatusChange }) {
   const CurrentStatusIcon = STATUS_ICON_COMPONENTS[bewerbung.status];
 
   return (
-    <article className="bewerbung-card" onMouseLeave={() => setShowMenu(false)}>
+    <article
+      className={`bewerbung-card ${isVerlaufOpen ? "bewerbung-card--selected" : ""}`}
+      onMouseLeave={() => setShowMenu(false)}
+    >
       <div className="card-header">
         <div className="card-title-section">
           <h3 className="card-position">{bewerbung.position}</h3>
@@ -198,23 +211,56 @@ function BewerbungsCard({ bewerbung, onEdit, onDelete, onStatusChange }) {
 
       {bewerbung.notizen && (
         <div className="card-notes-wrap">
+          {bewerbung.notizen_updated_at && (
+            <span className="card-entry-meta">
+              {formatShortDate(bewerbung.notizen_updated_at, i18n.language)}
+              {" · "}
+              {t("card.note")}
+            </span>
+          )}
           <p className="card-notizen">{bewerbung.notizen}</p>
         </div>
       )}
 
-      {isHttpUrl(bewerbung.link) && (
-        <div className="detail-item detail-item-link card-link-row">
-          <ExternalIcon className="meta-icon link-icon" aria-hidden="true" />
-          <a
-            href={bewerbung.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="card-link"
-          >
-            {t("card.openListing")}
-          </a>
+      {letzterEintrag && (
+        <div className="card-notes-wrap card-latest-entry">
+          <span className="card-entry-meta">
+            {formatShortDate(letzterEintrag.datum, i18n.language)}
+            {" · "}
+            {t(`verlauf.types.${letzterEintrag.typ}`)}
+          </span>
+          <p className="card-latest-text">{describeEntry(letzterEintrag, t)}</p>
         </div>
       )}
+
+      <div className="card-actions-row">
+        {onOpenVerlauf && (
+          <button
+            type="button"
+            className="card-history-link"
+            onClick={() => onOpenVerlauf(bewerbung)}
+            aria-expanded={isVerlaufOpen}
+          >
+            {verlaufAnzahl > 0
+              ? t("card.historyCount", { count: verlaufAnzahl })
+              : t("card.historyOpen")}
+          </button>
+        )}
+
+        {isHttpUrl(bewerbung.link) && (
+          <div className="detail-item detail-item-link card-link-row">
+            <ExternalIcon className="meta-icon link-icon" aria-hidden="true" />
+            <a
+              href={bewerbung.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card-link"
+            >
+              {t("card.openListing")}
+            </a>
+          </div>
+        )}
+      </div>
 
       {bewerbung.startdatum && bewerbung.status !== STATUS.ABGELEHNT && (
         <div className="card-footer">

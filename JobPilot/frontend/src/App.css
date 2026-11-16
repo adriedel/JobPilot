@@ -273,6 +273,26 @@ small {
   padding: 0 24px 30px;
 }
 
+/* Karten + optionales Verlauf-Panel rechts daneben */
+@media (min-width: 1000px) {
+  .dashboard-body--with-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 20px;
+    align-items: start;
+    padding-right: 24px;
+  }
+
+  .dashboard-body--with-panel .bewerbungen-grid {
+    padding-right: 0;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .dashboard-body--with-panel .verlauf-panel {
+    margin-bottom: 30px;
+  }
+}
+
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;

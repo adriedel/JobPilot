@@ -6,6 +6,7 @@ import StatCards from "./components/StatCards/StatCards";
 import SearchBar from "./components/SearchBar/SearchBar";
 import BewerbungsCard from "./components/BewerbungsCard/BewerbungsCard";
 import BewerbungsModal from "./components/BewerbungsModal/BewerbungsModal";
+import VerlaufPanel from "./components/VerlaufPanel/VerlaufPanel";
 import { STATUS, STATUS_ORDER } from "./utils/constants";
 import { subscribeToBewerbungenChanges } from "./utils/syncBus";
 
@@ -30,6 +31,7 @@ function App() {
 
   const [showModal, setShowModal] = useState(false);
   const [editingBewerbung, setEditingBewerbung] = useState(null);
+  const [verlaufBewerbungId, setVerlaufBewerbungId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("alle");
   const [sortBy, setSortBy] = useState("datum");
@@ -212,6 +214,17 @@ function App() {
     setEditingBewerbung(null);
   };
 
+  // Verlauf-Panel: per ID merken, damit es nach dem Neuladen die aktuellen
+  // Daten zeigt und sich schließt, falls die Bewerbung gelöscht wurde.
+  const toggleVerlauf = useCallback((bewerbung) => {
+    setVerlaufBewerbungId((current) =>
+      current === bewerbung.id ? null : bewerbung.id,
+    );
+  }, []);
+  const closeVerlauf = useCallback(() => setVerlaufBewerbungId(null), []);
+  const verlaufBewerbung =
+    bewerbungen.find((b) => b.id === verlaufBewerbungId) || null;
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -304,24 +317,38 @@ function App() {
           />
         </div>
 
-        <section className="bewerbungen-grid">
-          {getFilteredBewerbungen().length === 0 ? (
-            <div className="empty-state">
-              <h3>Keine Bewerbungen gefunden</h3>
-              <p>Erstellen Sie Ihre erste Bewerbung, um loszulegen!</p>
-            </div>
-          ) : (
-            getFilteredBewerbungen().map((bewerbung) => (
-              <BewerbungsCard
-                key={bewerbung.id}
-                bewerbung={bewerbung}
-                onEdit={openModal}
-                onDelete={handleDelete}
-                onStatusChange={handleStatusChange}
-              />
-            ))
+        <div
+          className={`dashboard-body ${verlaufBewerbung ? "dashboard-body--with-panel" : ""}`}
+        >
+          <section className="bewerbungen-grid">
+            {getFilteredBewerbungen().length === 0 ? (
+              <div className="empty-state">
+                <h3>Keine Bewerbungen gefunden</h3>
+                <p>Erstellen Sie Ihre erste Bewerbung, um loszulegen!</p>
+              </div>
+            ) : (
+              getFilteredBewerbungen().map((bewerbung) => (
+                <BewerbungsCard
+                  key={bewerbung.id}
+                  bewerbung={bewerbung}
+                  onEdit={openModal}
+                  onDelete={handleDelete}
+                  onStatusChange={handleStatusChange}
+                  onOpenVerlauf={toggleVerlauf}
+                  isVerlaufOpen={bewerbung.id === verlaufBewerbungId}
+                />
+              ))
+            )}
+          </section>
+
+          {verlaufBewerbung && (
+            <VerlaufPanel
+              bewerbung={verlaufBewerbung}
+              onClose={closeVerlauf}
+              onChanged={loadBewerbungen}
+            />
           )}
-        </section>
+        </div>
 
         <BewerbungsModal
           isOpen={showModal}
