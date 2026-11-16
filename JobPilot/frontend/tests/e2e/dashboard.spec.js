@@ -108,6 +108,51 @@ test.describe("Dashboard @demo", () => {
     await expect(cards(page)).toContainText("Frontend Developer");
   });
 
+  test("Verlauf: Status-Wechsel wird geloggt, Updates lassen sich hinzufügen", async ({
+    page,
+  }) => {
+    const card = cards(page).filter({ hasText: "Frontend Developer" });
+    // Anlegen der Bewerbung erzeugt keinen Eintrag
+    await expect(card.locator(".card-history-link")).toHaveText("Verlauf öffnen");
+
+    await openCardMenu(page, "Frontend Developer");
+    await page.locator(".dropdown-item", { hasText: "Stufe weiter" }).click();
+    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 1 Eintrag");
+    await expect(card.locator(".card-latest-entry")).toContainText(
+      "Status geändert: Beworben → Stufe weiter",
+    );
+
+    await card.locator(".card-history-link").click();
+    const panel = page.locator(".verlauf-panel");
+    await expect(panel).toContainText("Frontend Developer");
+
+    await panel.getByRole("radio", { name: "Gespräch" }).click();
+    await panel.locator("textarea").fill("Telefonat mit HR, Rückmeldung bis Freitag");
+    await panel.getByRole("button", { name: "Speichern" }).click();
+
+    await expect(panel.locator(".verlauf-entry")).toHaveCount(2);
+    await expect(panel.locator(".verlauf-entry").first()).toContainText("15.04.2026");
+    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
+
+    await page.keyboard.press("Escape");
+    await expect(panel).toBeHidden();
+
+    // Bleibt nach dem Neuladen erhalten
+    await page.reload();
+    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
+  });
+
+  test("Notiz zeigt das Datum der letzten Änderung", async ({ page }) => {
+    await openCardMenu(page, "UX Designer");
+    await page.getByRole("button", { name: "Bearbeiten" }).click();
+    await page.locator('.modal textarea[name="notizen"]').fill("Zweites Gespräch am Montag");
+    await page.locator(".modal .btn-submit").click();
+
+    const notes = cards(page).filter({ hasText: "UX Designer" }).locator(".card-notes-wrap").first();
+    await expect(notes).toContainText("15.04.2026 · Notiz");
+    await expect(notes).toContainText("Zweites Gespräch am Montag");
+  });
+
   test("Bewerbung löschen", async ({ page }) => {
     await openCardMenu(page, "Product Manager Intern");
     await page.locator(".dropdown-item-delete").click();
