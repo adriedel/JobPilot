@@ -35,13 +35,18 @@ function BewerbungsCard({
   onDelete,
   onStatusChange,
   onOpenVerlauf,
+  onCloseVerlauf,
   isVerlaufOpen = false,
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { t, i18n } = useTranslation();
   const letzterEintrag = bewerbung.letzter_eintrag;
-  const verlaufAnzahl = bewerbung.verlauf_anzahl || 0;
+  // Link erst zeigen, wenn es neben der Notiz echte Verlaufseinträge gibt.
+  // Die Notiz steht im Panel mit in der Timeline und zählt daher mit.
+  const hasVerlauf = (bewerbung.verlauf_anzahl || 0) > 0;
+  const verlaufAnzahl =
+    (bewerbung.verlauf_anzahl || 0) + (bewerbung.notizen?.trim() ? 1 : 0);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -147,6 +152,18 @@ function BewerbungsCard({
                 <PencilIcon className="meta-icon" aria-hidden="true" />
                 <span>{t("card.edit")}</span>
               </button>
+              {onOpenVerlauf && (
+                <button
+                  className="dropdown-item"
+                  onClick={() => {
+                    setShowMenu(false);
+                    onOpenVerlauf(bewerbung);
+                  }}
+                >
+                  <CalendarIcon className="meta-icon" aria-hidden="true" />
+                  <span>{t("card.addUpdate")}</span>
+                </button>
+              )}
               <div className="dropdown-divider" />
               {statusOptions.map((status) => {
                 const isCurrentStatus = bewerbung.status === status;
@@ -234,16 +251,16 @@ function BewerbungsCard({
       )}
 
       <div className="card-actions-row">
-        {onOpenVerlauf && (
+        {onOpenVerlauf && hasVerlauf && (
           <button
             type="button"
             className="card-history-link"
-            onClick={() => onOpenVerlauf(bewerbung)}
+            onClick={() =>
+              isVerlaufOpen ? onCloseVerlauf?.() : onOpenVerlauf(bewerbung)
+            }
             aria-expanded={isVerlaufOpen}
           >
-            {verlaufAnzahl > 0
-              ? t("card.historyCount", { count: verlaufAnzahl })
-              : t("card.historyOpen")}
+            {t("card.historyCount", { count: verlaufAnzahl })}
           </button>
         )}
 

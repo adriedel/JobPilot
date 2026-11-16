@@ -121,7 +121,7 @@
     "note": "Note",
     "historyCount_one": "History · {{count}} entry",
     "historyCount_other": "History · {{count}} entries",
-    "historyOpen": "Open history"
+    "addUpdate": "Add update"
   },
   "applicationMethod": {
     "initiativbewerbung": "Unsolicited Application",

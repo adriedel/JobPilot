@@ -216,10 +216,8 @@ function App() {
 
   // Verlauf-Panel: per ID merken, damit es nach dem Neuladen die aktuellen
   // Daten zeigt und sich schließt, falls die Bewerbung gelöscht wurde.
-  const toggleVerlauf = useCallback((bewerbung) => {
-    setVerlaufBewerbungId((current) =>
-      current === bewerbung.id ? null : bewerbung.id,
-    );
+  const openVerlauf = useCallback((bewerbung) => {
+    setVerlaufBewerbungId(bewerbung.id);
   }, []);
   const closeVerlauf = useCallback(() => setVerlaufBewerbungId(null), []);
   const verlaufBewerbung =
@@ -334,7 +332,8 @@ function App() {
                   onEdit={openModal}
                   onDelete={handleDelete}
                   onStatusChange={handleStatusChange}
-                  onOpenVerlauf={toggleVerlauf}
+                  onOpenVerlauf={openVerlauf}
+                  onCloseVerlauf={closeVerlauf}
                   isVerlaufOpen={bewerbung.id === verlaufBewerbungId}
                 />
               ))

@@ -121,7 +121,7 @@
     "note": "Notiz",
     "historyCount_one": "Verlauf · {{count}} Eintrag",
     "historyCount_other": "Verlauf · {{count}} Einträge",
-    "historyOpen": "Verlauf öffnen"
+    "addUpdate": "Update hinzufügen"
   },
   "applicationMethod": {
     "initiativbewerbung": "Initiativbewerbung",
