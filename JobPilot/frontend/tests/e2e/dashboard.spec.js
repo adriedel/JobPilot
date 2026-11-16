@@ -114,6 +114,8 @@ test.describe("Dashboard @demo", () => {
     const card = cards(page).filter({ hasText: "Frontend Developer" });
     // Nur Notiz, sonst nichts passiert → kein Verlauf-Link
     await expect(card.locator(".card-history-link")).toHaveCount(0);
+    // Anfangs-Notiz ohne gespeicherten Zeitstempel → Bewerbungsdatum
+    await expect(card.locator(".card-notes-wrap").first()).toContainText("15.03.2026 · Notiz");
 
     await openCardMenu(page, "Frontend Developer");
     await page.locator(".dropdown-item", { hasText: "Stufe weiter" }).click();
