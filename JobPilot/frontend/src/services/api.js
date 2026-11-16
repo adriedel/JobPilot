@@ -79,6 +79,14 @@ function writeDemoData(items) {
 // ── Demo-Verlauf: { [bewerbungId]: Eintrag[] } im localStorage ──
 const DEMO_VERLAUF_KEY = "jobpilot-demo-verlauf";
 
+// Eindeutige, aufsteigende IDs – Date.now() allein kollidiert bei schnellen
+// Aktionen hintereinander (bzw. in Tests mit eingefrorener Uhr).
+let demoIdCounter = 0;
+function nextDemoId() {
+  demoIdCounter = (demoIdCounter + 1) % 1000;
+  return Date.now() * 1000 + demoIdCounter;
+}
+
 function readDemoVerlauf() {
   try {
     return JSON.parse(localStorage.getItem(DEMO_VERLAUF_KEY)) || {};
@@ -104,7 +112,7 @@ function sortVerlauf(entries) {
 function addDemoVerlaufEntry(bewerbungId, entry) {
   const verlauf = readDemoVerlauf();
   const newEntry = {
-    id: Date.now(),
+    id: nextDemoId(),
     text: null,
     status_von: null,
     status_nach: null,
@@ -349,6 +357,7 @@ export async function addUpdate(bewerbungId, entry) {
   if (DEMO_MODE) {
     const created = addDemoVerlaufEntry(bewerbungId, {
       typ: entry.typ,
+      typ_label: entry.typ === "custom" ? entry.typ_label.trim() : null,
       text: entry.text.trim(),
       datum: entry.datum || todayIso(),
     });
@@ -400,6 +409,100 @@ export async function deleteUpdate(bewerbungId, updateId) {
   const result = await response.json();
   notifyBewerbungenChanged();
   return result;
+}
+
+// ==================== EIGENE UPDATE-GRÜNDE ====================
+// bewerbung_id null = für alle Bewerbungen, sonst nur für diese eine
+
+const DEMO_UPDATE_TYPEN_KEY = "jobpilot-demo-update-typen";
+
+function readDemoUpdateTypen() {
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_UPDATE_TYPEN_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+// GET gespeicherte Gründe (global + nur für diese Bewerbung)
+export async function getUpdateTypes(bewerbungId) {
+  if (DEMO_MODE) {
+    return readDemoUpdateTypen().filter(
+      (typ) =>
+        typ.bewerbung_id === null ||
+        String(typ.bewerbung_id) === String(bewerbungId),
+    );
+  }
+
+  const response = await authFetch(
+    `${API_URL}/bewerbungen/${bewerbungId}/update-typen`,
+    { headers: getHeaders() },
+  );
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || "Fehler beim Laden der Gründe");
+  }
+
+  return response.json();
+}
+
+// POST Grund speichern ({ label, bewerbung_id })
+export async function saveUpdateType({ label, bewerbung_id = null }) {
+  if (DEMO_MODE) {
+    const typen = readDemoUpdateTypen();
+    const existing = typen.find(
+      (typ) =>
+        String(typ.bewerbung_id) === String(bewerbung_id) &&
+        typ.label.toLowerCase() === label.trim().toLowerCase(),
+    );
+    if (existing) return existing;
+
+    const created = { id: nextDemoId(), label: label.trim(), bewerbung_id };
+    localStorage.setItem(
+      DEMO_UPDATE_TYPEN_KEY,
+      JSON.stringify([...typen, created]),
+    );
+    return created;
+  }
+
+  const response = await authFetch(`${API_URL}/update-typen`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ label, bewerbung_id }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || "Fehler beim Speichern des Grunds");
+  }
+
+  return response.json();
+}
+
+// DELETE gespeicherten Grund (Verlaufseinträge behalten ihren Grund)
+export async function deleteUpdateType(typId) {
+  if (DEMO_MODE) {
+    localStorage.setItem(
+      DEMO_UPDATE_TYPEN_KEY,
+      JSON.stringify(
+        readDemoUpdateTypen().filter((typ) => String(typ.id) !== String(typId)),
+      ),
+    );
+    return { message: "Demo-Grund gelöscht" };
+  }
+
+  const response = await authFetch(`${API_URL}/update-typen/${typId}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || "Fehler beim Löschen des Grunds");
+  }
+
+  return response.json();
 }
 
 // GET Statistiken

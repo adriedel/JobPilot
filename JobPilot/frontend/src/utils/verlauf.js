@@ -72,6 +72,14 @@ export function buildTimeline(entries, bewerbung) {
   );
 }
 
+export const MAX_REASON_LENGTH = 40;
+
+/** Typ-Bezeichnung eines Eintrags ("Gespräch", "Status" oder eigener Grund). */
+export function entryTypeLabel(entry, t) {
+  if (entry.typ === "custom") return entry.typ_label;
+  return t(`verlauf.types.${entry.typ}`);
+}
+
 /** Anzeigetext eines Eintrags (Status-Einträge haben keinen eigenen Text). */
 export function describeEntry(entry, t) {
   if (entry.typ === "status") {
