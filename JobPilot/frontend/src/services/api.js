@@ -1,6 +1,7 @@
 import { API_URL, DEMO_MODE } from "../utils/constants";
 import { getToken, authFetch } from "./auth";
 import { notifyBewerbungenChanged } from "../utils/syncBus";
+import { todayIso } from "../utils/verlauf";
 
 const DEMO_STORAGE_KEY = "jobpilot-demo-bewerbungen";
 export const DEMO_SEED_DATA = [
@@ -75,6 +76,59 @@ function writeDemoData(items) {
   return clone(items);
 }
 
+// ── Demo-Verlauf: { [bewerbungId]: Eintrag[] } im localStorage ──
+const DEMO_VERLAUF_KEY = "jobpilot-demo-verlauf";
+
+function readDemoVerlauf() {
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_VERLAUF_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeDemoVerlauf(verlauf) {
+  localStorage.setItem(DEMO_VERLAUF_KEY, JSON.stringify(verlauf));
+}
+
+/** Neueste zuerst – gleiche Reihenfolge wie das Backend. */
+function sortVerlauf(entries) {
+  return [...entries].sort(
+    (a, b) =>
+      b.datum.localeCompare(a.datum) ||
+      (b.created_at || "").localeCompare(a.created_at || "") ||
+      b.id - a.id,
+  );
+}
+
+function addDemoVerlaufEntry(bewerbungId, entry) {
+  const verlauf = readDemoVerlauf();
+  const newEntry = {
+    id: Date.now(),
+    text: null,
+    status_von: null,
+    status_nach: null,
+    datum: todayIso(),
+    created_at: new Date().toISOString(),
+    ...entry,
+  };
+  verlauf[bewerbungId] = [...(verlauf[bewerbungId] || []), newEntry];
+  writeDemoVerlauf(verlauf);
+  return newEntry;
+}
+
+function withDemoVerlaufSummary(items) {
+  const verlauf = readDemoVerlauf();
+  return items.map((item) => {
+    const entries = sortVerlauf(verlauf[item.id] || []);
+    return {
+      ...item,
+      verlauf_anzahl: entries.length,
+      letzter_eintrag: entries[0] || null,
+    };
+  });
+}
+
 export function buildDemoStats(items) {
   return items.reduce(
     (accumulator, item) => {
@@ -106,7 +160,7 @@ function getHeaders() {
 // GET alle Bewerbungen
 export async function getAll(status = null) {
   if (DEMO_MODE) {
-    const items = readDemoData();
+    const items = withDemoVerlaufSummary(readDemoData());
     return status ? items.filter((item) => item.status === status) : items;
   }
 
@@ -159,6 +213,9 @@ export async function create(bewerbung) {
     const newItem = {
       ...bewerbung,
       id: Date.now(),
+      notizen_updated_at: bewerbung.notizen?.trim()
+        ? new Date().toISOString()
+        : null,
     };
 
     writeDemoData([newItem, ...items]);
@@ -186,11 +243,36 @@ export async function create(bewerbung) {
 export async function update(id, bewerbung) {
   if (DEMO_MODE) {
     const items = readDemoData();
-    const updatedItems = items.map((item) =>
-      String(item.id) === String(id)
-        ? { ...item, ...bewerbung, id: item.id }
-        : item,
-    );
+    const updatedItems = items.map((item) => {
+      if (String(item.id) !== String(id)) return item;
+
+      // Gleiche Regeln wie im Backend: Status-Wechsel loggen,
+      // Notiz-Datum nur bei geändertem Text aktualisieren.
+      if (bewerbung.status && bewerbung.status !== item.status) {
+        addDemoVerlaufEntry(item.id, {
+          typ: "status",
+          status_von: item.status,
+          status_nach: bewerbung.status,
+        });
+      }
+
+      const newNote = bewerbung.notizen ?? "";
+      let notizenUpdatedAt = item.notizen_updated_at ?? null;
+      if (!newNote.trim()) notizenUpdatedAt = null;
+      else if (newNote !== (item.notizen ?? "")) {
+        notizenUpdatedAt = new Date().toISOString();
+      }
+
+      // Abgeleitete Listenfelder nicht mitspeichern
+      // eslint-disable-next-line no-unused-vars
+      const { verlauf_anzahl, letzter_eintrag, ...fields } = bewerbung;
+      return {
+        ...item,
+        ...fields,
+        id: item.id,
+        notizen_updated_at: notizenUpdatedAt,
+      };
+    });
 
     writeDemoData(updatedItems);
     notifyBewerbungenChanged();
@@ -230,6 +312,85 @@ export async function deleteBewerbung(id) {
     method: "DELETE",
     headers: getHeaders(),
   });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || "Fehler beim Löschen");
+  }
+
+  const result = await response.json();
+  notifyBewerbungenChanged();
+  return result;
+}
+
+// ==================== VERLAUF ====================
+
+// GET Verlauf einer Bewerbung (neueste zuerst)
+export async function getUpdates(bewerbungId) {
+  if (DEMO_MODE) {
+    return sortVerlauf(readDemoVerlauf()[bewerbungId] || []);
+  }
+
+  const response = await authFetch(
+    `${API_URL}/bewerbungen/${bewerbungId}/updates`,
+    { headers: getHeaders() },
+  );
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || "Fehler beim Laden des Verlaufs");
+  }
+
+  return response.json();
+}
+
+// POST Verlaufseintrag ({ typ: "notiz" | "gespraech" | "mail", text, datum })
+export async function addUpdate(bewerbungId, entry) {
+  if (DEMO_MODE) {
+    const created = addDemoVerlaufEntry(bewerbungId, {
+      typ: entry.typ,
+      text: entry.text.trim(),
+      datum: entry.datum || todayIso(),
+    });
+    notifyBewerbungenChanged();
+    return created;
+  }
+
+  const response = await authFetch(
+    `${API_URL}/bewerbungen/${bewerbungId}/updates`,
+    {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(entry),
+    },
+  );
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || "Fehler beim Speichern");
+  }
+
+  const result = await response.json();
+  notifyBewerbungenChanged();
+  return result;
+}
+
+// DELETE Verlaufseintrag
+export async function deleteUpdate(bewerbungId, updateId) {
+  if (DEMO_MODE) {
+    const verlauf = readDemoVerlauf();
+    verlauf[bewerbungId] = (verlauf[bewerbungId] || []).filter(
+      (entry) => String(entry.id) !== String(updateId),
+    );
+    writeDemoVerlauf(verlauf);
+    notifyBewerbungenChanged();
+    return { message: "Demo-Eintrag gelöscht" };
+  }
+
+  const response = await authFetch(
+    `${API_URL}/bewerbungen/${bewerbungId}/updates/${updateId}`,
+    { method: "DELETE", headers: getHeaders() },
+  );
 
   if (!response.ok) {
     const data = await response.json();
