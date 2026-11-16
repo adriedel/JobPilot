@@ -164,6 +164,59 @@ test.describe("Dashboard @demo", () => {
     await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
   });
 
+  test("eigener Update-Grund: einmalig, für diese oder alle Bewerbungen", async ({
+    page,
+  }) => {
+    const panel = page.locator(".verlauf-panel");
+    const reasonChip = (label) => panel.locator(".verlauf-type", { hasText: label });
+
+    const addReason = async (label, scope) => {
+      await panel.getByRole("button", { name: "Eigener Grund" }).click();
+      await panel.getByPlaceholder("z.B. Assessment Center").fill(label);
+      await panel.getByLabel(scope).check();
+      await panel.getByRole("button", { name: "Übernehmen" }).click();
+    };
+    const saveUpdate = async (text) => {
+      await panel.locator("textarea").fill(text);
+      await panel.getByRole("button", { name: "Speichern" }).click();
+    };
+
+    await openCardMenu(page, "Frontend Developer");
+    await page.locator(".dropdown-item", { hasText: "Update hinzufügen" }).click();
+
+    // Einmalig: wird benutzt und verschwindet danach wieder
+    await addReason("Messe-Gespräch", "Nur dieses Mal");
+    await expect(reasonChip("Messe-Gespräch")).toHaveAttribute("aria-checked", "true");
+    await saveUpdate("Am Stand kennengelernt");
+    await expect(panel.locator(".verlauf-entry").first()).toContainText("Messe-Gespräch");
+    await expect(reasonChip("Messe-Gespräch")).toHaveCount(0);
+
+    // Für diese Bewerbung und für alle Bewerbungen speichern
+    await addReason("Probearbeiten", "Für diese Bewerbung");
+    await saveUpdate("Probetag vereinbart");
+    await addReason("Assessment Center", "Für alle Bewerbungen");
+    await expect(reasonChip("Probearbeiten")).toBeVisible();
+    await expect(reasonChip("Assessment Center")).toBeVisible();
+
+    // Andere Bewerbung: nur der globale Grund ist da
+    await page.keyboard.press("Escape");
+    await openCardMenu(page, "UX Designer");
+    await page.locator(".dropdown-item", { hasText: "Update hinzufügen" }).click();
+    await expect(panel).toContainText("UX Designer");
+    await expect(reasonChip("Assessment Center")).toBeVisible();
+    await expect(reasonChip("Probearbeiten")).toHaveCount(0);
+
+    // Globalen Grund wieder entfernen
+    await panel.getByRole("button", { name: "Grund entfernen: Assessment Center" }).click();
+    await expect(reasonChip("Assessment Center")).toHaveCount(0);
+
+    // Karte zeigt den eigenen Grund als Typ des letzten Eintrags
+    await page.keyboard.press("Escape");
+    await expect(
+      cards(page).filter({ hasText: "Frontend Developer" }).locator(".card-latest-entry"),
+    ).toContainText("Probearbeiten");
+  });
+
   test("Notiz zeigt das Datum der letzten Änderung", async ({ page }) => {
     await openCardMenu(page, "UX Designer");
     await page.getByRole("button", { name: "Bearbeiten" }).click();
