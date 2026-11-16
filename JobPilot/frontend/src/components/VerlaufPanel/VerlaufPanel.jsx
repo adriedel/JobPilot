@@ -7,6 +7,7 @@ import {
   todayIso,
   formatShortDate,
   describeEntry,
+  buildTimeline,
 } from "../../utils/verlauf";
 import TrashIcon from "../../assets/icons/trash.svg?react";
 
@@ -105,6 +106,7 @@ function VerlaufPanel({ bewerbung, onClose, onChanged }) {
     }
   };
 
+  const timeline = buildTimeline(entries, bewerbung);
   const isToday = datum === todayIso();
   const meta = [bewerbung.firma, bewerbung.standort].filter(Boolean).join(" · ");
 
@@ -191,11 +193,11 @@ function VerlaufPanel({ bewerbung, onClose, onChanged }) {
         </form>
 
         <div className="verlauf-timeline-wrap">
-          {loading && entries.length === 0 ? null : entries.length === 0 ? (
+          {loading && timeline.length === 0 ? null : timeline.length === 0 ? (
             <p className="verlauf-empty">{t("verlauf.empty")}</p>
           ) : (
             <ol className="verlauf-timeline">
-              {entries.map((entry) => (
+              {timeline.map((entry) => (
                 <li key={entry.id} className="verlauf-entry">
                   <span className="verlauf-dot" aria-hidden="true" />
                   <div className="verlauf-entry-body">
@@ -204,15 +206,18 @@ function VerlaufPanel({ bewerbung, onClose, onChanged }) {
                         {formatShortDate(entry.datum, i18n.language)}
                       </time>
                       <span>{t(`verlauf.types.${entry.typ}`)}</span>
-                      <button
-                        type="button"
-                        className="verlauf-entry-delete"
-                        onClick={() => handleDelete(entry.id)}
-                        aria-label={t("verlauf.deleteEntry")}
-                        title={t("verlauf.deleteEntry")}
-                      >
-                        <TrashIcon aria-hidden="true" />
-                      </button>
+                      {/* Die Notiz der Bewerbung wird über "Bearbeiten" gepflegt */}
+                      {!entry.isNote && (
+                        <button
+                          type="button"
+                          className="verlauf-entry-delete"
+                          onClick={() => handleDelete(entry.id)}
+                          aria-label={t("verlauf.deleteEntry")}
+                          title={t("verlauf.deleteEntry")}
+                        >
+                          <TrashIcon aria-hidden="true" />
+                        </button>
+                      )}
                     </div>
                     <p className="verlauf-entry-text">
                       {describeEntry(entry, t)}

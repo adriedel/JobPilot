@@ -32,6 +32,46 @@ export function formatShortDate(value, language) {
   });
 }
 
+/** Zeitstempel → YYYY-MM-DD in lokaler Zeit (für Sortierung mit Verlaufsdaten). */
+export function toIsoDay(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/**
+ * Timeline fürs Panel: Verlaufseinträge plus die Notiz der Bewerbung
+ * (mit Datum der letzten Änderung), neueste zuerst. Bei gleichem Datum
+ * steht die Notiz unten, weil sie meist der Ausgangspunkt war.
+ */
+export function buildTimeline(entries, bewerbung) {
+  const note = bewerbung.notizen?.trim();
+  const all = note
+    ? [
+        ...entries,
+        {
+          id: "notiz-feld",
+          typ: "notiz",
+          text: bewerbung.notizen,
+          datum:
+            toIsoDay(bewerbung.notizen_updated_at) ||
+            toIsoDay(bewerbung.created_at) ||
+            bewerbung.datum,
+          isNote: true,
+        },
+      ]
+    : entries;
+
+  return [...all].sort(
+    (a, b) =>
+      b.datum.localeCompare(a.datum) ||
+      Number(!!a.isNote) - Number(!!b.isNote) ||
+      Number(b.id) - Number(a.id),
+  );
+}
+
 /** Anzeigetext eines Eintrags (Status-Einträge haben keinen eigenen Text). */
 export function describeEntry(entry, t) {
   if (entry.typ === "status") {
