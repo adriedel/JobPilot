@@ -53,6 +53,34 @@ async function initDB() {
   await pool.query(
     `CREATE INDEX IF NOT EXISTS idx_bewerbungen_user_id ON bewerbungen(user_id)`,
   );
+
+  // Zeitpunkt, an dem die Notiz zuletzt geschrieben/geändert wurde
+  await pool.query(
+    `ALTER TABLE bewerbungen ADD COLUMN IF NOT EXISTS notizen_updated_at TIMESTAMP`,
+  );
+  // Bestehende Notizen: beste Näherung ist der letzte Änderungszeitpunkt der Bewerbung
+  await pool.query(
+    `UPDATE bewerbungen
+     SET notizen_updated_at = COALESCE(updated_at, created_at)
+     WHERE notizen_updated_at IS NULL AND COALESCE(TRIM(notizen), '') <> ''`,
+  );
+
+  // Verlauf: Notizen, Gespräche, Mails und automatische Status-Änderungen
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS bewerbung_updates (
+      id SERIAL PRIMARY KEY,
+      bewerbung_id INTEGER NOT NULL REFERENCES bewerbungen(id) ON DELETE CASCADE,
+      typ TEXT NOT NULL,
+      text TEXT,
+      status_von TEXT,
+      status_nach TEXT,
+      datum DATE NOT NULL DEFAULT CURRENT_DATE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS idx_bewerbung_updates_bewerbung_id ON bewerbung_updates(bewerbung_id)`,
+  );
   await pool.query(
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_url TEXT`,
   );
