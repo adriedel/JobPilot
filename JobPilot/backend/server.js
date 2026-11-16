@@ -294,20 +294,61 @@ app.put("/api/auth/profile/avatar-config", authenticateToken, async (req, res) =
 
 // ==================== BEWERBUNGEN ROUTES (PROTECTED) ====================
 
+// Verlauf: manuell anlegbare Typen ("status" wird nur automatisch erzeugt)
+const MANUAL_UPDATE_TYPES = ["notiz", "gespraech", "mail"];
+const UPDATE_SELECT_FIELDS = `u.id, u.typ, u.text, u.status_von, u.status_nach,
+  to_char(u.datum, 'YYYY-MM-DD') AS datum, u.created_at`;
+const UPDATE_JSON_FIELDS = `'id', u.id, 'typ', u.typ, 'text', u.text,
+  'status_von', u.status_von, 'status_nach', u.status_nach,
+  'datum', to_char(u.datum, 'YYYY-MM-DD')`;
+const UPDATE_ORDER = "u.datum DESC, u.created_at DESC, u.id DESC";
+
+function isIsoDate(value) {
+  return (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    !Number.isNaN(new Date(`${value}T00:00:00Z`).getTime())
+  );
+}
+
+async function findOwnBewerbung(client, id, userId, { lock = false } = {}) {
+  const result = await client.query(
+    `SELECT id, status, notizen FROM bewerbungen WHERE id = $1 AND user_id = $2${lock ? " FOR UPDATE" : ""}`,
+    [id, userId],
+  );
+  return result.rows[0] || null;
+}
+
 // GET alle Bewerbungen (NUR für eingeloggten User!)
 app.get("/api/bewerbungen", authenticateToken, async (req, res) => {
   const { status } = req.query;
   const userId = req.userId; // Aus JWT Token
 
-  let query = "SELECT * FROM bewerbungen WHERE user_id = $1";
+  // Pro Bewerbung: Anzahl der Verlaufseinträge + der neueste Eintrag (für die Karte)
+  let query = `
+    SELECT b.*,
+           COALESCE(v.anzahl, 0)::int AS verlauf_anzahl,
+           l.eintrag AS letzter_eintrag
+    FROM bewerbungen b
+    LEFT JOIN LATERAL (
+      SELECT COUNT(*) AS anzahl FROM bewerbung_updates u WHERE u.bewerbung_id = b.id
+    ) v ON true
+    LEFT JOIN LATERAL (
+      SELECT json_build_object(${UPDATE_JSON_FIELDS}) AS eintrag
+      FROM bewerbung_updates u
+      WHERE u.bewerbung_id = b.id
+      ORDER BY ${UPDATE_ORDER}
+      LIMIT 1
+    ) l ON true
+    WHERE b.user_id = $1`;
   let params = [userId];
 
   if (status) {
-    query += " AND status = $2";
+    query += " AND b.status = $2";
     params.push(status);
   }
 
-  query += " ORDER BY created_at DESC";
+  query += " ORDER BY b.created_at DESC";
 
   try {
     const result = await pool.query(query, params);
@@ -363,10 +404,13 @@ app.post("/api/bewerbungen", authenticateToken, async (req, res) => {
       .json({ error: "Position, Firma, Status und Datum sind erforderlich" });
   }
 
+  // Das Anlegen selbst wird bewusst NICHT im Verlauf geloggt –
+  // Datum und Status sind auf der Karte ohnehin sichtbar.
   const query = `
     INSERT INTO bewerbungen
-    (position, firma, status, datum, standort, ansprechpartner, notizen, bewerbungsart, startdatum, link, gehalt, waehrung, user_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    (position, firma, status, datum, standort, ansprechpartner, notizen, bewerbungsart, startdatum, link, gehalt, waehrung, user_id, notizen_updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
+            CASE WHEN COALESCE(TRIM($7), '') <> '' THEN CURRENT_TIMESTAMP END)
     RETURNING id
   `;
 
@@ -415,17 +459,32 @@ app.put("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
     waehrung,
   } = req.body;
 
+  // notizen_updated_at nur anfassen, wenn sich der Notiztext wirklich ändert
   const query = `
     UPDATE bewerbungen
     SET position = $1, firma = $2, status = $3, datum = $4,
         standort = $5, ansprechpartner = $6, notizen = $7,
         bewerbungsart = $8, startdatum = $9, link = $10,
-        gehalt = $11, waehrung = $12, updated_at = CURRENT_TIMESTAMP
+        gehalt = $11, waehrung = $12, updated_at = CURRENT_TIMESTAMP,
+        notizen_updated_at = CASE
+          WHEN COALESCE(TRIM($7), '') = '' THEN NULL
+          WHEN COALESCE(notizen, '') IS DISTINCT FROM $7 THEN CURRENT_TIMESTAMP
+          ELSE notizen_updated_at
+        END
     WHERE id = $13 AND user_id = $14
   `;
 
+  const client = await pool.connect();
   try {
-    const result = await pool.query(query, [
+    await client.query("BEGIN");
+
+    const existing = await findOwnBewerbung(client, id, userId, { lock: true });
+    if (!existing) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+    }
+
+    const result = await client.query(query, [
       position,
       firma,
       status,
@@ -443,14 +502,112 @@ app.put("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
     ]);
 
     if (result.rowCount === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ error: "Bewerbung nicht gefunden" });
     }
 
+    // Status-Wechsel automatisch im Verlauf festhalten
+    if (status && existing.status !== status) {
+      await client.query(
+        `INSERT INTO bewerbung_updates (bewerbung_id, typ, status_von, status_nach)
+         VALUES ($1, 'status', $2, $3)`,
+        [id, existing.status, status],
+      );
+    }
+
+    await client.query("COMMIT");
     res.json({ message: "Bewerbung aktualisiert" });
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// GET Verlauf einer Bewerbung (neueste zuerst)
+app.get("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!(await findOwnBewerbung(pool, id, req.userId))) {
+      return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+    }
+
+    const result = await pool.query(
+      `SELECT ${UPDATE_SELECT_FIELDS}
+       FROM bewerbung_updates u
+       WHERE u.bewerbung_id = $1
+       ORDER BY ${UPDATE_ORDER}`,
+      [id],
+    );
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// POST neuen Verlaufseintrag (Notiz, Gespräch, Mail)
+app.post("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { typ, datum } = req.body;
+  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+
+  if (!MANUAL_UPDATE_TYPES.includes(typ)) {
+    return res
+      .status(400)
+      .json({ error: `Typ muss einer von ${MANUAL_UPDATE_TYPES.join(", ")} sein` });
+  }
+  if (!text) {
+    return res.status(400).json({ error: "Text ist erforderlich" });
+  }
+  if (datum !== undefined && datum !== null && datum !== "" && !isIsoDate(datum)) {
+    return res.status(400).json({ error: "Datum muss im Format YYYY-MM-DD sein" });
+  }
+
+  try {
+    if (!(await findOwnBewerbung(pool, id, req.userId))) {
+      return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO bewerbung_updates AS u (bewerbung_id, typ, text, datum)
+       VALUES ($1, $2, $3, COALESCE($4::date, CURRENT_DATE))
+       RETURNING ${UPDATE_SELECT_FIELDS}`,
+      [id, typ, text, datum || null],
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE Verlaufseintrag
+app.delete(
+  "/api/bewerbungen/:id/updates/:updateId",
+  authenticateToken,
+  async (req, res) => {
+    const { id, updateId } = req.params;
+
+    try {
+      const result = await pool.query(
+        `DELETE FROM bewerbung_updates u
+         USING bewerbungen b
+         WHERE u.id = $1 AND u.bewerbung_id = $2
+           AND b.id = u.bewerbung_id AND b.user_id = $3`,
+        [updateId, id, req.userId],
+      );
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Eintrag nicht gefunden" });
+      }
+
+      res.json({ message: "Eintrag gelöscht" });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
 
 // DELETE Bewerbung löschen (NUR für eingeloggten User!)
 app.delete("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
