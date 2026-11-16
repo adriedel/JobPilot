@@ -6,6 +6,7 @@ import {
   formatShortDate,
   describeEntry,
   entryTypeLabel,
+  noteDay,
 } from "../../utils/verlauf";
 import DeleteConfirmModal from "../DeleteConfirmModal/DeleteConfirmModal";
 import BeworbenIcon from "../../assets/icons/paperplane-applied.svg?react";
@@ -232,9 +233,9 @@ function BewerbungsCard({
 
       {bewerbung.notizen && (
         <div className="card-notes-wrap">
-          {bewerbung.notizen_updated_at && (
+          {noteDay(bewerbung) && (
             <span className="card-entry-meta">
-              {formatShortDate(bewerbung.notizen_updated_at, i18n.language)}
+              {formatShortDate(noteDay(bewerbung), i18n.language)}
               {" · "}
               {t("card.note")}
             </span>

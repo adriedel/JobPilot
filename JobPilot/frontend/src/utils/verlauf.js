@@ -42,6 +42,19 @@ export function toIsoDay(value) {
 }
 
 /**
+ * Datum der Notiz als YYYY-MM-DD: letzte Änderung, sonst Anlegedatum,
+ * sonst Bewerbungsdatum (ältere Notizen / Demo-Daten haben keinen Zeitstempel).
+ */
+export function noteDay(bewerbung) {
+  return (
+    toIsoDay(bewerbung.notizen_updated_at) ||
+    toIsoDay(bewerbung.created_at) ||
+    bewerbung.datum ||
+    ""
+  );
+}
+
+/**
  * Timeline fürs Panel: Verlaufseinträge plus die Notiz der Bewerbung
  * (mit Datum der letzten Änderung), neueste zuerst. Bei gleichem Datum
  * steht die Notiz unten, weil sie meist der Ausgangspunkt war.
@@ -55,10 +68,7 @@ export function buildTimeline(entries, bewerbung) {
           id: "notiz-feld",
           typ: "notiz",
           text: bewerbung.notizen,
-          datum:
-            toIsoDay(bewerbung.notizen_updated_at) ||
-            toIsoDay(bewerbung.created_at) ||
-            bewerbung.datum,
+          datum: noteDay(bewerbung),
           isNote: true,
         },
       ]
