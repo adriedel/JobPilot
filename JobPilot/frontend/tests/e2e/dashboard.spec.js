@@ -112,33 +112,55 @@ test.describe("Dashboard @demo", () => {
     page,
   }) => {
     const card = cards(page).filter({ hasText: "Frontend Developer" });
-    // Anlegen der Bewerbung erzeugt keinen Eintrag
-    await expect(card.locator(".card-history-link")).toHaveText("Verlauf öffnen");
+    // Nur Notiz, sonst nichts passiert → kein Verlauf-Link
+    await expect(card.locator(".card-history-link")).toHaveCount(0);
 
     await openCardMenu(page, "Frontend Developer");
     await page.locator(".dropdown-item", { hasText: "Stufe weiter" }).click();
-    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 1 Eintrag");
+    // Status-Eintrag + Notiz
+    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
     await expect(card.locator(".card-latest-entry")).toContainText(
       "Status geändert: Beworben → Stufe weiter",
     );
 
     await card.locator(".card-history-link").click();
     const panel = page.locator(".verlauf-panel");
+    const entries = panel.locator(".verlauf-entry");
     await expect(panel).toContainText("Frontend Developer");
+    await expect(entries).toHaveCount(2);
+    // Die ursprüngliche Notiz steht mit Datum ganz unten
+    await expect(entries.last()).toContainText("Notiz");
+    await expect(entries.last()).toContainText("Portfolio bereits verschickt");
 
     await panel.getByRole("radio", { name: "Gespräch" }).click();
     await panel.locator("textarea").fill("Telefonat mit HR, Rückmeldung bis Freitag");
     await panel.getByRole("button", { name: "Speichern" }).click();
 
-    await expect(panel.locator(".verlauf-entry")).toHaveCount(2);
-    await expect(panel.locator(".verlauf-entry").first()).toContainText("15.04.2026");
-    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
+    await expect(entries).toHaveCount(3);
+    await expect(entries.first()).toContainText("15.04.2026");
+    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 3 Einträge");
 
     await page.keyboard.press("Escape");
     await expect(panel).toBeHidden();
 
     // Bleibt nach dem Neuladen erhalten
     await page.reload();
+    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 3 Einträge");
+  });
+
+  test("erstes Update über das Kartenmenü hinzufügen", async ({ page }) => {
+    const card = cards(page).filter({ hasText: "Product Manager Intern" });
+    await expect(card.locator(".card-history-link")).toHaveCount(0);
+
+    await openCardMenu(page, "Product Manager Intern");
+    await page.locator(".dropdown-item", { hasText: "Update hinzufügen" }).click();
+
+    const panel = page.locator(".verlauf-panel");
+    await panel.locator("textarea").fill("Anschreiben abgeschickt");
+    await panel.getByRole("button", { name: "Speichern" }).click();
+
+    await expect(panel.locator(".verlauf-entry")).toHaveCount(2);
+    await page.keyboard.press("Escape");
     await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
   });
 
