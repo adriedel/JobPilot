@@ -310,7 +310,19 @@
       "notiz": "Notiz",
       "gespraech": "Gespräch",
       "mail": "Mail",
-      "status": "Status"
-    }
+      "status": "Status",
+      "custom": "Eigener Grund"
+    },
+    "addReason": "Eigener Grund",
+    "reasonPlaceholder": "z.B. Assessment Center",
+    "scopeQuestion": "Wofür soll der Grund gelten?",
+    "scope_once": "Nur dieses Mal",
+    "scope_bewerbung": "Für diese Bewerbung",
+    "scope_alle": "Für alle Bewerbungen",
+    "scopeBewerbungHint": "Gespeichert für diese Bewerbung",
+    "scopeAllHint": "Gespeichert für alle Bewerbungen",
+    "removeReason": "Grund entfernen",
+    "apply": "Übernehmen",
+    "cancel": "Abbrechen"
   }
 }

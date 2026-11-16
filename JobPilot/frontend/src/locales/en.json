@@ -310,7 +310,19 @@
       "notiz": "Note",
       "gespraech": "Call",
       "mail": "Mail",
-      "status": "Status"
-    }
+      "status": "Status",
+      "custom": "Custom"
+    },
+    "addReason": "Custom reason",
+    "reasonPlaceholder": "e.g. Assessment center",
+    "scopeQuestion": "Where should this reason be available?",
+    "scope_once": "Just this once",
+    "scope_bewerbung": "For this application",
+    "scope_alle": "For all applications",
+    "scopeBewerbungHint": "Saved for this application",
+    "scopeAllHint": "Saved for all applications",
+    "removeReason": "Remove reason",
+    "apply": "Apply",
+    "cancel": "Cancel"
   }
 }

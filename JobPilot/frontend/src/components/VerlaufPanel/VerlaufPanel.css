@@ -121,6 +121,158 @@
   font-weight: 700;
 }
 
+/* Gespeicherter eigener Grund: Label + kleines × in einem Chip */
+.verlauf-type--custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px 0 0;
+  cursor: default;
+}
+
+.verlauf-type-label {
+  padding: 5px 4px 5px 12px;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.verlauf-type-remove {
+  padding: 0 4px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.verlauf-type-remove:hover {
+  color: var(--text-error);
+  background: var(--bg-surface);
+}
+
+/* Einmaliger Grund: gestrichelt, weil er nicht gespeichert wird */
+.verlauf-type--once {
+  border-style: dashed;
+}
+
+.verlauf-type-add {
+  min-width: 32px;
+  font-weight: 700;
+  color: var(--link-color);
+}
+
+/* ── Eigenen Grund anlegen ── */
+.verlauf-reason {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-hover);
+}
+
+.verlauf-reason-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.verlauf-reason-label input {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 400;
+  outline: none;
+}
+
+.verlauf-reason-label input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.verlauf-reason-scope {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.verlauf-reason-scope legend {
+  padding: 0;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.verlauf-reason-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.verlauf-reason-option input {
+  /* App.css setzt global appearance: none → Radio wäre sonst unsichtbar */
+  -webkit-appearance: radio;
+  appearance: auto;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--blue);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.verlauf-reason-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.verlauf-reason-cancel,
+.verlauf-reason-apply {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.verlauf-reason-cancel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-label);
+}
+
+.verlauf-reason-apply {
+  background: var(--blue);
+  border: none;
+  color: #ffffff;
+}
+
+.verlauf-reason-apply:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .verlauf-textarea {
   width: 100%;
   box-sizing: border-box;

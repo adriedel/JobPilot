@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./BewerbungsCard.css";
 import { STATUS } from "../../utils/constants";
-import { formatShortDate, describeEntry } from "../../utils/verlauf";
+import {
+  formatShortDate,
+  describeEntry,
+  entryTypeLabel,
+} from "../../utils/verlauf";
 import DeleteConfirmModal from "../DeleteConfirmModal/DeleteConfirmModal";
 import BeworbenIcon from "../../assets/icons/paperplane-applied.svg?react";
 import StufeWeiterIcon from "../../assets/icons/arrow-step-further.svg?react";
@@ -244,7 +248,7 @@ function BewerbungsCard({
           <span className="card-entry-meta">
             {formatShortDate(letzterEintrag.datum, i18n.language)}
             {" · "}
-            {t(`verlauf.types.${letzterEintrag.typ}`)}
+            {entryTypeLabel(letzterEintrag, t)}
           </span>
           <p className="card-latest-text">{describeEntry(letzterEintrag, t)}</p>
         </div>
