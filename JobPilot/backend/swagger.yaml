@@ -574,6 +574,116 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /api/bewerbungen/{id}/updates:
+    get:
+      tags:
+        - Bewerbungen
+      summary: Verlauf einer Bewerbung
+      description: >
+        Alle Verlaufseinträge, neueste zuerst. Status-Wechsel über PUT
+        /api/bewerbungen/{id} werden automatisch als typ=status eingetragen;
+        das Anlegen der Bewerbung wird nicht geloggt.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste der Einträge
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BewerbungUpdate"
+        "404":
+          description: Bewerbung nicht gefunden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - Bewerbungen
+      summary: Verlaufseintrag hinzufügen
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [typ, text]
+              properties:
+                typ:
+                  type: string
+                  enum: [notiz, gespraech, mail]
+                text:
+                  type: string
+                  example: "Telefonat mit HR, Rückmeldung bis Freitag"
+                datum:
+                  type: string
+                  format: date
+                  description: Optional, Standard ist heute
+      responses:
+        "201":
+          description: Eintrag erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BewerbungUpdate"
+        "400":
+          description: Ungültige Eingabe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Bewerbung nicht gefunden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/bewerbungen/{id}/updates/{updateId}:
+    delete:
+      tags:
+        - Bewerbungen
+      summary: Verlaufseintrag löschen
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: updateId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Eintrag gelöscht
+        "404":
+          description: Eintrag nicht gefunden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/statistiken:
     get:
       tags:
@@ -774,6 +884,54 @@ components:
           type: string
           format: date-time
           example: "2026-03-02T12:00:00Z"
+        notizen_updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Zeitpunkt, an dem die Notiz zuletzt geschrieben/geändert wurde
+          example: "2026-03-02T12:00:00Z"
+        verlauf_anzahl:
+          type: integer
+          description: Anzahl der Verlaufseinträge (nur in GET /api/bewerbungen)
+          example: 2
+        letzter_eintrag:
+          allOf:
+            - $ref: "#/components/schemas/BewerbungUpdate"
+          nullable: true
+          description: Neuester Verlaufseintrag (nur in GET /api/bewerbungen)
+
+    BewerbungUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 7
+        typ:
+          type: string
+          enum: [notiz, gespraech, mail, status]
+          example: "gespraech"
+        text:
+          type: string
+          nullable: true
+          example: "Telefonat mit HR, Rückmeldung bis Freitag"
+        status_von:
+          type: string
+          nullable: true
+          description: Nur bei typ=status
+          example: "beworben"
+        status_nach:
+          type: string
+          nullable: true
+          description: Nur bei typ=status
+          example: "abgelehnt"
+        datum:
+          type: string
+          format: date
+          example: "2026-08-28"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-08-28T09:15:00Z"
 
     BewerbungInput:
       type: object
