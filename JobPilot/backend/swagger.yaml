@@ -628,7 +628,12 @@ paths:
               properties:
                 typ:
                   type: string
-                  enum: [notiz, gespraech, mail]
+                  enum: [notiz, gespraech, mail, custom]
+                typ_label:
+                  type: string
+                  maxLength: 40
+                  description: Eigener Grund, Pflicht bei typ=custom
+                  example: "Assessment Center"
                 text:
                   type: string
                   example: "Telefonat mit HR, Rückmeldung bis Freitag"
@@ -655,6 +660,88 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /api/bewerbungen/{id}/update-typen:
+    get:
+      tags:
+        - Bewerbungen
+      summary: Gespeicherte eigene Update-Gründe
+      description: Alle Gründe "für alle Bewerbungen" plus die nur für diese Bewerbung.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste der Gründe
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UpdateTyp"
+        "404":
+          description: Bewerbung nicht gefunden
+
+  /api/update-typen:
+    post:
+      tags:
+        - Bewerbungen
+      summary: Eigenen Update-Grund speichern
+      description: >
+        Mit bewerbung_id nur für diese Bewerbung, ohne für alle Bewerbungen.
+        Existiert der Grund schon (Groß-/Kleinschreibung egal), wird er zurückgegeben (200).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [label]
+              properties:
+                label:
+                  type: string
+                  maxLength: 40
+                bewerbung_id:
+                  type: integer
+                  nullable: true
+      responses:
+        "201":
+          description: Grund gespeichert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateTyp"
+        "200":
+          description: Grund existierte bereits
+        "400":
+          description: Ungültiges Label
+
+  /api/update-typen/{typId}:
+    delete:
+      tags:
+        - Bewerbungen
+      summary: Gespeicherten Update-Grund löschen
+      description: Bestehende Verlaufseinträge behalten ihren Grund.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: typId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Grund gelöscht
+        "404":
+          description: Grund nicht gefunden
 
   /api/bewerbungen/{id}/updates/{updateId}:
     delete:
@@ -908,8 +995,13 @@ components:
           example: 7
         typ:
           type: string
-          enum: [notiz, gespraech, mail, status]
+          enum: [notiz, gespraech, mail, custom, status]
           example: "gespraech"
+        typ_label:
+          type: string
+          nullable: true
+          description: Eigener Grund, nur bei typ=custom
+          example: "Assessment Center"
         text:
           type: string
           nullable: true
@@ -932,6 +1024,20 @@ components:
           type: string
           format: date-time
           example: "2026-08-28T09:15:00Z"
+
+    UpdateTyp:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        label:
+          type: string
+          example: "Assessment Center"
+        bewerbung_id:
+          type: integer
+          nullable: true
+          description: null = für alle Bewerbungen
 
     BewerbungInput:
       type: object
