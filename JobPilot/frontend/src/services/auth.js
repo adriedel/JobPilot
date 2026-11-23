@@ -150,6 +150,15 @@ export function logout() {
   window.location.href = DEMO_MODE ? "/dashboard" : "/";
 }
 
+// Gespeicherten User aus localStorage lesen (null, wenn keiner/ungültig)
+export function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+}
+
 // Check if logged in
 export function isAuthenticated() {
   const token = localStorage.getItem("token");
@@ -275,6 +284,16 @@ export async function getAdminUsers() {
   const data = await parseJSON(response);
   if (!response.ok) throw new Error(data.error || "Fehler beim Laden der User");
   return data.users;
+}
+
+export async function getAdminStats() {
+  const token = getToken();
+  const response = await authFetch(`${API_URL}/admin/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await parseJSON(response);
+  if (!response.ok) throw new Error(data.error || "Fehler beim Laden der Statistiken");
+  return data; // { users, weekly }
 }
 
 export async function updateUserRole(userId, role) {

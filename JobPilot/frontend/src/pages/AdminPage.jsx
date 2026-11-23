@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAdminUsers, updateUserRole, deleteAdminUser } from "../services/auth";
+import {
+  getAdminUsers,
+  updateUserRole,
+  deleteAdminUser,
+  getStoredUser,
+} from "../services/auth";
 import "./AdminPage.css";
 
 function formatDate(dateStr) {
@@ -12,7 +17,10 @@ function formatDate(dateStr) {
   });
 }
 
-function AdminPage({ user }) {
+function AdminPage() {
+  // Beim Öffnen der Seite lesen, nicht beim App-Start – sonst fehlt der
+  // User nach einem Login ohne Seiten-Reload.
+  const [user] = useState(getStoredUser);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -80,6 +88,11 @@ function AdminPage({ user }) {
         <div className="admin-header-title">
           <h1>Admin-Bereich</h1>
           <p>Benutzerverwaltung</p>
+        </div>
+        <div className="admin-header-actions">
+          <button className="admin-stats-btn" onClick={() => navigate("/admin/statistiken")}>
+            📊 Statistiken
+          </button>
         </div>
       </div>
 

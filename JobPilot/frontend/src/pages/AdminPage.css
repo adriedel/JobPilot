@@ -242,8 +242,13 @@
 }
 
 .dark-mode .admin-stat-card {
-  background: var(--card-bg);
+  background: var(--bg-surface);
   border-color: var(--border);
+}
+
+/* --blue ist im Dark Mode zu dunkel für große Zahlen */
+.dark-mode .admin-stat-number {
+  color: var(--blue-hover);
 }
 
 .dark-mode .admin-table {
@@ -300,5 +305,42 @@
 
   .admin-actions {
     justify-content: flex-end;
+  }
+}
+
+/* Admin-Seite: Button zur Statistik */
+.admin-header-actions {
+  margin-left: auto;
+}
+
+.admin-stats-btn {
+  background: var(--blue, #1e3a8a);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.admin-stats-btn:hover {
+  background: var(--blue-hover, #1e40af);
+}
+
+@media (max-width: 640px) {
+  .admin-header {
+    flex-wrap: wrap;
+  }
+
+  .admin-header-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .admin-stats-btn {
+    width: 100%;
   }
 }
