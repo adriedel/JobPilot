@@ -7,7 +7,9 @@ services:
       POSTGRES_USER: jobpilot
       POSTGRES_PASSWORD: jobpilot
     ports:
-      - "5432:5432"
+      # Host-Port 5433, damit es nicht mit anderen lokalen Postgres-Instanzen
+      # (Standard-Port 5432) kollidiert. Im Docker-Netz bleibt es db:5432.
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,8 +25,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Optional: eigene Werte (z. B. RESEND_API_KEY) aus backend/.env.
+    # Die Werte unter "environment" haben Vorrang.
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
       PORT: 3001
       DATABASE_URL: postgresql://jobpilot:jobpilot@db:5432/jobpilot
@@ -32,7 +37,11 @@ services:
       FRONTEND_URLS: http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173
       FRONTEND_URL: http://localhost:8080
       FROM_EMAIL: info@bewerbungstracker.com
-      # RESEND_API_KEY wird aus backend/.env geladen (via env_file)
+      # Lokale Test-Accounts (admin@jobpilot.test usw., siehe backend/seed.js)
+      SEED_DEMO_DATA: "true"
+      SEED_PASSWORD: jobpilot-lokal
+      # RESEND_API_KEY optional aus backend/.env – ohne Key landen Mails
+      # (Bestätigungs-/Reset-Links) im Backend-Log: docker compose logs -f backend
     ports:
       - "3001:3001"
 
