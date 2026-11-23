@@ -19,34 +19,38 @@ function fakeToken() {
 
 const daysAgo = (n) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
 
-function statsUser(id, name, email, counts, neu30, lastActivityDaysAgo) {
-  const base = { in_planung: 0, beworben: 0, stufe_weiter: 0, angenommen: 0, abgelehnt: 0, keine_antwort: 0 };
-  const all = { ...base, ...counts };
-  return {
-    id,
-    name,
-    email,
-    role: id === 1 ? "admin" : "user",
-    created_at: daysAgo(90),
-    ...all,
-    gesamt: Object.values(all).reduce((a, b) => a + b, 0),
-    neu_30_tage: neu30,
-    letzte_aktivitaet: lastActivityDaysAgo === null ? null : daysAgo(lastActivityDaysAgo),
-  };
-}
+const LENA = {
+  id: 2,
+  email: "lena@jobpilot.test",
+  name: "Lena Fleißig",
+  role: "user",
+  created_at: daysAgo(90),
+  email_verified_at: daysAgo(90),
+  bewerbungen_count: 12,
+};
 
-const STATS = {
-  users: [
-    // 10 abgeschickt, 6 Antworten → 60 %
-    statsUser(2, "Lena Fleißig", "lena@jobpilot.test",
-      { in_planung: 2, beworben: 3, stufe_weiter: 3, angenommen: 1, abgelehnt: 2, keine_antwort: 1 }, 5, 2),
-    statsUser(3, null, "leer@jobpilot.test", {}, 0, null),
-    statsUser(1, "Admin", "admin@jobpilot.test", { beworben: 2, abgelehnt: 2 }, 0, 45),
-  ],
+// 10 abgeschickt, 6 Antworten → 60 %
+const LENA_STATS = {
+  user: {
+    ...LENA,
+    gesamt: 12,
+    in_planung: 2,
+    beworben: 3,
+    stufe_weiter: 3,
+    angenommen: 1,
+    abgelehnt: 2,
+    keine_antwort: 1,
+    neu_30_tage: 5,
+    letzte_aktivitaet: daysAgo(2),
+  },
   weekly: Array.from({ length: 12 }, (_, i) => ({
     woche: daysAgo((11 - i) * 7).slice(0, 10),
     anzahl: [0, 1, 3, 2, 0, 4, 1, 2, 5, 3, 1, 2][i],
   })),
+  bewerbungen: [
+    { id: 11, firma: "SAP", position: "Frontend Developer", status: "stufe_weiter" },
+    { id: 12, firma: "adidas", position: "UX Designer", status: "angenommen" },
+  ],
 };
 
 async function mockApi(page) {
@@ -57,8 +61,8 @@ async function mockApi(page) {
 
     if (url.includes("/auth/login")) return json({ token: fakeToken(), user: ADMIN });
     if (url.includes("/auth/me")) return json({ user: ADMIN });
-    if (url.includes("/admin/stats")) return json(STATS);
-    if (url.includes("/admin/users")) return json({ users: [] });
+    if (url.includes("/admin/users/2/stats")) return json(LENA_STATS);
+    if (url.includes("/admin/users")) return json({ users: [{ ...ADMIN, created_at: daysAgo(100) }, LENA] });
     if (url.includes("statistiken")) return json({ gesamt: 0 });
     return json([]);
   });
@@ -80,7 +84,7 @@ test.describe("Admin-Bereich @smoke", () => {
     await expect(page.getByRole("heading", { name: "Admin-Bereich" })).toBeVisible();
   });
 
-  test("Statistik-Seite zeigt Kennzahlen und User", async ({ page }) => {
+  test("Statistik eines Users zeigt Kennzahlen und Bewerbungen", async ({ page }) => {
     await mockApi(page);
     await page.addInitScript(
       ([t, u]) => {
@@ -90,19 +94,20 @@ test.describe("Admin-Bereich @smoke", () => {
       [fakeToken(), ADMIN],
     );
     await page.goto("/admin");
-    await page.getByRole("button", { name: /Statistiken/ }).click();
+    await page
+      .locator("tbody tr", { hasText: LENA.email })
+      .getByRole("button", { name: "Statistik" })
+      .click();
 
-    await expect(page).toHaveURL(/\/admin\/statistiken$/);
-    await expect(page.getByRole("heading", { name: "Statistiken" })).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/users\/2\/statistik$/);
+    await expect(page.getByRole("heading", { name: "Statistik: Lena Fleißig" })).toBeVisible();
 
-    // 1 von 3 Usern in den letzten 30 Tagen aktiv
-    await expect(page.locator(".admin-stat-card").first()).toContainText("1 / 3");
+    const cards = page.locator(".admin-stat-card");
+    await expect(cards.filter({ hasText: "Rückmeldequote" })).toContainText("60 %");
+    await expect(cards.filter({ hasText: "Letzte Aktivität" })).toContainText("vor 2 Tagen");
 
-    const lena = page.locator("tbody tr", { hasText: "Lena Fleißig" });
-    await expect(lena).toContainText("60 %");
-    await expect(lena).toContainText("vor 2 Tagen");
-
-    const leer = page.locator("tbody tr", { hasText: "leer@jobpilot.test" });
-    await expect(leer).toContainText("noch nie");
+    const sap = page.locator("tbody tr", { hasText: "SAP" });
+    await expect(sap).toContainText("Frontend Developer");
+    await expect(sap).toContainText("Stufe weiter");
   });
 });
