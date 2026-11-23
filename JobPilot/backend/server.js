@@ -791,6 +791,50 @@ app.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) =>
   }
 });
 
+// GET Statistiken: wie läuft es bei den Usern?
+app.get("/api/admin/stats", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const usersResult = await pool.query(`
+      SELECT u.id, u.email, u.name, u.role, u.created_at,
+             COUNT(b.id)::int AS gesamt,
+             COUNT(b.id) FILTER (WHERE b.status = 'in_planung')::int AS in_planung,
+             COUNT(b.id) FILTER (WHERE b.status = 'beworben')::int AS beworben,
+             COUNT(b.id) FILTER (WHERE b.status = 'stufe_weiter')::int AS stufe_weiter,
+             COUNT(b.id) FILTER (WHERE b.status = 'angenommen')::int AS angenommen,
+             COUNT(b.id) FILTER (WHERE b.status = 'abgelehnt')::int AS abgelehnt,
+             COUNT(b.id) FILTER (WHERE b.status = 'keine_antwort')::int AS keine_antwort,
+             COUNT(b.id) FILTER (WHERE b.created_at >= NOW() - INTERVAL '30 days')::int AS neu_30_tage,
+             GREATEST(MAX(b.created_at), MAX(b.updated_at), MAX(up.letztes_update)) AS letzte_aktivitaet
+      FROM users u
+      LEFT JOIN bewerbungen b ON b.user_id = u.id
+      LEFT JOIN (
+        SELECT bu.bewerbung_id, MAX(bu.created_at) AS letztes_update
+        FROM bewerbung_updates bu
+        GROUP BY bu.bewerbung_id
+      ) up ON up.bewerbung_id = b.id
+      GROUP BY u.id
+      ORDER BY letzte_aktivitaet DESC NULLS LAST, u.created_at DESC
+    `);
+
+    // Neu angelegte Bewerbungen pro Woche (letzte 12 Wochen, alle User)
+    const weeklyResult = await pool.query(`
+      SELECT to_char(w.woche, 'YYYY-MM-DD') AS woche, COUNT(b.id)::int AS anzahl
+      FROM generate_series(
+        date_trunc('week', NOW()) - INTERVAL '11 weeks',
+        date_trunc('week', NOW()),
+        INTERVAL '1 week'
+      ) AS w(woche)
+      LEFT JOIN bewerbungen b ON date_trunc('week', b.created_at) = w.woche
+      GROUP BY w.woche
+      ORDER BY w.woche
+    `);
+
+    res.json({ users: usersResult.rows, weekly: weeklyResult.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // PATCH Rolle eines Users ändern
 app.patch("/api/admin/users/:id/role", authenticateToken, requireAdmin, async (req, res) => {
   const { role } = req.body;
