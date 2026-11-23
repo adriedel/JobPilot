@@ -89,11 +89,6 @@ function AdminPage() {
           <h1>Admin-Bereich</h1>
           <p>Benutzerverwaltung</p>
         </div>
-        <div className="admin-header-actions">
-          <button className="admin-stats-btn" onClick={() => navigate("/admin/statistiken")}>
-            📊 Statistiken
-          </button>
-        </div>
       </div>
 
       <div className="admin-stats">
@@ -150,6 +145,13 @@ function AdminPage() {
                   </td>
                   <td data-label="Bewerbungen">{u.bewerbungen_count}</td>
                   <td data-label="Aktionen" className="admin-actions">
+                    <button
+                      className="admin-btn admin-btn--stats"
+                      onClick={() => navigate(`/admin/users/${u.id}/statistik`)}
+                      title="Statistik dieses Users anzeigen"
+                    >
+                      Statistik
+                    </button>
                     {u.id !== user?.id ? (
                       <>
                         <button

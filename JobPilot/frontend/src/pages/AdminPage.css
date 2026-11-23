@@ -218,6 +218,16 @@
   background: rgba(37, 99, 235, 0.2);
 }
 
+.admin-btn--stats {
+  background: var(--bg-surface, #fff);
+  color: var(--text-primary, #1a202c);
+  border-color: var(--border, #e2e8f0);
+}
+
+.admin-btn--stats:hover:not(:disabled) {
+  background: var(--bg-hover, #f3f4f6);
+}
+
 .admin-btn--delete {
   background: rgba(220, 38, 38, 0.08);
   color: #dc2626;
@@ -273,6 +283,11 @@
     padding: 20px 16px 48px;
   }
 
+  .admin-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
   .admin-table thead {
     display: none;
   }
@@ -305,42 +320,5 @@
 
   .admin-actions {
     justify-content: flex-end;
-  }
-}
-
-/* Admin-Seite: Button zur Statistik */
-.admin-header-actions {
-  margin-left: auto;
-}
-
-.admin-stats-btn {
-  background: var(--blue, #1e3a8a);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 9px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-}
-
-.admin-stats-btn:hover {
-  background: var(--blue-hover, #1e40af);
-}
-
-@media (max-width: 640px) {
-  .admin-header {
-    flex-wrap: wrap;
-  }
-
-  .admin-header-actions {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .admin-stats-btn {
-    width: 100%;
   }
 }
