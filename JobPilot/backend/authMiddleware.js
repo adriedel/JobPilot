@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "jwt_secret_token";
+const JWT_SECRET = require("./jwtSecret");
 
 // Middleware um geschützte Routes zu schützen.
 // Token-Probleme antworten immer mit 401 und einem eindeutigen `code`, damit das
