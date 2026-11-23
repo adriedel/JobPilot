@@ -807,22 +807,31 @@ paths:
         "403":
           description: Kein Zugriff (keine Admin-Rolle)
 
-  /api/admin/stats:
+  /api/admin/users/{id}/stats:
     get:
       tags:
         - Admin
-      summary: Nutzungsstatistiken aller Benutzer
+      summary: Statistik eines Benutzers
       description: >
-        Pro Benutzer die Anzahl Bewerbungen je Status, neue Bewerbungen der
-        letzten 30 Tage und die letzte Aktivität; dazu neu angelegte
-        Bewerbungen pro Woche der letzten 12 Wochen (nur Rolle admin)
+        Anzahl Bewerbungen je Status, Bewerbungen der letzten 30 Tage und
+        pro Woche der letzten 12 Wochen (nach Bewerbungsdatum), letzte
+        Aktivität und die Bewerbungen nur mit Firma, Stelle und Status
+        (nur Rolle admin)
       security:
         - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
       responses:
         "200":
-          description: "{ users: [...], weekly: [{ woche, anzahl }] }"
+          description: "{ user: {...}, weekly: [{ woche, anzahl }], bewerbungen: [{ id, firma, position, status }] }"
         "403":
           description: Kein Zugriff (keine Admin-Rolle)
+        "404":
+          description: User nicht gefunden
 
   /api/admin/users/{id}/role:
     patch:

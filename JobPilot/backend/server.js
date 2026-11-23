@@ -791,45 +791,76 @@ app.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) =>
   }
 });
 
-// GET Statistiken: wie läuft es bei den Usern?
-app.get("/api/admin/stats", authenticateToken, requireAdmin, async (req, res) => {
+// GET Statistik eines einzelnen Users (nur Zahlen + Firma/Stelle/Status)
+app.get("/api/admin/users/:id/stats", authenticateToken, requireAdmin, async (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (!Number.isInteger(targetId)) {
+    return res.status(400).json({ error: "Ungültige User-ID" });
+  }
   try {
-    const usersResult = await pool.query(`
-      SELECT u.id, u.email, u.name, u.role, u.created_at,
-             COUNT(b.id)::int AS gesamt,
-             COUNT(b.id) FILTER (WHERE b.status = 'in_planung')::int AS in_planung,
-             COUNT(b.id) FILTER (WHERE b.status = 'beworben')::int AS beworben,
-             COUNT(b.id) FILTER (WHERE b.status = 'stufe_weiter')::int AS stufe_weiter,
-             COUNT(b.id) FILTER (WHERE b.status = 'angenommen')::int AS angenommen,
-             COUNT(b.id) FILTER (WHERE b.status = 'abgelehnt')::int AS abgelehnt,
-             COUNT(b.id) FILTER (WHERE b.status = 'keine_antwort')::int AS keine_antwort,
-             COUNT(b.id) FILTER (WHERE b.created_at >= NOW() - INTERVAL '30 days')::int AS neu_30_tage,
-             GREATEST(MAX(b.created_at), MAX(b.updated_at), MAX(up.letztes_update)) AS letzte_aktivitaet
-      FROM users u
-      LEFT JOIN bewerbungen b ON b.user_id = u.id
-      LEFT JOIN (
-        SELECT bu.bewerbung_id, MAX(bu.created_at) AS letztes_update
-        FROM bewerbung_updates bu
-        GROUP BY bu.bewerbung_id
-      ) up ON up.bewerbung_id = b.id
-      GROUP BY u.id
-      ORDER BY letzte_aktivitaet DESC NULLS LAST, u.created_at DESC
-    `);
+    const userResult = await pool.query(
+      `SELECT u.id, u.email, u.name, u.role, u.created_at,
+              COUNT(b.id)::int AS gesamt,
+              COUNT(b.id) FILTER (WHERE b.status = 'in_planung')::int AS in_planung,
+              COUNT(b.id) FILTER (WHERE b.status = 'beworben')::int AS beworben,
+              COUNT(b.id) FILTER (WHERE b.status = 'stufe_weiter')::int AS stufe_weiter,
+              COUNT(b.id) FILTER (WHERE b.status = 'angenommen')::int AS angenommen,
+              COUNT(b.id) FILTER (WHERE b.status = 'abgelehnt')::int AS abgelehnt,
+              COUNT(b.id) FILTER (WHERE b.status = 'keine_antwort')::int AS keine_antwort,
+              COUNT(b.id) FILTER (
+                WHERE (CASE WHEN b.datum ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN b.datum::date END)
+                      BETWEEN CURRENT_DATE - 30 AND CURRENT_DATE
+              )::int AS neu_30_tage,
+              GREATEST(
+                MAX(b.created_at),
+                MAX(b.updated_at),
+                (SELECT MAX(bu.created_at)
+                 FROM bewerbung_updates bu
+                 JOIN bewerbungen b2 ON b2.id = bu.bewerbung_id
+                 WHERE b2.user_id = u.id)
+              ) AS letzte_aktivitaet
+       FROM users u
+       LEFT JOIN bewerbungen b ON b.user_id = u.id
+       WHERE u.id = $1
+       GROUP BY u.id`,
+      [targetId],
+    );
+    if (userResult.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
 
-    // Neu angelegte Bewerbungen pro Woche (letzte 12 Wochen, alle User)
-    const weeklyResult = await pool.query(`
-      SELECT to_char(w.woche, 'YYYY-MM-DD') AS woche, COUNT(b.id)::int AS anzahl
-      FROM generate_series(
-        date_trunc('week', NOW()) - INTERVAL '11 weeks',
-        date_trunc('week', NOW()),
-        INTERVAL '1 week'
-      ) AS w(woche)
-      LEFT JOIN bewerbungen b ON date_trunc('week', b.created_at) = w.woche
-      GROUP BY w.woche
-      ORDER BY w.woche
-    `);
+    // Bewerbungen pro Woche nach Bewerbungsdatum (letzte 12 Wochen).
+    // datum ist TEXT – nur gültige YYYY-MM-DD-Werte zählen.
+    const weeklyResult = await pool.query(
+      `SELECT to_char(w.woche, 'YYYY-MM-DD') AS woche, COUNT(b.id)::int AS anzahl
+       FROM generate_series(
+         date_trunc('week', NOW()) - INTERVAL '11 weeks',
+         date_trunc('week', NOW()),
+         INTERVAL '1 week'
+       ) AS w(woche)
+       LEFT JOIN bewerbungen b
+         ON b.user_id = $1
+        AND date_trunc(
+              'week',
+              CASE WHEN b.datum ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN b.datum::date END
+            ) = w.woche
+       GROUP BY w.woche
+       ORDER BY w.woche`,
+      [targetId],
+    );
 
-    res.json({ users: usersResult.rows, weekly: weeklyResult.rows });
+    // Bewerbungen: bewusst nur Firma, Stelle und Status – keine Notizen o. Ä.
+    const bewerbungenResult = await pool.query(
+      `SELECT id, firma, position, status
+       FROM bewerbungen
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [targetId],
+    );
+
+    res.json({
+      user: userResult.rows[0],
+      weekly: weeklyResult.rows,
+      bewerbungen: bewerbungenResult.rows,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
