@@ -65,7 +65,7 @@ export function Root() {
           path="/admin"
           element={
             <ProtectedRoute>
-              <AdminPage user={JSON.parse(localStorage.getItem("user") || "null")} />
+              <AdminPage />
             </ProtectedRoute>
           }
         />

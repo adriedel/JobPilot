@@ -150,6 +150,15 @@ export function logout() {
   window.location.href = DEMO_MODE ? "/dashboard" : "/";
 }
 
+// Gespeicherten User aus localStorage lesen (null, wenn keiner/ungültig)
+export function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+}
+
 // Check if logged in
 export function isAuthenticated() {
   const token = localStorage.getItem("token");
