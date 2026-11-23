@@ -9,7 +9,9 @@ services:
     ports:
       # Host-Port 5433, damit es nicht mit anderen lokalen Postgres-Instanzen
       # (Standard-Port 5432) kollidiert. Im Docker-Netz bleibt es db:5432.
-      - "5433:5432"
+      # Nur an 127.0.0.1 gebunden: Mit dem Standard-Passwort soll die DB nicht
+      # aus dem WLAN bzw. Netzwerk erreichbar sein.
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
