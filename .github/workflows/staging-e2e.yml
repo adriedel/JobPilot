@@ -18,6 +18,9 @@ on:
         required: true
         default: "https://jobpilot-git-staging-adriedels-projects.vercel.app"
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     # Nur erfolgreiche Deployments, nie Produktion

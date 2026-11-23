@@ -15,6 +15,9 @@ on:
       - "JobPilot/frontend/**"
       - ".github/workflows/qa.yml"
 
+permissions:
+  contents: read
+
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
