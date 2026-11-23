@@ -15,7 +15,7 @@ import QuickAdd from "./pages/QuickAdd";
 import BookmarkletInstall from "./pages/BookmarkletInstall";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminPage from "./pages/AdminPage";
-import AdminStatsPage from "./pages/AdminStatsPage";
+import AdminUserStatsPage from "./pages/AdminUserStatsPage";
 import PreviewPage from "./pages/PreviewPage";
 import { DEMO_MODE } from "./utils/constants";
 import "./index.css";
@@ -72,10 +72,10 @@ export function Root() {
         />
 
         <Route
-          path="/admin/statistiken"
+          path="/admin/users/:id/statistik"
           element={
             <ProtectedRoute>
-              <AdminStatsPage />
+              <AdminUserStatsPage />
             </ProtectedRoute>
           }
         />

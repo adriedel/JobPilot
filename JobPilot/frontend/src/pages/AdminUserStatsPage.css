@@ -1,9 +1,8 @@
-/* Statistik-Seite im Admin-Bereich (baut auf AdminPage.css auf) */
+/* Statistik-Seite eines Users im Admin-Bereich (baut auf AdminPage.css auf) */
 
-.stats-stat-of {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-secondary, #718096);
+/* Kachel mit Text statt Zahl ("vor 2 Tagen") */
+.stats-stat-text {
+  font-size: 1.4rem;
 }
 
 .stats-panels {
@@ -40,15 +39,7 @@
   display: flex;
   gap: 2px;
   width: 100%;
-}
-
-.stats-statusbar--large {
   height: 14px;
-}
-
-.stats-statusbar--small {
-  height: 8px;
-  min-width: 90px;
 }
 
 .stats-statusbar-seg {
@@ -113,9 +104,6 @@
 
 .stats-legend-label {
   color: var(--text-secondary, #718096);
-}
-
-.stats-legend-label {
   white-space: nowrap;
 }
 
@@ -213,7 +201,7 @@
   font-size: 0.72rem;
 }
 
-/* Tabelle pro User */
+/* Bewerbungsliste */
 .stats-table-head {
   display: flex;
   align-items: center;
@@ -223,54 +211,11 @@
   margin-bottom: 12px;
 }
 
-.stats-sort {
-  display: flex;
+.stats-status {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
-  color: var(--text-secondary, #718096);
-}
-
-.stats-sort select {
-  background: var(--bg-input, #fff);
-  color: var(--text-primary, #1a202c);
-  border: 1.5px solid var(--border, #e2e8f0);
-  border-radius: 8px;
-  padding: 5px 8px;
-  font: inherit;
-  font-size: 0.85rem;
-}
-
-.stats-table td {
-  font-variant-numeric: tabular-nums;
-}
-
-.stats-user {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.stats-user-name {
-  font-weight: 600;
-}
-
-.stats-user-email {
-  font-size: 0.78rem;
-  color: var(--text-secondary, #718096);
-}
-
-.stats-dist-cell {
-  min-width: 120px;
-}
-
-.stats-active {
-  color: var(--text-primary, #1a202c);
-}
-
-.stats-inactive {
-  color: var(--text-secondary, #718096);
-  font-style: italic;
+  white-space: nowrap;
 }
 
 .stats-footnote {
@@ -285,12 +230,8 @@
     padding: 16px;
   }
 
-  .stats-dist-cell .stats-statusbar {
-    max-width: 55%;
-  }
-
-  .stats-user {
-    align-items: flex-end;
+  .admin-table.stats-table td {
+    gap: 12px;
     text-align: right;
   }
 }
