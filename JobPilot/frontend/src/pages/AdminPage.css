@@ -242,8 +242,13 @@
 }
 
 .dark-mode .admin-stat-card {
-  background: var(--card-bg);
+  background: var(--bg-surface);
   border-color: var(--border);
+}
+
+/* --blue ist im Dark Mode zu dunkel für große Zahlen */
+.dark-mode .admin-stat-number {
+  color: var(--blue-hover);
 }
 
 .dark-mode .admin-table {
