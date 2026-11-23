@@ -176,7 +176,7 @@ function QuickAdd() {
               className="qa-btn-primary"
               disabled={loginLoading}
             >
-              {loginLoading ? "Wird geladenâ€¦" : "Anmelden & speichern"}
+              {loginLoading ? "Wird geladen…" : "Anmelden & speichern"}
             </button>
           </form>
         </div>
@@ -296,7 +296,7 @@ function QuickAdd() {
               />
             </div>
             <div className="qa-field qa-field--narrow">
-              <label htmlFor="qa-waehrung">WÃ¤hrung</label>
+              <label htmlFor="qa-waehrung">Währung</label>
               <select
                 id="qa-waehrung"
                 name="waehrung"
