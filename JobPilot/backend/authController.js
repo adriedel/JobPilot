@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const pool = require("./database");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./emailService");
 
-const JWT_SECRET = process.env.JWT_SECRET || "jwt_secret_token";
+const JWT_SECRET = require("./jwtSecret");
 const JWT_EXPIRES_IN = "2d";
 
 function hashToken(token) {

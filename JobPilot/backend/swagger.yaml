@@ -287,16 +287,21 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email]
+              required: [email, currentPassword]
               properties:
                 email:
                   type: string
                   format: email
+                currentPassword:
+                  type: string
+                  description: Aktuelles Passwort zur Bestätigung
       responses:
         "200":
           description: Aktualisierter Benutzer
         "400":
-          description: Ungültige oder bereits vergebene E-Mail-Adresse
+          description: Ungültige oder bereits vergebene E-Mail-Adresse oder fehlendes Passwort
+        "401":
+          description: Aktuelles Passwort ist falsch
 
   /api/auth/profile/password:
     put:

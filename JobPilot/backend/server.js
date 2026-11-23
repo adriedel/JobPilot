@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -6,6 +7,12 @@ const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const swaggerDocument = YAML.load("./swagger.yaml");
 const authenticateToken = require("./authMiddleware");
+const {
+  loginLimiter,
+  registerLimiter,
+  emailLimiter,
+  tokenLimiter,
+} = require("./rateLimits");
 const {
   register,
   login,
@@ -18,7 +25,6 @@ const {
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
-require("dotenv").config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -51,6 +57,12 @@ const uploadAvatar = multer({
   },
 });
 
+/** Fehler nur loggen – DB-Details o. Ä. gehen nicht an den Client. */
+function serverError(res, err) {
+  console.error(err);
+  res.status(500).json({ error: "Interner Serverfehler" });
+}
+
 function parseUserRow(row) {
   if (!row) return row;
   if (row.avatar_config && typeof row.avatar_config === "string") {
@@ -61,6 +73,10 @@ function parseUserRow(row) {
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Hinter dem Proxy von Render/Vercel: echte Client-IP aus X-Forwarded-For
+// lesen (Anzahl vertrauenswürdiger Proxys), sonst teilen sich alle ein Rate-Limit.
+app.set("trust proxy", Number(process.env.TRUST_PROXY ?? 1));
 
 // CORS Configuration - Allow multiple origins
 const configuredOrigins = [
@@ -91,7 +107,10 @@ app.use(
       // Allow requests with no origin (like mobile apps, Postman, curl)
       if (!origin) return callback(null, true);
 
+      // Beliebige localhost-Ports nur in der Entwicklung; in Produktion (auch im
+      // lokalen Docker-Setup) müssen Origins explizit in FRONTEND_URLS stehen.
       const isLocalhostOrigin =
+        process.env.NODE_ENV !== "production" &&
         /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
       if (
@@ -106,9 +125,10 @@ app.use(
       console.error(msg);
       return callback(new Error(msg), false);
     },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    // PATCH wird für das Ändern von Rollen im Admin-Bereich gebraucht.
+    // Keine Cookies im Einsatz (Token im Authorization-Header) → kein credentials.
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   }),
 );
 app.use(bodyParser.json());
@@ -144,18 +164,18 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // ==================== AUTH ROUTES (UNPROTECTED) ====================
 
 // Register
-app.post("/api/auth/register", register);
+app.post("/api/auth/register", registerLimiter, register);
 
 // Login
-app.post("/api/auth/login", login);
+app.post("/api/auth/login", loginLimiter, login);
 
 // E-Mail-Verifizierung
-app.get("/api/auth/verify-email", verifyEmail);
-app.post("/api/auth/resend-verification", resendVerification);
+app.get("/api/auth/verify-email", tokenLimiter, verifyEmail);
+app.post("/api/auth/resend-verification", emailLimiter, resendVerification);
 
 // Passwort vergessen / zurücksetzen
-app.post("/api/auth/forgot-password", forgotPassword);
-app.post("/api/auth/reset-password", resetPassword);
+app.post("/api/auth/forgot-password", emailLimiter, forgotPassword);
+app.post("/api/auth/reset-password", tokenLimiter, resetPassword);
 
 // Get current user (PROTECTED)
 app.get("/api/auth/me", authenticateToken, getCurrentUser);
@@ -173,7 +193,7 @@ app.put("/api/auth/profile", authenticateToken, async (req, res) => {
     );
     res.json({ user: parseUserRow(result.rows[0]) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -197,7 +217,7 @@ app.post(
       );
       res.json({ user: parseUserRow(result.rows[0]) });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      serverError(res, err);
     }
   },
 );
@@ -212,21 +232,35 @@ app.delete("/api/auth/profile/image", authenticateToken, async (req, res) => {
     );
     res.json({ message: "Profilbild gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
 // Change email (PROTECTED)
-app.put("/api/auth/profile/email", authenticateToken, async (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.trim()) {
+app.put("/api/auth/profile/email", authenticateToken, tokenLimiter, async (req, res) => {
+  const { email, currentPassword } = req.body;
+  if (typeof email !== "string" || !email.trim()) {
     return res.status(400).json({ error: "E-Mail ist erforderlich" });
+  }
+  // Ohne Passwort-Abfrage könnte ein gestohlenes Token die E-Mail umstellen und
+  // über "Passwort vergessen" den Account dauerhaft übernehmen.
+  if (typeof currentPassword !== "string" || !currentPassword) {
+    return res.status(400).json({ error: "Aktuelles Passwort ist erforderlich" });
   }
   const newEmail = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
     return res.status(400).json({ error: "Ungültige E-Mail-Adresse" });
   }
   try {
+    const current = await pool.query("SELECT password_hash FROM users WHERE id = $1", [
+      req.userId,
+    ]);
+    if (current.rows.length === 0) {
+      return res.status(404).json({ error: "User nicht gefunden" });
+    }
+    if (!(await bcrypt.compare(currentPassword, current.rows[0].password_hash))) {
+      return res.status(401).json({ error: "Das aktuelle Passwort ist falsch" });
+    }
     const existing = await pool.query(
       "SELECT id FROM users WHERE email = $1 AND id != $2",
       [newEmail, req.userId],
@@ -240,12 +274,12 @@ app.put("/api/auth/profile/email", authenticateToken, async (req, res) => {
     );
     res.json({ user: parseUserRow(result.rows[0]) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
 // Change password (PROTECTED)
-app.put("/api/auth/profile/password", authenticateToken, async (req, res) => {
+app.put("/api/auth/profile/password", authenticateToken, tokenLimiter, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ error: "Aktuelles und neues Passwort sind erforderlich" });
@@ -273,7 +307,7 @@ app.put("/api/auth/profile/password", authenticateToken, async (req, res) => {
     );
     res.json({ message: "Passwort erfolgreich geändert" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -288,7 +322,7 @@ app.put("/api/auth/profile/avatar-config", authenticateToken, async (req, res) =
     );
     res.json({ user: parseUserRow(result.rows[0]) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -362,7 +396,7 @@ app.get("/api/bewerbungen", authenticateToken, async (req, res) => {
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -383,7 +417,7 @@ app.get("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -444,7 +478,7 @@ app.post("/api/bewerbungen", authenticateToken, async (req, res) => {
       message: "Bewerbung erstellt",
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -527,7 +561,7 @@ app.put("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
     res.json({ message: "Bewerbung aktualisiert" });
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   } finally {
     client.release();
   }
@@ -551,7 +585,7 @@ app.get("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -592,7 +626,7 @@ app.post("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => 
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -615,7 +649,7 @@ app.get("/api/bewerbungen/:id/update-typen", authenticateToken, async (req, res)
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -656,7 +690,7 @@ app.post("/api/update-typen", authenticateToken, async (req, res) => {
     );
     res.json(existing.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -672,7 +706,7 @@ app.delete("/api/update-typen/:typId", authenticateToken, async (req, res) => {
     }
     res.json({ message: "Grund gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -698,7 +732,7 @@ app.delete(
 
       res.json({ message: "Eintrag gelöscht" });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      serverError(res, err);
     }
   },
 );
@@ -720,7 +754,7 @@ app.delete("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
 
     res.json({ message: "Bewerbung gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -756,7 +790,7 @@ app.get("/api/statistiken", authenticateToken, async (req, res) => {
 
     res.json(stats);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -770,7 +804,7 @@ async function requireAdmin(req, res, next) {
     }
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 }
 
@@ -787,7 +821,7 @@ app.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) =>
     `);
     res.json({ users: result.rows });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -862,7 +896,7 @@ app.get("/api/admin/users/:id/stats", authenticateToken, requireAdmin, async (re
       bewerbungen: bewerbungenResult.rows,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -884,7 +918,7 @@ app.patch("/api/admin/users/:id/role", authenticateToken, requireAdmin, async (r
     if (result.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
     res.json({ message: "Rolle aktualisiert" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -899,8 +933,32 @@ app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, 
     if (result.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
     res.json({ message: "User gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
+});
+
+// Zentrale Fehlerbehandlung (Upload, CORS, kaputtes JSON …) statt der
+// Express-Standardseite, die in der Entwicklung Stacktraces ausgibt.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE" ? "Das Bild darf maximal 5 MB groß sein" : "Ungültiger Upload";
+    return res.status(400).json({ error: message });
+  }
+  if (err.message === "Nur JPEG, PNG, GIF und WebP erlaubt") {
+    return res.status(400).json({ error: err.message });
+  }
+  if (err.message?.startsWith("CORS not allowed")) {
+    return res.status(403).json({ error: "Origin nicht erlaubt" });
+  }
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "Ungültiges JSON" });
+  }
+  if (err.type === "entity.too.large") {
+    return res.status(413).json({ error: "Anfrage zu groß" });
+  }
+  serverError(res, err);
 });
 
 pool

@@ -25,6 +25,26 @@ const header = `
 `;
 const body = `padding:40px;`;
 
+/**
+ * Nutzereingaben (z. B. der Name) landen im Mail-HTML. Ohne Escaping könnte
+ * jemand mit fremder Adresse registrieren und eigene Links in eine echte
+ * JobPilot-Mail an diese Adresse schmuggeln.
+ */
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Vorname für die Anrede, HTML-sicher und auf 50 Zeichen gekürzt. */
+function greetingName(name) {
+  const first = typeof name === "string" ? name.trim().split(/\s+/)[0] : "";
+  return first ? escapeHtml(first.slice(0, 50)) : "dort";
+}
+
 /** Verschickt die Mail über Resend – oder gibt sie ohne API-Key in der Konsole aus. */
 async function sendEmail({ to, subject, html, link }) {
   if (!resend) {
@@ -37,7 +57,7 @@ async function sendEmail({ to, subject, html, link }) {
 
 async function sendVerificationEmail(toEmail, name, token) {
   const url = `${FRONTEND_URL}/verify-email/confirm?token=${token}`;
-  const hi = name ? name.split(" ")[0] : "dort";
+  const hi = greetingName(name);
 
   await sendEmail({
     link: url,
@@ -81,7 +101,7 @@ async function sendVerificationEmail(toEmail, name, token) {
 
 async function sendPasswordResetEmail(toEmail, name, token) {
   const url = `${FRONTEND_URL}/reset-password?token=${token}`;
-  const hi = name ? name.split(" ")[0] : "dort";
+  const hi = greetingName(name);
 
   await sendEmail({
     link: url,
