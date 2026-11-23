@@ -215,7 +215,7 @@ export async function uploadProfileImage(file) {
 }
 
 // Change email
-export async function changeEmail(email) {
+export async function changeEmail(email, currentPassword) {
   const token = getToken();
   const response = await authFetch(`${API_URL}/auth/profile/email`, {
     method: "PUT",
@@ -223,7 +223,7 @@ export async function changeEmail(email) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, currentPassword }),
   });
   const data = await parseJSON(response);
   if (!response.ok) throw new Error(data.error || "Fehler beim Ändern der E-Mail");

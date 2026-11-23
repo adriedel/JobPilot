@@ -222,15 +222,29 @@ app.delete("/api/auth/profile/image", authenticateToken, async (req, res) => {
 
 // Change email (PROTECTED)
 app.put("/api/auth/profile/email", authenticateToken, async (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.trim()) {
+  const { email, currentPassword } = req.body;
+  if (typeof email !== "string" || !email.trim()) {
     return res.status(400).json({ error: "E-Mail ist erforderlich" });
+  }
+  // Ohne Passwort-Abfrage könnte ein gestohlenes Token die E-Mail umstellen und
+  // über "Passwort vergessen" den Account dauerhaft übernehmen.
+  if (typeof currentPassword !== "string" || !currentPassword) {
+    return res.status(400).json({ error: "Aktuelles Passwort ist erforderlich" });
   }
   const newEmail = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
     return res.status(400).json({ error: "Ungültige E-Mail-Adresse" });
   }
   try {
+    const current = await pool.query("SELECT password_hash FROM users WHERE id = $1", [
+      req.userId,
+    ]);
+    if (current.rows.length === 0) {
+      return res.status(404).json({ error: "User nicht gefunden" });
+    }
+    if (!(await bcrypt.compare(currentPassword, current.rows[0].password_hash))) {
+      return res.status(401).json({ error: "Das aktuelle Passwort ist falsch" });
+    }
     const existing = await pool.query(
       "SELECT id FROM users WHERE email = $1 AND id != $2",
       [newEmail, req.userId],

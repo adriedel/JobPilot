@@ -163,6 +163,7 @@ function PasswordInput({ value, onChange, placeholder, autoFocus, onKeyDown }) {
 function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
   const [email, setEmail] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -171,6 +172,7 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return t("profile.emailInvalid");
     if (email.trim().toLowerCase() === currentEmail?.toLowerCase()) return t("profile.emailSameAsCurrent");
     if (email.trim() !== confirm.trim()) return t("profile.emailMismatch");
+    if (!password) return t("profile.currentPasswordRequired");
     return null;
   };
 
@@ -180,7 +182,7 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
     setSaving(true);
     setError("");
     try {
-      const updatedUser = await changeEmail(email.trim());
+      const updatedUser = await changeEmail(email.trim(), password);
       onSuccess(updatedUser);
     } catch (e) {
       setError(e.message);
@@ -234,6 +236,16 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
             />
           </div>
 
+          <div className="profile-field">
+            <label className="profile-label">{t("profile.currentPassword")}</label>
+            <PasswordInput
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setError(""); }}
+              placeholder={t("profile.currentPasswordPlaceholder")}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            />
+          </div>
+
           <p className="profile-modal-hint">{t("profile.emailChangeHint")}</p>
         </div>
 
@@ -244,7 +256,7 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
           <button
             className="profile-btn profile-btn--primary"
             onClick={handleSubmit}
-            disabled={saving || !email.trim() || !confirm.trim()}
+            disabled={saving || !email.trim() || !confirm.trim() || !password}
           >
             {saving ? t("profile.saving") : t("profile.saveChanges")}
           </button>
