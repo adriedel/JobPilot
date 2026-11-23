@@ -111,6 +111,11 @@ async function initDB() {
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'`,
   );
 
+  // Wird bei Passwort-Reset/-Wechsel erhöht und macht damit alle alten Tokens ungültig
+  await pool.query(
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0`,
+  );
+
   // E-Mail-Verifizierung
   await pool.query(
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMP`,

@@ -1,11 +1,9 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const pool = require("./database");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./emailService");
 
-const JWT_SECRET = require("./jwtSecret");
-const JWT_EXPIRES_IN = "2d";
+const { signToken } = require("./authMiddleware");
 
 function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -80,7 +78,7 @@ async function login(req, res) {
 
   try {
     const result = await pool.query(
-      "SELECT id, email, password_hash, name, role, email_verified_at FROM users WHERE email = $1",
+      "SELECT id, email, password_hash, name, role, email_verified_at, token_version FROM users WHERE email = $1",
       [email.toLowerCase()],
     );
 
@@ -103,9 +101,7 @@ async function login(req, res) {
       });
     }
 
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
+    const token = signToken(user);
 
     res.json({
       message: "Login erfolgreich",
@@ -274,7 +270,10 @@ async function resetPassword(req, res) {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     await pool.query(
-      "UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+      // token_version erhöhen → alle bisherigen Logins (auch ein evtl. gestohlener) enden
+      `UPDATE users SET password_hash = $1, token_version = token_version + 1,
+                        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2`,
       [hashedPassword, userId],
     );
     await pool.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [userId]);

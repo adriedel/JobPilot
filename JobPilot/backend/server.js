@@ -7,6 +7,7 @@ const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const swaggerDocument = YAML.load("./swagger.yaml");
 const authenticateToken = require("./authMiddleware");
+const { signToken } = authenticateToken;
 const {
   loginLimiter,
   registerLimiter,
@@ -301,11 +302,15 @@ app.put("/api/auth/profile/password", authenticateToken, tokenLimiter, async (re
     }
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(newPassword, salt);
-    await pool.query(
-      "UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+    // Alle anderen Sitzungen beenden; diese hier bekommt ein frisches Token
+    const updated = await pool.query(
+      `UPDATE users SET password_hash = $1, token_version = token_version + 1,
+                        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2
+       RETURNING id, email, token_version`,
       [hashed, req.userId],
     );
-    res.json({ message: "Passwort erfolgreich geändert" });
+    res.json({ message: "Passwort erfolgreich geändert", token: signToken(updated.rows[0]) });
   } catch (err) {
     serverError(res, err);
   }
