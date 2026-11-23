@@ -57,6 +57,12 @@ const uploadAvatar = multer({
   },
 });
 
+/** Fehler nur loggen – DB-Details o. Ä. gehen nicht an den Client. */
+function serverError(res, err) {
+  console.error(err);
+  res.status(500).json({ error: "Interner Serverfehler" });
+}
+
 function parseUserRow(row) {
   if (!row) return row;
   if (row.avatar_config && typeof row.avatar_config === "string") {
@@ -187,7 +193,7 @@ app.put("/api/auth/profile", authenticateToken, async (req, res) => {
     );
     res.json({ user: parseUserRow(result.rows[0]) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -211,7 +217,7 @@ app.post(
       );
       res.json({ user: parseUserRow(result.rows[0]) });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      serverError(res, err);
     }
   },
 );
@@ -226,7 +232,7 @@ app.delete("/api/auth/profile/image", authenticateToken, async (req, res) => {
     );
     res.json({ message: "Profilbild gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -268,7 +274,7 @@ app.put("/api/auth/profile/email", authenticateToken, tokenLimiter, async (req, 
     );
     res.json({ user: parseUserRow(result.rows[0]) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -301,7 +307,7 @@ app.put("/api/auth/profile/password", authenticateToken, tokenLimiter, async (re
     );
     res.json({ message: "Passwort erfolgreich geändert" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -316,7 +322,7 @@ app.put("/api/auth/profile/avatar-config", authenticateToken, async (req, res) =
     );
     res.json({ user: parseUserRow(result.rows[0]) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -390,7 +396,7 @@ app.get("/api/bewerbungen", authenticateToken, async (req, res) => {
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -411,7 +417,7 @@ app.get("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -472,7 +478,7 @@ app.post("/api/bewerbungen", authenticateToken, async (req, res) => {
       message: "Bewerbung erstellt",
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -555,7 +561,7 @@ app.put("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
     res.json({ message: "Bewerbung aktualisiert" });
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   } finally {
     client.release();
   }
@@ -579,7 +585,7 @@ app.get("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -620,7 +626,7 @@ app.post("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => 
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -643,7 +649,7 @@ app.get("/api/bewerbungen/:id/update-typen", authenticateToken, async (req, res)
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -684,7 +690,7 @@ app.post("/api/update-typen", authenticateToken, async (req, res) => {
     );
     res.json(existing.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -700,7 +706,7 @@ app.delete("/api/update-typen/:typId", authenticateToken, async (req, res) => {
     }
     res.json({ message: "Grund gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -726,7 +732,7 @@ app.delete(
 
       res.json({ message: "Eintrag gelöscht" });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      serverError(res, err);
     }
   },
 );
@@ -748,7 +754,7 @@ app.delete("/api/bewerbungen/:id", authenticateToken, async (req, res) => {
 
     res.json({ message: "Bewerbung gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -784,7 +790,7 @@ app.get("/api/statistiken", authenticateToken, async (req, res) => {
 
     res.json(stats);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -798,7 +804,7 @@ async function requireAdmin(req, res, next) {
     }
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 }
 
@@ -815,7 +821,7 @@ app.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) =>
     `);
     res.json({ users: result.rows });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -890,7 +896,7 @@ app.get("/api/admin/users/:id/stats", authenticateToken, requireAdmin, async (re
       bewerbungen: bewerbungenResult.rows,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -912,7 +918,7 @@ app.patch("/api/admin/users/:id/role", authenticateToken, requireAdmin, async (r
     if (result.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
     res.json({ message: "Rolle aktualisiert" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
 });
 
@@ -927,8 +933,32 @@ app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, 
     if (result.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
     res.json({ message: "User gelöscht" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, err);
   }
+});
+
+// Zentrale Fehlerbehandlung (Upload, CORS, kaputtes JSON …) statt der
+// Express-Standardseite, die in der Entwicklung Stacktraces ausgibt.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE" ? "Das Bild darf maximal 5 MB groß sein" : "Ungültiger Upload";
+    return res.status(400).json({ error: message });
+  }
+  if (err.message === "Nur JPEG, PNG, GIF und WebP erlaubt") {
+    return res.status(400).json({ error: err.message });
+  }
+  if (err.message?.startsWith("CORS not allowed")) {
+    return res.status(403).json({ error: "Origin nicht erlaubt" });
+  }
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "Ungültiges JSON" });
+  }
+  if (err.type === "entity.too.large") {
+    return res.status(413).json({ error: "Anfrage zu groß" });
+  }
+  serverError(res, err);
 });
 
 pool
