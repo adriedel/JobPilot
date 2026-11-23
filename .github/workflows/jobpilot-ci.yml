@@ -57,6 +57,7 @@ jobs:
           node --check authController.js
           node --check authMiddleware.js
           node --check jwtSecret.js
+          node --check rateLimits.js
           node --check database.js
           node --check migrate.js
 

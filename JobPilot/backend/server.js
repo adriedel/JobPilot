@@ -8,6 +8,12 @@ const YAML = require("yamljs");
 const swaggerDocument = YAML.load("./swagger.yaml");
 const authenticateToken = require("./authMiddleware");
 const {
+  loginLimiter,
+  registerLimiter,
+  emailLimiter,
+  tokenLimiter,
+} = require("./rateLimits");
+const {
   register,
   login,
   getCurrentUser,
@@ -61,6 +67,10 @@ function parseUserRow(row) {
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Hinter dem Proxy von Render/Vercel: echte Client-IP aus X-Forwarded-For
+// lesen (Anzahl vertrauenswürdiger Proxys), sonst teilen sich alle ein Rate-Limit.
+app.set("trust proxy", Number(process.env.TRUST_PROXY ?? 1));
 
 // CORS Configuration - Allow multiple origins
 const configuredOrigins = [
@@ -148,18 +158,18 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // ==================== AUTH ROUTES (UNPROTECTED) ====================
 
 // Register
-app.post("/api/auth/register", register);
+app.post("/api/auth/register", registerLimiter, register);
 
 // Login
-app.post("/api/auth/login", login);
+app.post("/api/auth/login", loginLimiter, login);
 
 // E-Mail-Verifizierung
-app.get("/api/auth/verify-email", verifyEmail);
-app.post("/api/auth/resend-verification", resendVerification);
+app.get("/api/auth/verify-email", tokenLimiter, verifyEmail);
+app.post("/api/auth/resend-verification", emailLimiter, resendVerification);
 
 // Passwort vergessen / zurücksetzen
-app.post("/api/auth/forgot-password", forgotPassword);
-app.post("/api/auth/reset-password", resetPassword);
+app.post("/api/auth/forgot-password", emailLimiter, forgotPassword);
+app.post("/api/auth/reset-password", tokenLimiter, resetPassword);
 
 // Get current user (PROTECTED)
 app.get("/api/auth/me", authenticateToken, getCurrentUser);
@@ -221,7 +231,7 @@ app.delete("/api/auth/profile/image", authenticateToken, async (req, res) => {
 });
 
 // Change email (PROTECTED)
-app.put("/api/auth/profile/email", authenticateToken, async (req, res) => {
+app.put("/api/auth/profile/email", authenticateToken, tokenLimiter, async (req, res) => {
   const { email, currentPassword } = req.body;
   if (typeof email !== "string" || !email.trim()) {
     return res.status(400).json({ error: "E-Mail ist erforderlich" });
@@ -263,7 +273,7 @@ app.put("/api/auth/profile/email", authenticateToken, async (req, res) => {
 });
 
 // Change password (PROTECTED)
-app.put("/api/auth/profile/password", authenticateToken, async (req, res) => {
+app.put("/api/auth/profile/password", authenticateToken, tokenLimiter, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ error: "Aktuelles und neues Passwort sind erforderlich" });
