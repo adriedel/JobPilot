@@ -1,12 +1,14 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const pool = require("./database");
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const swaggerDocument = YAML.load("./swagger.yaml");
 const authenticateToken = require("./authMiddleware");
+const { signToken } = authenticateToken;
 const {
   loginLimiter,
   registerLimiter,
@@ -77,6 +79,9 @@ const PORT = process.env.PORT || 3001;
 // Hinter dem Proxy von Render/Vercel: echte Client-IP aus X-Forwarded-For
 // lesen (Anzahl vertrauenswürdiger Proxys), sonst teilen sich alle ein Rate-Limit.
 app.set("trust proxy", Number(process.env.TRUST_PROXY ?? 1));
+
+// Security-Header (HSTS, nosniff, Frame-Schutz, CSP für /api-docs …)
+app.use(helmet());
 
 // CORS Configuration - Allow multiple origins
 const configuredOrigins = [
@@ -301,11 +306,15 @@ app.put("/api/auth/profile/password", authenticateToken, tokenLimiter, async (re
     }
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(newPassword, salt);
-    await pool.query(
-      "UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+    // Alle anderen Sitzungen beenden; diese hier bekommt ein frisches Token
+    const updated = await pool.query(
+      `UPDATE users SET password_hash = $1, token_version = token_version + 1,
+                        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2
+       RETURNING id, email, token_version`,
       [hashed, req.userId],
     );
-    res.json({ message: "Passwort erfolgreich geändert" });
+    res.json({ message: "Passwort erfolgreich geändert", token: signToken(updated.rows[0]) });
   } catch (err) {
     serverError(res, err);
   }

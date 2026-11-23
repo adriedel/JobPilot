@@ -177,6 +177,7 @@ async function seedDemoData(pool, { reset = false } = {}) {
           await client.query(
             `UPDATE users
              SET password_hash = $2, name = $3, role = $4,
+                 token_version = token_version + 1,
                  email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP),
                  updated_at = CURRENT_TIMESTAMP
              WHERE id = $1`,

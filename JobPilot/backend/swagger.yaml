@@ -229,7 +229,7 @@ paths:
                   minLength: 8
       responses:
         "200":
-          description: Passwort erfolgreich zurückgesetzt
+          description: Passwort zurückgesetzt. Alle bestehenden Sitzungen sind beendet.
         "400":
           description: Ungültiger oder abgelaufener Token
 
@@ -327,7 +327,7 @@ paths:
                   minLength: 8
       responses:
         "200":
-          description: Passwort erfolgreich geändert
+          description: Passwort geändert. Alle anderen Sitzungen sind beendet; `token` ersetzt das bisherige Token.
         "401":
           description: Aktuelles Passwort falsch
 

@@ -243,6 +243,9 @@ export async function changePassword(currentPassword, newPassword) {
   });
   const data = await parseJSON(response);
   if (!response.ok) throw new Error(data.error || "Fehler beim Ändern des Passworts");
+  // Der Server beendet beim Passwortwechsel alle Sitzungen und schickt für
+  // diese hier ein neues Token mit
+  if (data.token) localStorage.setItem("token", data.token);
   return data;
 }
 
