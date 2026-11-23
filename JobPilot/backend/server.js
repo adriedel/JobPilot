@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const pool = require("./database");
 const swaggerUi = require("swagger-ui-express");
@@ -78,6 +79,9 @@ const PORT = process.env.PORT || 3001;
 // Hinter dem Proxy von Render/Vercel: echte Client-IP aus X-Forwarded-For
 // lesen (Anzahl vertrauenswürdiger Proxys), sonst teilen sich alle ein Rate-Limit.
 app.set("trust proxy", Number(process.env.TRUST_PROXY ?? 1));
+
+// Security-Header (HSTS, nosniff, Frame-Schutz, CSP für /api-docs …)
+app.use(helmet());
 
 // CORS Configuration - Allow multiple origins
 const configuredOrigins = [
