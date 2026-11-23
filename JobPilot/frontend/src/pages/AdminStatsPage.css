@@ -1,0 +1,296 @@
+/* Statistik-Seite im Admin-Bereich (baut auf AdminPage.css auf) */
+
+.stats-stat-of {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-secondary, #718096);
+}
+
+.stats-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stats-panel {
+  background: var(--bg-surface, #fff);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 14px;
+  padding: 20px 24px;
+  min-width: 0;
+}
+
+.stats-panel h2,
+.stats-table-head h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #1a202c);
+  margin: 0;
+}
+
+.stats-panel-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #718096);
+  margin: 2px 0 16px;
+}
+
+/* Gestapelter Status-Balken: 2px Lücke zwischen Segmenten, runde Enden */
+.stats-statusbar {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+}
+
+.stats-statusbar--large {
+  height: 14px;
+}
+
+.stats-statusbar--small {
+  height: 8px;
+  min-width: 90px;
+}
+
+.stats-statusbar-seg {
+  flex-basis: 0;
+  min-width: 3px;
+  transition: opacity 0.15s;
+}
+
+.stats-statusbar-seg:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.stats-statusbar-seg:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.stats-statusbar-seg:only-child {
+  border-radius: 4px;
+}
+
+.stats-statusbar:hover .stats-statusbar-seg {
+  opacity: 0.45;
+}
+
+.stats-statusbar:hover .stats-statusbar-seg:hover {
+  opacity: 1;
+}
+
+.stats-statusbar--empty {
+  background: var(--border, #e2e8f0);
+  border-radius: 4px;
+}
+
+/* Legende mit Werten */
+.stats-legend {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px 16px;
+}
+
+.stats-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  transition: opacity 0.15s;
+}
+
+.stats-legend li.is-dimmed {
+  opacity: 0.4;
+}
+
+.stats-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.stats-legend-label {
+  color: var(--text-secondary, #718096);
+}
+
+.stats-legend-label {
+  white-space: nowrap;
+}
+
+.stats-legend-value {
+  margin-left: auto;
+  white-space: nowrap;
+  font-weight: 700;
+  color: var(--text-primary, #1a202c);
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-legend-pct {
+  font-weight: 500;
+  color: var(--text-secondary, #718096);
+}
+
+/* Wochen-Balken */
+.stats-weekly-plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 120px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.stats-weekly-col {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: default;
+  outline: none;
+}
+
+.stats-weekly-col:hover,
+.stats-weekly-col:focus-visible {
+  background: var(--bg-hover, #f3f4f6);
+  border-radius: 4px 4px 0 0;
+}
+
+.stats-weekly-bar {
+  width: 100%;
+  max-width: 24px;
+  background: var(--status-beworben-accent, #3b82f6);
+  border-radius: 4px 4px 0 0;
+}
+
+.stats-weekly-axis {
+  display: flex;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.stats-weekly-axis span {
+  flex: 1;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-secondary, #718096);
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.stats-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  background: var(--text-primary, #1a202c);
+  color: var(--bg-surface, #fff);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stats-weekly-col:first-child .stats-tooltip {
+  left: 0;
+  transform: none;
+}
+
+.stats-weekly-col:last-child .stats-tooltip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.stats-tooltip-label {
+  display: block;
+  opacity: 0.75;
+  font-size: 0.72rem;
+}
+
+/* Tabelle pro User */
+.stats-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.stats-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #718096);
+}
+
+.stats-sort select {
+  background: var(--bg-input, #fff);
+  color: var(--text-primary, #1a202c);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.stats-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-user {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stats-user-name {
+  font-weight: 600;
+}
+
+.stats-user-email {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #718096);
+}
+
+.stats-dist-cell {
+  min-width: 120px;
+}
+
+.stats-active {
+  color: var(--text-primary, #1a202c);
+}
+
+.stats-inactive {
+  color: var(--text-secondary, #718096);
+  font-style: italic;
+}
+
+.stats-footnote {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #718096);
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .stats-panel {
+    padding: 16px;
+  }
+
+  .stats-dist-cell .stats-statusbar {
+    max-width: 55%;
+  }
+
+  .stats-user {
+    align-items: flex-end;
+    text-align: right;
+  }
+}

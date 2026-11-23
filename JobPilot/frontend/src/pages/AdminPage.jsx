@@ -89,6 +89,11 @@ function AdminPage() {
           <h1>Admin-Bereich</h1>
           <p>Benutzerverwaltung</p>
         </div>
+        <div className="admin-header-actions">
+          <button className="admin-stats-btn" onClick={() => navigate("/admin/statistiken")}>
+            📊 Statistiken
+          </button>
+        </div>
       </div>
 
       <div className="admin-stats">

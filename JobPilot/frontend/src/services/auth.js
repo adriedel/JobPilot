@@ -286,6 +286,16 @@ export async function getAdminUsers() {
   return data.users;
 }
 
+export async function getAdminStats() {
+  const token = getToken();
+  const response = await authFetch(`${API_URL}/admin/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await parseJSON(response);
+  if (!response.ok) throw new Error(data.error || "Fehler beim Laden der Statistiken");
+  return data; // { users, weekly }
+}
+
 export async function updateUserRole(userId, role) {
   const token = getToken();
   const response = await authFetch(`${API_URL}/admin/users/${userId}/role`, {
