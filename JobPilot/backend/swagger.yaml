@@ -119,9 +119,9 @@ paths:
                   type: string
       responses:
         "201":
-          description: Registrierung erfolgreich, E-Mail-Bestätigung ausstehend
+          description: Registrierung angenommen. Auch bei bereits vergebener E-Mail (dann bekommt der Inhaber eine Hinweis-Mail), damit nicht erkennbar ist, welche Adressen registriert sind.
         "400":
-          description: Ungültige Eingabe oder E-Mail bereits vergeben
+          description: Ungültige Eingabe
 
   /api/auth/login:
     post:

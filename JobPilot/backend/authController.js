@@ -1,7 +1,11 @@
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const pool = require("./database");
-const { sendVerificationEmail, sendPasswordResetEmail } = require("./emailService");
+const {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendAccountExistsEmail,
+} = require("./emailService");
 
 const { signToken } = require("./authMiddleware");
 
@@ -9,10 +13,18 @@ function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
+// Für Logins mit unbekannter E-Mail: trotzdem einen bcrypt-Vergleich rechnen,
+// damit die Antwortzeit nicht verrät, ob es die Adresse gibt.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("kein-echtes-passwort", 10);
+
+const REGISTER_RESPONSE = {
+  message: "Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.",
+};
+
 async function register(req, res) {
   const { email, password, name } = req.body;
 
-  if (!email || !password) {
+  if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
     return res
       .status(400)
       .json({ message: "Email und Passwort sind erforderlich" });
@@ -24,29 +36,48 @@ async function register(req, res) {
       .json({ message: "Das Passwort muss mindestens 8 Zeichen lang sein" });
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
+
   try {
-    const existingUser = await pool.query(
-      "SELECT id FROM users WHERE email = $1",
-      [email.toLowerCase()],
-    );
-
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({
-        message: "Ein Benutzer mit dieser E-Mail-Adresse existiert bereits",
-      });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
+    // Immer hashen – auch wenn es die Adresse schon gibt – damit beide Fälle
+    // gleich lange dauern
+    const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    const existing = await pool.query(
+      "SELECT id, email, name, email_verified_at FROM users WHERE email = $1",
+      [normalizedEmail],
+    );
+
+    // Gibt es die Adresse schon, antwortet die API genauso wie bei einer neuen
+    // Registrierung (verrät also nicht, wer registriert ist). Der Inhaber bekommt
+    // eine Mail: bei bestätigtem Konto einen Hinweis, sonst einen neuen Bestätigungslink.
+    if (existing.rows.length > 0) {
+      const user = existing.rows[0];
+      try {
+        if (user.email_verified_at) {
+          await sendAccountExistsEmail(user.email, user.name);
+        } else {
+          await pool.query(
+            `UPDATE users
+             SET email_verification_token = $1, email_verification_token_expires = $2
+             WHERE id = $3`,
+            [hashToken(verificationToken), tokenExpires, user.id],
+          );
+          await sendVerificationEmail(user.email, user.name, verificationToken);
+        }
+      } catch (emailErr) {
+        console.error("Fehler beim Senden der E-Mail für bestehenden Account:", emailErr);
+      }
+      return res.status(201).json({ ...REGISTER_RESPONSE, email: normalizedEmail });
+    }
 
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, name, email_verification_token, email_verification_token_expires)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, email, name, created_at`,
-      [email.toLowerCase(), hashedPassword, name || null, verificationToken, tokenExpires],
+      [normalizedEmail, hashedPassword, name || null, hashToken(verificationToken), tokenExpires],
     );
 
     const user = result.rows[0];
@@ -57,10 +88,7 @@ async function register(req, res) {
       console.error("Fehler beim Senden der Verifizierungs-E-Mail:", emailErr);
     }
 
-    res.status(201).json({
-      message: "Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.",
-      email: user.email,
-    });
+    res.status(201).json({ ...REGISTER_RESPONSE, email: user.email });
   } catch (err) {
     console.error("Fehler bei der Registrierung:", err);
     res.status(500).json({ message: "Interner Serverfehler" });
@@ -70,7 +98,7 @@ async function register(req, res) {
 async function login(req, res) {
   const { email, password } = req.body;
 
-  if (!email || !password) {
+  if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
     return res
       .status(400)
       .json({ error: "Email und Passwort sind erforderlich" });
@@ -83,6 +111,7 @@ async function login(req, res) {
     );
 
     if (result.rows.length === 0) {
+      await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
       return res.status(401).json({ error: "Ungültige Email oder Passwort" });
     }
 
@@ -122,17 +151,20 @@ async function login(req, res) {
 async function verifyEmail(req, res) {
   const { token } = req.query;
 
-  if (!token) {
+  if (typeof token !== "string" || !token) {
     return res.status(400).json({ error: "Ungültiger Token" });
   }
 
   try {
+    // In der DB liegt nur der Hash – ein DB-Leak verrät so keine gültigen Links.
+    // Übergang: vor dieser Änderung verschickte Links enthalten den Klartext-Token
+    // (läuft nach 24 h aus, danach kann der zweite Vergleich entfallen).
     const result = await pool.query(
       `SELECT id FROM users
-       WHERE email_verification_token = $1
+       WHERE email_verification_token IN ($1, $2)
          AND email_verification_token_expires > NOW()
          AND email_verified_at IS NULL`,
-      [token],
+      [hashToken(token), token],
     );
 
     if (result.rows.length === 0) {
@@ -159,7 +191,7 @@ async function verifyEmail(req, res) {
 async function resendVerification(req, res) {
   const { email } = req.body;
 
-  if (!email) {
+  if (typeof email !== "string" || !email) {
     return res.status(400).json({ error: "E-Mail-Adresse ist erforderlich" });
   }
 
@@ -183,7 +215,7 @@ async function resendVerification(req, res) {
        SET email_verification_token = $1,
            email_verification_token_expires = $2
        WHERE id = $3`,
-      [verificationToken, tokenExpires, user.id],
+      [hashToken(verificationToken), tokenExpires, user.id],
     );
 
     try {
@@ -202,7 +234,7 @@ async function resendVerification(req, res) {
 async function forgotPassword(req, res) {
   const { email } = req.body;
 
-  if (!email) {
+  if (typeof email !== "string" || !email) {
     return res.status(400).json({ error: "E-Mail-Adresse ist erforderlich" });
   }
 
@@ -245,7 +277,7 @@ async function forgotPassword(req, res) {
 async function resetPassword(req, res) {
   const { token, password } = req.body;
 
-  if (!token || !password) {
+  if (typeof token !== "string" || typeof password !== "string" || !token || !password) {
     return res.status(400).json({ error: "Token und Passwort sind erforderlich" });
   }
 

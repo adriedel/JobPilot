@@ -144,4 +144,52 @@ async function sendPasswordResetEmail(toEmail, name, token) {
   });
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail };
+/**
+ * Jemand hat sich mit einer bereits registrierten Adresse registriert. Statt
+ * das im Formular zu verraten, bekommt der Inhaber der Adresse diesen Hinweis.
+ */
+async function sendAccountExistsEmail(toEmail, name) {
+  const loginUrl = `${FRONTEND_URL}/login`;
+  const resetUrl = `${FRONTEND_URL}/forgot-password`;
+  const hi = greetingName(name);
+
+  await sendEmail({
+    link: loginUrl,
+    to: toEmail,
+    subject: "Du hast bereits ein Konto – JobPilot",
+    html: `<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:20px;background:#f3f4f6">
+<div style="${emailWrapper}">
+  <div style="${header}">
+    <p style="color:#fff;font-size:28px;font-weight:800;margin:0;letter-spacing:-0.5px">JobPilot</p>
+    <p style="color:rgba(255,255,255,0.8);font-size:14px;margin:8px 0 0">Dein Bewerbungstracker</p>
+  </div>
+  <div style="${body}">
+    <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 12px">Hallo ${hi}!</h1>
+    <p style="color:#4b5563;font-size:15px;line-height:1.6;margin:0 0 28px">
+      Gerade wurde versucht, mit dieser E-Mail-Adresse ein neues Konto zu erstellen.
+      Du hast aber bereits ein Konto bei JobPilot – melde dich einfach an.
+    </p>
+    <div style="text-align:center;margin:32px 0">
+      <a href="${loginUrl}"
+         style="display:inline-block;background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);
+                color:#fff;text-decoration:none;padding:14px 36px;
+                border-radius:10px;font-size:15px;font-weight:600">
+        Zum Login
+      </a>
+    </div>
+    <p style="color:#9ca3af;font-size:13px;margin:24px 0 0;line-height:1.5">
+      Passwort vergessen? <a href="${resetUrl}" style="color:#3b82f6">Hier zurücksetzen</a>.
+    </p>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0">
+    <p style="color:#9ca3af;font-size:12px;margin:0">
+      Falls du das nicht warst, kannst du diese E-Mail ignorieren. An deinem Konto hat sich nichts geändert.
+    </p>
+  </div>
+</div>
+</body></html>`,
+  });
+}
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendAccountExistsEmail };
