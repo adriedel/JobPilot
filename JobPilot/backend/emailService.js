@@ -1,6 +1,16 @@
 const { Resend } = require("resend");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Ohne API-Key (z. B. lokal) nicht abstürzen: Mails werden dann nur in die
+// Konsole geschrieben, damit Bestätigungs-/Reset-Links trotzdem nutzbar sind.
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
+if (!resend) {
+  console.warn(
+    "[email] RESEND_API_KEY fehlt – E-Mails werden nicht verschickt, sondern nur in der Konsole ausgegeben.",
+  );
+}
 const FROM_EMAIL = process.env.FROM_EMAIL || "onboarding@resend.dev";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
@@ -15,12 +25,22 @@ const header = `
 `;
 const body = `padding:40px;`;
 
+/** Verschickt die Mail über Resend – oder gibt sie ohne API-Key in der Konsole aus. */
+async function sendEmail({ to, subject, html, link }) {
+  if (!resend) {
+    console.log(`[email] (nicht verschickt) An: ${to} | Betreff: ${subject}
+[email] Link: ${link}`);
+    return;
+  }
+  await resend.emails.send({ from: `JobPilot <${FROM_EMAIL}>`, to, subject, html });
+}
+
 async function sendVerificationEmail(toEmail, name, token) {
   const url = `${FRONTEND_URL}/verify-email/confirm?token=${token}`;
   const hi = name ? name.split(" ")[0] : "dort";
 
-  await resend.emails.send({
-    from: `JobPilot <${FROM_EMAIL}>`,
+  await sendEmail({
+    link: url,
     to: toEmail,
     subject: "Bitte bestätige deine E-Mail-Adresse – JobPilot",
     html: `<!DOCTYPE html><html><head><meta charset="utf-8">
@@ -63,8 +83,8 @@ async function sendPasswordResetEmail(toEmail, name, token) {
   const url = `${FRONTEND_URL}/reset-password?token=${token}`;
   const hi = name ? name.split(" ")[0] : "dort";
 
-  await resend.emails.send({
-    from: `JobPilot <${FROM_EMAIL}>`,
+  await sendEmail({
+    link: url,
     to: toEmail,
     subject: "Passwort zurücksetzen – JobPilot",
     html: `<!DOCTYPE html><html><head><meta charset="utf-8">
