@@ -91,7 +91,10 @@ app.use(
       // Allow requests with no origin (like mobile apps, Postman, curl)
       if (!origin) return callback(null, true);
 
+      // Beliebige localhost-Ports nur in der Entwicklung; in Produktion (auch im
+      // lokalen Docker-Setup) müssen Origins explizit in FRONTEND_URLS stehen.
       const isLocalhostOrigin =
+        process.env.NODE_ENV !== "production" &&
         /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
       if (
@@ -106,9 +109,10 @@ app.use(
       console.error(msg);
       return callback(new Error(msg), false);
     },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    // PATCH wird für das Ändern von Rollen im Admin-Bereich gebraucht.
+    // Keine Cookies im Einsatz (Token im Authorization-Header) → kein credentials.
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   }),
 );
 app.use(bodyParser.json());
