@@ -191,7 +191,7 @@ async function verifyEmail(req, res) {
 async function resendVerification(req, res) {
   const { email } = req.body;
 
-  if (!email) {
+  if (typeof email !== "string" || !email) {
     return res.status(400).json({ error: "E-Mail-Adresse ist erforderlich" });
   }
 
@@ -234,7 +234,7 @@ async function resendVerification(req, res) {
 async function forgotPassword(req, res) {
   const { email } = req.body;
 
-  if (!email) {
+  if (typeof email !== "string" || !email) {
     return res.status(400).json({ error: "E-Mail-Adresse ist erforderlich" });
   }
 
@@ -277,7 +277,7 @@ async function forgotPassword(req, res) {
 async function resetPassword(req, res) {
   const { token, password } = req.body;
 
-  if (!token || !password) {
+  if (typeof token !== "string" || typeof password !== "string" || !token || !password) {
     return res.status(400).json({ error: "Token und Passwort sind erforderlich" });
   }
 
