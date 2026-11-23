@@ -171,9 +171,66 @@ Alle Accounts sind bereits verifiziert, es werden keine E-Mails verschickt.
 
 ---
 
+## Lokal testen (vor dem PR)
+
+Voraussetzung: Docker Desktop läuft. Alle Befehle im Ordner `JobPilot`.
+
+### Variante A – komplette App in Docker (am nächsten an Staging)
+
+```bash
+docker compose up --build -d     # --build nicht vergessen, sonst läuft alter Code!
+```
+
+| Was | Adresse |
+|---|---|
+| App | http://localhost:8080 |
+| Backend / API-Doku | http://localhost:3001/api-docs |
+| Datenbank (z. B. für DBeaver) | `localhost:5433`, DB/User/Passwort `jobpilot` |
+
+Test-Accounts werden beim Start automatisch angelegt (Passwort `jobpilot-lokal`):
+`admin@jobpilot.test` (Admin), `demo@jobpilot.test` (mit Bewerbungen), `leer@jobpilot.test`, `e2e@jobpilot.test`.
+
+E-Mails (Bestätigung, Passwort-Reset) werden ohne `RESEND_API_KEY` nicht verschickt –
+der Link steht im Backend-Log:
+
+```bash
+docker compose logs -f backend
+```
+
+Beenden: `docker compose down` (Daten bleiben erhalten) – alles löschen inkl. Datenbank:
+`docker compose down -v`.
+
+### Variante B – Entwickeln mit Hot-Reload
+
+Nur die Datenbank in Docker, Backend und Frontend direkt mit `npm run dev`:
+
+```bash
+docker compose up -d db
+cd backend  && npm run dev       # http://localhost:3001
+cd frontend && npm run dev       # http://localhost:5173
+```
+
+Dafür braucht das Backend eine `backend/.env` (Vorlage: `backend/.env.example`), mindestens:
+
+```env
+DATABASE_URL=postgresql://jobpilot:jobpilot@localhost:5433/jobpilot
+JWT_SECRET=irgendwas-langes-lokal
+FRONTEND_URL=http://localhost:5173
+FRONTEND_URLS=http://localhost:5173
+SEED_DEMO_DATA=true
+SEED_PASSWORD=mind-8-zeichen
+```
+
+Das Frontend braucht `frontend/.env.local` mit `VITE_API_URL=http://localhost:3001/api`.
+
+> Wichtig: Das Backend liest nur `backend/.env` – nicht `.env.local`.
+
+---
+
 ## Täglicher Ablauf
 
 1. Feature-Branch von `staging` (oder `main`) erstellen, entwickeln.
-2. PR öffnen → CI testet, Vercel baut eine Preview-URL → Smoke-Tests laufen gegen die Preview.
-3. In `staging` mergen → `staging.bewerbungstracker.com` aktualisiert sich → Link an andere zum Testen schicken.
-4. Passt alles: PR `staging` → `main` → Produktion.
+2. **Lokal testen** (siehe oben), z. B. `docker compose up --build -d` und durchklicken.
+3. PR öffnen → CI testet, Vercel baut eine Preview-URL → Smoke-Tests laufen gegen die Preview.
+4. In `staging` mergen → `staging.bewerbungstracker.com` aktualisiert sich → Link an andere zum Testen schicken.
+5. Passt alles: PR `staging` → `main` → Produktion.
