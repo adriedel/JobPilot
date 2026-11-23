@@ -46,7 +46,7 @@ async function register(req, res) {
       `INSERT INTO users (email, password_hash, name, email_verification_token, email_verification_token_expires)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, email, name, created_at`,
-      [email.toLowerCase(), hashedPassword, name || null, verificationToken, tokenExpires],
+      [email.toLowerCase(), hashedPassword, name || null, hashToken(verificationToken), tokenExpires],
     );
 
     const user = result.rows[0];
@@ -122,17 +122,20 @@ async function login(req, res) {
 async function verifyEmail(req, res) {
   const { token } = req.query;
 
-  if (!token) {
+  if (typeof token !== "string" || !token) {
     return res.status(400).json({ error: "Ungültiger Token" });
   }
 
   try {
+    // In der DB liegt nur der Hash – ein DB-Leak verrät so keine gültigen Links.
+    // Übergang: vor dieser Änderung verschickte Links enthalten den Klartext-Token
+    // (läuft nach 24 h aus, danach kann der zweite Vergleich entfallen).
     const result = await pool.query(
       `SELECT id FROM users
-       WHERE email_verification_token = $1
+       WHERE email_verification_token IN ($1, $2)
          AND email_verification_token_expires > NOW()
          AND email_verified_at IS NULL`,
-      [token],
+      [hashToken(token), token],
     );
 
     if (result.rows.length === 0) {
@@ -183,7 +186,7 @@ async function resendVerification(req, res) {
        SET email_verification_token = $1,
            email_verification_token_expires = $2
        WHERE id = $3`,
-      [verificationToken, tokenExpires, user.id],
+      [hashToken(verificationToken), tokenExpires, user.id],
     );
 
     try {
