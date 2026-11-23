@@ -37,6 +37,8 @@ services:
       FRONTEND_URLS: http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173
       FRONTEND_URL: http://localhost:8080
       FROM_EMAIL: info@bewerbungstracker.com
+      # Swagger-UI unter /api-docs (in Produktion standardmäßig aus)
+      API_DOCS: "true"
       # Lokale Test-Accounts (admin@jobpilot.test usw., siehe backend/seed.js)
       SEED_DEMO_DATA: "true"
       SEED_PASSWORD: jobpilot-lokal

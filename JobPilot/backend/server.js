@@ -163,7 +163,14 @@ app.get("/api", (req, res) => {
   });
 });
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// API-Doku verrät allen die komplette Angriffsfläche – in Produktion nur mit
+// API_DOCS=true (z. B. im lokalen Docker-Setup), sonst immer an.
+const apiDocsEnabled =
+  process.env.API_DOCS === "true" ||
+  (process.env.API_DOCS !== "false" && process.env.NODE_ENV !== "production");
+if (apiDocsEnabled) {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 
 
 // ==================== AUTH ROUTES (UNPROTECTED) ====================
