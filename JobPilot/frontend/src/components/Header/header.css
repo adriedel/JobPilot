@@ -54,7 +54,8 @@
   font-weight: 800;
   color: var(--text-primary);
   margin: 0;
-  line-height: 1.05;
+  /* Nicht knapper: wegen overflow:hidden würden sonst Unterlängen (g, p, y) abgeschnitten */
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -834,7 +835,6 @@
 
   .header-title {
     font-size: 1.1rem;
-    line-height: 1.1;
   }
 
   .theme-btn {
