@@ -15,6 +15,7 @@ import AngenommenIcon from "../../assets/icons/check-circle-accepted.svg?react";
 import AbgelehntIcon from "../../assets/icons/cross-circle-denied.svg?react";
 import KeineAntwortIcon from "../../assets/icons/clock-no-answer.svg?react";
 import InPlanungIcon from "../../assets/icons/plan.svg?react";
+import QuestionmarkIcon from "../../assets/icons/questionmark.svg?react";
 import ChevronDownIcon from "../../assets/icons/chevron-down.svg?react";
 
 function BewerbungsModal({
@@ -91,6 +92,7 @@ function BewerbungsModal({
     STATUS.ANGENOMMEN,
     STATUS.ABGELEHNT,
     STATUS.KEINE_ANTWORT,
+    STATUS.UNKLAR,
   ];
 
   const STATUS_ICON_COMPONENTS = {
@@ -100,6 +102,7 @@ function BewerbungsModal({
     [STATUS.ANGENOMMEN]: AngenommenIcon,
     [STATUS.ABGELEHNT]: AbgelehntIcon,
     [STATUS.KEINE_ANTWORT]: KeineAntwortIcon,
+    [STATUS.UNKLAR]: QuestionmarkIcon,
   };
 
   if (!isOpen || !formData) return null;

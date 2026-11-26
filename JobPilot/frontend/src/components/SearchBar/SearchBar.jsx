@@ -8,6 +8,7 @@ import AngenommenIcon from "../../assets/icons/check-circle-accepted.svg?react";
 import AbgelehntIcon from "../../assets/icons/cross-circle-denied.svg?react";
 import KeineAntwortIcon from "../../assets/icons/clock-no-answer.svg?react";
 import InPlanungIcon from "../../assets/icons/plan.svg?react";
+import QuestionmarkIcon from "../../assets/icons/questionmark.svg?react";
 import SearchIcon from "../../assets/icons/search.svg?react";
 import SlidersIcon from "../../assets/icons/sliders-horizontal.svg?react";
 import ChevronDownIcon from "../../assets/icons/chevron-down.svg?react";
@@ -73,6 +74,11 @@ function SearchBar({
         value: STATUS.KEINE_ANTWORT,
         label: t("status.keine_antwort"),
         icon: KeineAntwortIcon,
+      },
+      {
+        value: STATUS.UNKLAR,
+        label: t("status.unklar"),
+        icon: QuestionmarkIcon,
       },
     ],
     [t],

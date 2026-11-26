@@ -6,6 +6,7 @@ import AngenommenIcon from "../../assets/icons/check-circle-accepted.svg?react";
 import AbgelehntIcon from "../../assets/icons/cross-circle-denied.svg?react";
 import KeineAntwortIcon from "../../assets/icons/clock-no-answer.svg?react";
 import InPlanungIcon from "../../assets/icons/plan.svg?react";
+import UnklarIcon from "../../assets/icons/questionmark.svg?react";
 import GesamtIcon from "../../assets/icons/trending.svg?react";
 
 function StatCards({ stats }) {
@@ -58,6 +59,14 @@ function StatCards({ stats }) {
         </div>
         <div className="stat-number">{stats.keine_antwort ?? 0}</div>
         <div className="stat-label">{t("status.keine_antwort")}</div>
+      </section>
+
+      <section className="stat-card unklar">
+        <div className="stat-icon">
+          <UnklarIcon />
+        </div>
+        <div className="stat-number">{stats.unklar ?? 0}</div>
+        <div className="stat-label">{t("status.unklar")}</div>
       </section>
 
       <section className="stat-card gesamt">

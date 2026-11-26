@@ -24,6 +24,7 @@ import ExternalIcon from "../../assets/icons/external.svg?react";
 import BuildingIcon from "../../assets/icons/building-1-line.svg?react";
 import GehaltIcon from "../../assets/icons/cash-coin.svg?react";
 import PinIcon from "../../assets/icons/pin.svg?react";
+import QuestionmarkIcon from "../../assets/icons/questionmark.svg?react";
 
 function isHttpUrl(value) {
   if (!value) return false;
@@ -113,6 +114,7 @@ function BewerbungsCard({
     STATUS.ANGENOMMEN,
     STATUS.ABGELEHNT,
     STATUS.KEINE_ANTWORT,
+    STATUS.UNKLAR,
   ];
 
   const STATUS_ICON_COMPONENTS = {
@@ -122,6 +124,7 @@ function BewerbungsCard({
     [STATUS.ANGENOMMEN]: AngenommenIcon,
     [STATUS.ABGELEHNT]: AbgelehntIcon,
     [STATUS.KEINE_ANTWORT]: KeineAntwortIcon,
+    [STATUS.UNKLAR]: QuestionmarkIcon,
   };
 
   const CurrentStatusIcon = STATUS_ICON_COMPONENTS[bewerbung.status];
