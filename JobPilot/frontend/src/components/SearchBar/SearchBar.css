@@ -231,6 +231,10 @@
   color: var(--status-keine_antwort-accent);
 }
 
+.status-dropdown-option.status-option-unklar {
+  color: var(--status-unklar-accent);
+}
+
 .status-dropdown-option.selected {
   color: var(--text-primary);
 }

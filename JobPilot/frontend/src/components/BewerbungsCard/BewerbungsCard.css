@@ -212,6 +212,11 @@
   border: 1px solid var(--status-keine_antwort-border);
   color: var(--status-keine_antwort-accent);
 }
+.status-unklar {
+  background: var(--status-unklar-bg);
+  border: 1px solid var(--status-unklar-border);
+  color: var(--status-unklar-accent);
+}
 
 .status-in_planung {
   background: var(--status-in-planung-bg);

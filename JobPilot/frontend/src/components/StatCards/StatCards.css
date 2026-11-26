@@ -1,6 +1,6 @@
 .stats-container {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 16px;
   padding: 24px;
 }
@@ -79,6 +79,10 @@
   background: var(--status-keine_antwort-bg);
   color: var(--status-keine_antwort-accent);
 }
+.unklar .stat-icon {
+  background: var(--status-unklar-bg);
+  color: var(--status-unklar-accent);
+}
 
 /* ── Gesamt-Karte ── */
 .gesamt {
@@ -143,7 +147,7 @@
   }
 
   .gesamt {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   .stat-label {
