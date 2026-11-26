@@ -48,6 +48,23 @@ services:
       # (Bestätigungs-/Reset-Links) im Backend-Log: docker compose logs -f backend
     ports:
       - "3001:3001"
+    # Auto-Update bei Code-Änderungen: "docker compose up --watch" oder
+    # während "docker compose up" die Taste "w" drücken.
+    develop:
+      watch:
+        # Geänderte Dateien in den Container kopieren und Node neu starten (~1-2 s)
+        - action: sync+restart
+          path: ./backend
+          target: /app
+          ignore:
+            - node_modules/
+            - uploads/
+            - .env
+        # Neue/entfernte Pakete → Image neu bauen
+        - action: rebuild
+          path: ./backend/package.json
+        - action: rebuild
+          path: ./backend/package-lock.json
 
   frontend:
     build:
@@ -62,6 +79,20 @@ services:
       - backend
     ports:
       - "8080:80"
+    # Das Frontend ist ein Produktions-Build in nginx: Jede Änderung baut das
+    # Image neu (~20-40 s, danach Browser neu laden). Für schnelles Arbeiten
+    # stattdessen lokal "npm run dev" nutzen (http://localhost:5173, sofortige
+    # Aktualisierung) und nur "docker compose up --watch db backend" starten.
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend
+          ignore:
+            - node_modules/
+            - dist/
+            - tests/
+            - test-results/
+            - playwright-report/
 
 volumes:
   postgres_data:

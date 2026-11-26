@@ -139,6 +139,20 @@ Danach ist die Anwendung erreichbar unter:
 - **Backend:** `http://localhost:3001`
 - **Health-Check:** `http://localhost:3001/health`
 
+#### Entwicklung mit automatischer Aktualisierung
+
+Während `docker compose up` läuft, die Taste **`w`** drücken (oder direkt `docker compose up --build --watch`). Dann gilt:
+
+- **Backend:** Änderungen werden in den Container kopiert und der Server startet nach wenigen Sekunden neu.
+- **Frontend:** Das Image wird bei jeder Änderung neu gebaut (~20–40 s, danach Browser neu laden).
+
+Schneller fürs Frontend: nur Datenbank und Backend in Docker starten und das Frontend lokal mit Vite betreiben – Änderungen erscheinen dann sofort im Browser. Dafür muss `JobPilot/frontend/.env.local` die Zeile `VITE_API_URL=http://localhost:3001/api` enthalten, sonst spricht das Frontend mit dem Produktiv-Backend.
+
+```bash
+docker compose up --build --watch db backend
+cd frontend && npm run dev   # http://localhost:5173
+```
+
 > Für Bildupload (Cloudinary) und Transaktions-E-Mails (Resend) werden gültige API-Keys in `JobPilot/backend/.env` benötigt (siehe Abschnitt „Umgebungsvariablen" weiter unten). Ohne diese starten Login, Registrierung und CRUD-Funktionen weiterhin normal – lediglich Profilbild-Upload und der Versand von Verifizierungs-/Reset-Mails schlagen fehl.
 
 ### Einordnung des Demo-Modus im Docker-Setup
