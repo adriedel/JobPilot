@@ -78,7 +78,8 @@
     "stufe_weiter": "Next Round",
     "angenommen": "Accepted",
     "abgelehnt": "Rejected",
-    "keine_antwort": "No Response"
+    "keine_antwort": "No Response",
+    "unklar": "Unclear"
   },
   "messages": {
     "loading": "Loading...",

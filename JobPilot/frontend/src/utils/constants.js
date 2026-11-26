@@ -13,6 +13,7 @@ export const STATUS = {
   ANGENOMMEN: "angenommen",
   ABGELEHNT: "abgelehnt",
   KEINE_ANTWORT: "keine_antwort",
+  UNKLAR: "unklar",
   GESAMT: "gesamt",
 };
 
@@ -23,6 +24,7 @@ export const STATUS_LABELS = {
   [STATUS.ANGENOMMEN]: "Angenommen",
   [STATUS.ABGELEHNT]: "Abgelehnt",
   [STATUS.KEINE_ANTWORT]: "Keine Antwort",
+  [STATUS.UNKLAR]: "Unklar",
   [STATUS.GESAMT]: "Gesamt",
 };
 
@@ -34,6 +36,7 @@ export const STATUS_ORDER = [
   STATUS.ANGENOMMEN,
   STATUS.ABGELEHNT,
   STATUS.KEINE_ANTWORT,
+  STATUS.UNKLAR,
 ];
 
 export const STATUS_ICONS = {
@@ -43,6 +46,7 @@ export const STATUS_ICONS = {
   [STATUS.ANGENOMMEN]: "/check-circle-accepted.svg",
   [STATUS.ABGELEHNT]: "/cross-circle-denied.svg",
   [STATUS.KEINE_ANTWORT]: "/clock-no-answer.svg",
+  [STATUS.UNKLAR]: "/questionmark.svg",
   [STATUS.GESAMT]: "/trending.svg",
 };
 

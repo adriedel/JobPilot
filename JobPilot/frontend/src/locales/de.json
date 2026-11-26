@@ -78,7 +78,8 @@
     "stufe_weiter": "Stufe weiter",
     "angenommen": "Angenommen",
     "abgelehnt": "Abgelehnt",
-    "keine_antwort": "Keine Antwort"
+    "keine_antwort": "Keine Antwort",
+    "unklar": "Unklar"
   },
   "messages": {
     "loading": "Lädt...",
