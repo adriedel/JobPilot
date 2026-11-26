@@ -40,6 +40,7 @@ const LENA_STATS = {
     angenommen: 1,
     abgelehnt: 2,
     keine_antwort: 1,
+    unklar: 0,
     neu_30_tage: 5,
     letzte_aktivitaet: daysAgo(2),
   },

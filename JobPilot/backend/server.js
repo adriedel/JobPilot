@@ -855,6 +855,7 @@ app.get("/api/statistiken", authenticateToken, async (req, res) => {
       angenommen: 0,
       abgelehnt: 0,
       keine_antwort: 0,
+      unklar: 0,
       gesamt: 0,
     };
 
@@ -927,6 +928,7 @@ app.get(
               COUNT(b.id) FILTER (WHERE b.status = 'angenommen')::int AS angenommen,
               COUNT(b.id) FILTER (WHERE b.status = 'abgelehnt')::int AS abgelehnt,
               COUNT(b.id) FILTER (WHERE b.status = 'keine_antwort')::int AS keine_antwort,
+              COUNT(b.id) FILTER (WHERE b.status = 'unklar')::int AS unklar,
               COUNT(b.id) FILTER (
                 WHERE (CASE WHEN b.datum ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN b.datum::date END)
                       BETWEEN CURRENT_DATE - 30 AND CURRENT_DATE

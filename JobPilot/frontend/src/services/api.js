@@ -151,6 +151,7 @@ export function buildDemoStats(items) {
       angenommen: 0,
       abgelehnt: 0,
       keine_antwort: 0,
+      unklar: 0,
       gesamt: 0,
     },
   );
