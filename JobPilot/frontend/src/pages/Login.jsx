@@ -114,7 +114,10 @@ function Login() {
           <h2>Anmelden</h2>
 
           {sessionExpired && (
-            <div className="error-message session-expired-message" role="status">
+            <div
+              className="error-message session-expired-message"
+              role="status"
+            >
               Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.
             </div>
           )}
@@ -129,7 +132,13 @@ function Login() {
             <div className="error-message">
               {error}
               {unverifiedEmail && (
-                <p style={{ marginTop: "8px", marginBottom: 0, fontSize: "0.85rem" }}>
+                <p
+                  style={{
+                    marginTop: "8px",
+                    marginBottom: 0,
+                    fontSize: "0.85rem",
+                  }}
+                >
                   <Link
                     to={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
                     style={{ color: "inherit", textDecoration: "underline" }}
@@ -205,8 +214,17 @@ function Login() {
             )}
           </div>
 
-          <div style={{ textAlign: "right", marginTop: "-8px", marginBottom: "16px" }}>
-            <Link to="/forgot-password" style={{ fontSize: "0.88rem", color: "var(--blue)" }}>
+          <div
+            style={{
+              textAlign: "right",
+              marginTop: "-8px",
+              marginBottom: "16px",
+            }}
+          >
+            <Link
+              to="/forgot-password"
+              style={{ fontSize: "0.88rem", color: "var(--blue)" }}
+            >
               Passwort vergessen?
             </Link>
           </div>

@@ -47,7 +47,8 @@ function responseRate(counts) {
 
 /** Gestapelter Balken der Status-Verteilung (mit Lücken zwischen Segmenten). */
 function StatusBar({ counts, onHover }) {
-  if (!counts.gesamt) return <div className="stats-statusbar stats-statusbar--empty" />;
+  if (!counts.gesamt)
+    return <div className="stats-statusbar stats-statusbar--empty" />;
   return (
     <div
       className="stats-statusbar"
@@ -91,8 +92,11 @@ function WeeklyChart({ weekly }) {
           >
             {hovered === i && (
               <div className="stats-tooltip" role="tooltip">
-                <span className="stats-tooltip-label">Woche ab {formatShortDate(w.woche)}</span>
-                <strong>{w.anzahl}</strong> {w.anzahl === 1 ? "Bewerbung" : "Bewerbungen"}
+                <span className="stats-tooltip-label">
+                  Woche ab {formatShortDate(w.woche)}
+                </span>
+                <strong>{w.anzahl}</strong>{" "}
+                {w.anzahl === 1 ? "Bewerbung" : "Bewerbungen"}
               </div>
             )}
             <div
@@ -104,7 +108,9 @@ function WeeklyChart({ weekly }) {
       </div>
       <div className="stats-weekly-axis">
         {weekly.map((w, i) => (
-          <span key={w.woche}>{i % 2 === weekly.length % 2 ? formatShortDate(w.woche) : ""}</span>
+          <span key={w.woche}>
+            {i % 2 === weekly.length % 2 ? formatShortDate(w.woche) : ""}
+          </span>
         ))}
       </div>
     </div>
@@ -127,7 +133,10 @@ function AdminUserStatsPage() {
     let cancelled = false;
     getAdminUserStats(id)
       .then((data) => !cancelled && setResult({ id, data, error: "" }))
-      .catch((err) => !cancelled && setResult({ id, data: null, error: err.message }));
+      .catch(
+        (err) =>
+          !cancelled && setResult({ id, data: null, error: err.message }),
+      );
     return () => {
       cancelled = true;
     };
@@ -167,7 +176,9 @@ function AdminUserStatsPage() {
             </div>
             <div className="admin-stat-card">
               <span className="admin-stat-number">{u.neu_30_tage}</span>
-              <span className="admin-stat-label">Bewerbungen (letzte 30 Tage)</span>
+              <span className="admin-stat-label">
+                Bewerbungen (letzte 30 Tage)
+              </span>
             </div>
             <div className="admin-stat-card">
               <span className="admin-stat-number">
@@ -190,13 +201,25 @@ function AdminUserStatsPage() {
           <div className="stats-panels">
             <section className="stats-panel">
               <h2>Status der Bewerbungen</h2>
-              <p className="stats-panel-sub">{u.gesamt} Bewerbungen insgesamt</p>
+              <p className="stats-panel-sub">
+                {u.gesamt} Bewerbungen insgesamt
+              </p>
               <StatusBar counts={u} onHover={setHoveredStatus} />
               <ul className="stats-legend">
                 {STATUS_ORDER.map((s) => (
-                  <li key={s} className={hoveredStatus && hoveredStatus !== s ? "is-dimmed" : ""}>
-                    <span className="stats-legend-swatch" style={{ background: statusColor(s) }} />
-                    <span className="stats-legend-label">{STATUS_LABELS[s]}</span>
+                  <li
+                    key={s}
+                    className={
+                      hoveredStatus && hoveredStatus !== s ? "is-dimmed" : ""
+                    }
+                  >
+                    <span
+                      className="stats-legend-swatch"
+                      style={{ background: statusColor(s) }}
+                    />
+                    <span className="stats-legend-label">
+                      {STATUS_LABELS[s]}
+                    </span>
                     <span className="stats-legend-value">
                       {u[s]}
                       {u.gesamt > 0 && (
@@ -213,7 +236,9 @@ function AdminUserStatsPage() {
 
             <section className="stats-panel">
               <h2>Bewerbungen pro Woche</h2>
-              <p className="stats-panel-sub">Nach Bewerbungsdatum, letzte 12 Wochen</p>
+              <p className="stats-panel-sub">
+                Nach Bewerbungsdatum, letzte 12 Wochen
+              </p>
               <WeeklyChart weekly={data.weekly} />
             </section>
           </div>
@@ -223,7 +248,9 @@ function AdminUserStatsPage() {
           </div>
 
           {data.bewerbungen.length === 0 ? (
-            <div className="admin-loading">Dieser User hat noch keine Bewerbungen.</div>
+            <div className="admin-loading">
+              Dieser User hat noch keine Bewerbungen.
+            </div>
           ) : (
             <div className="admin-table-wrapper">
               <table className="admin-table stats-table">
@@ -256,9 +283,10 @@ function AdminUserStatsPage() {
           )}
 
           <p className="stats-footnote">
-            Rückmeldequote = Antworten (Stufe weiter, Angenommen, Abgelehnt) im Verhältnis zu
-            allen abgeschickten Bewerbungen (ohne „In Planung“). Letzte Aktivität = Bewerbung
-            angelegt, geändert oder Verlauf ergänzt.
+            Rückmeldequote = Antworten (Stufe weiter, Angenommen, Abgelehnt) im
+            Verhältnis zu allen abgeschickten Bewerbungen (ohne „In Planung“).
+            Letzte Aktivität = Bewerbung angelegt, geändert oder Verlauf
+            ergänzt.
           </p>
         </>
       )}

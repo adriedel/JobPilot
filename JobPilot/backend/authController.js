@@ -24,7 +24,12 @@ const REGISTER_RESPONSE = {
 async function register(req, res) {
   const { email, password, name } = req.body;
 
-  if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    !email ||
+    !password
+  ) {
     return res
       .status(400)
       .json({ message: "Email und Passwort sind erforderlich" });
@@ -68,16 +73,27 @@ async function register(req, res) {
           await sendVerificationEmail(user.email, user.name, verificationToken);
         }
       } catch (emailErr) {
-        console.error("Fehler beim Senden der E-Mail für bestehenden Account:", emailErr);
+        console.error(
+          "Fehler beim Senden der E-Mail für bestehenden Account:",
+          emailErr,
+        );
       }
-      return res.status(201).json({ ...REGISTER_RESPONSE, email: normalizedEmail });
+      return res
+        .status(201)
+        .json({ ...REGISTER_RESPONSE, email: normalizedEmail });
     }
 
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, name, email_verification_token, email_verification_token_expires)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, email, name, created_at`,
-      [normalizedEmail, hashedPassword, name || null, hashToken(verificationToken), tokenExpires],
+      [
+        normalizedEmail,
+        hashedPassword,
+        name || null,
+        hashToken(verificationToken),
+        tokenExpires,
+      ],
     );
 
     const user = result.rows[0];
@@ -98,7 +114,12 @@ async function register(req, res) {
 async function login(req, res) {
   const { email, password } = req.body;
 
-  if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    !email ||
+    !password
+  ) {
     return res
       .status(400)
       .json({ error: "Email und Passwort sind erforderlich" });
@@ -168,7 +189,9 @@ async function verifyEmail(req, res) {
     );
 
     if (result.rows.length === 0) {
-      return res.status(400).json({ error: "Ungültiger oder abgelaufener Verifizierungslink" });
+      return res
+        .status(400)
+        .json({ error: "Ungültiger oder abgelaufener Verifizierungslink" });
     }
 
     await pool.query(
@@ -203,7 +226,10 @@ async function resendVerification(req, res) {
 
     // Immer Success zurückgeben (verhindert E-Mail-Enumeration)
     if (result.rows.length === 0 || result.rows[0].email_verified_at) {
-      return res.json({ message: "Falls ein unbestätigter Account existiert, wurde eine neue E-Mail gesendet." });
+      return res.json({
+        message:
+          "Falls ein unbestätigter Account existiert, wurde eine neue E-Mail gesendet.",
+      });
     }
 
     const user = result.rows[0];
@@ -224,7 +250,10 @@ async function resendVerification(req, res) {
       console.error("Fehler beim Senden:", emailErr);
     }
 
-    res.json({ message: "Falls ein unbestätigter Account existiert, wurde eine neue E-Mail gesendet." });
+    res.json({
+      message:
+        "Falls ein unbestätigter Account existiert, wurde eine neue E-Mail gesendet.",
+    });
   } catch (err) {
     console.error("Resend verification error:", err);
     res.status(500).json({ error: "Interner Serverfehler" });
@@ -238,7 +267,10 @@ async function forgotPassword(req, res) {
     return res.status(400).json({ error: "E-Mail-Adresse ist erforderlich" });
   }
 
-  const genericResponse = { message: "Falls ein Account mit dieser E-Mail existiert, wurde ein Zurücksetzen-Link gesendet." };
+  const genericResponse = {
+    message:
+      "Falls ein Account mit dieser E-Mail existiert, wurde ein Zurücksetzen-Link gesendet.",
+  };
 
   try {
     const result = await pool.query(
@@ -255,7 +287,9 @@ async function forgotPassword(req, res) {
     const tokenHash = hashToken(resetToken);
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-    await pool.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [user.id]);
+    await pool.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [
+      user.id,
+    ]);
     await pool.query(
       "INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)",
       [user.id, tokenHash, expiresAt],
@@ -277,12 +311,21 @@ async function forgotPassword(req, res) {
 async function resetPassword(req, res) {
   const { token, password } = req.body;
 
-  if (typeof token !== "string" || typeof password !== "string" || !token || !password) {
-    return res.status(400).json({ error: "Token und Passwort sind erforderlich" });
+  if (
+    typeof token !== "string" ||
+    typeof password !== "string" ||
+    !token ||
+    !password
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Token und Passwort sind erforderlich" });
   }
 
   if (password.length < 8) {
-    return res.status(400).json({ error: "Das Passwort muss mindestens 8 Zeichen lang sein" });
+    return res
+      .status(400)
+      .json({ error: "Das Passwort muss mindestens 8 Zeichen lang sein" });
   }
 
   try {
@@ -294,7 +337,9 @@ async function resetPassword(req, res) {
     );
 
     if (result.rows.length === 0) {
-      return res.status(400).json({ error: "Ungültiger oder abgelaufener Zurücksetzen-Link" });
+      return res
+        .status(400)
+        .json({ error: "Ungültiger oder abgelaufener Zurücksetzen-Link" });
     }
 
     const userId = result.rows[0].user_id;
@@ -308,7 +353,9 @@ async function resetPassword(req, res) {
        WHERE id = $2`,
       [hashedPassword, userId],
     );
-    await pool.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [
+      userId,
+    ]);
 
     res.json({ message: "Passwort erfolgreich zurückgesetzt" });
   } catch (err) {
@@ -330,7 +377,11 @@ async function getCurrentUser(req, res) {
 
     const user = result.rows[0];
     if (user.avatar_config && typeof user.avatar_config === "string") {
-      try { user.avatar_config = JSON.parse(user.avatar_config); } catch { user.avatar_config = null; }
+      try {
+        user.avatar_config = JSON.parse(user.avatar_config);
+      } catch {
+        user.avatar_config = null;
+      }
     }
     res.json({ user });
   } catch (err) {

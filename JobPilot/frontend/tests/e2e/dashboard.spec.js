@@ -19,11 +19,15 @@ test.describe("Dashboard @demo", () => {
 
   test("zeigt die Demo-Bewerbungen an", async ({ page }) => {
     await expect(page.locator(".header-title")).toHaveText("Bewerbungstracker");
-    await expect(cards(page).filter({ hasText: "Frontend Developer" })).toContainText("SAP");
-    await expect(cards(page).filter({ hasText: "UX Designer" })).toContainText("adidas");
-    await expect(cards(page).filter({ hasText: "Product Manager Intern" })).toContainText(
-      "BMW Group",
+    await expect(
+      cards(page).filter({ hasText: "Frontend Developer" }),
+    ).toContainText("SAP");
+    await expect(cards(page).filter({ hasText: "UX Designer" })).toContainText(
+      "adidas",
     );
+    await expect(
+      cards(page).filter({ hasText: "Product Manager Intern" }),
+    ).toContainText("BMW Group");
   });
 
   test("Suche filtert nach Firma, Position und Standort", async ({ page }) => {
@@ -62,10 +66,18 @@ test.describe("Dashboard @demo", () => {
     await page.getByRole("option", { name: "Firma" }).click();
 
     // Standard-Richtung ist absteigend → SAP, BMW Group, adidas
-    await expect(page.locator(".card-firma")).toHaveText(["SAP", "BMW Group", "adidas"]);
+    await expect(page.locator(".card-firma")).toHaveText([
+      "SAP",
+      "BMW Group",
+      "adidas",
+    ]);
 
     await page.locator(".sort-direction-toggle").click();
-    await expect(page.locator(".card-firma")).toHaveText(["adidas", "BMW Group", "SAP"]);
+    await expect(page.locator(".card-firma")).toHaveText([
+      "adidas",
+      "BMW Group",
+      "SAP",
+    ]);
   });
 
   test("neue Bewerbung anlegen", async ({ page }) => {
@@ -95,7 +107,9 @@ test.describe("Dashboard @demo", () => {
     await position.fill("Senior UX Designer");
     await page.locator(".modal .btn-submit").click();
 
-    await expect(cards(page).filter({ hasText: "Senior UX Designer" })).toHaveCount(1);
+    await expect(
+      cards(page).filter({ hasText: "Senior UX Designer" }),
+    ).toHaveCount(1);
   });
 
   test("Status über das Kartenmenü ändern", async ({ page }) => {
@@ -115,12 +129,16 @@ test.describe("Dashboard @demo", () => {
     // Nur Notiz, sonst nichts passiert → kein Verlauf-Link
     await expect(card.locator(".card-history-link")).toHaveCount(0);
     // Anfangs-Notiz ohne gespeicherten Zeitstempel → Bewerbungsdatum
-    await expect(card.locator(".card-notes-wrap").first()).toContainText("15.03.2026 · Anfangsnotiz");
+    await expect(card.locator(".card-notes-wrap").first()).toContainText(
+      "15.03.2026 · Anfangsnotiz",
+    );
 
     await openCardMenu(page, "Frontend Developer");
     await page.locator(".dropdown-item", { hasText: "Stufe weiter" }).click();
     // Status-Eintrag + Notiz
-    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
+    await expect(card.locator(".card-history-link")).toHaveText(
+      "Verlauf · 2 Einträge",
+    );
     await expect(card.locator(".card-latest-entry")).toContainText(
       "Status geändert: Beworben → Stufe weiter",
     );
@@ -135,19 +153,25 @@ test.describe("Dashboard @demo", () => {
     await expect(entries.last()).toContainText("Portfolio bereits verschickt");
 
     await panel.getByRole("radio", { name: "Gespräch" }).click();
-    await panel.locator("textarea").fill("Telefonat mit HR, Rückmeldung bis Freitag");
+    await panel
+      .locator("textarea")
+      .fill("Telefonat mit HR, Rückmeldung bis Freitag");
     await panel.getByRole("button", { name: "Speichern" }).click();
 
     await expect(entries).toHaveCount(3);
     await expect(entries.first()).toContainText("15.04.2026");
-    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 3 Einträge");
+    await expect(card.locator(".card-history-link")).toHaveText(
+      "Verlauf · 3 Einträge",
+    );
 
     await page.keyboard.press("Escape");
     await expect(panel).toBeHidden();
 
     // Bleibt nach dem Neuladen erhalten
     await page.reload();
-    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 3 Einträge");
+    await expect(card.locator(".card-history-link")).toHaveText(
+      "Verlauf · 3 Einträge",
+    );
   });
 
   test("erstes Update über das Kartenmenü hinzufügen", async ({ page }) => {
@@ -155,7 +179,9 @@ test.describe("Dashboard @demo", () => {
     await expect(card.locator(".card-history-link")).toHaveCount(0);
 
     await openCardMenu(page, "Product Manager Intern");
-    await page.locator(".dropdown-item", { hasText: "Update hinzufügen" }).click();
+    await page
+      .locator(".dropdown-item", { hasText: "Update hinzufügen" })
+      .click();
 
     const panel = page.locator(".verlauf-panel");
     await panel.locator("textarea").fill("Anschreiben abgeschickt");
@@ -163,14 +189,17 @@ test.describe("Dashboard @demo", () => {
 
     await expect(panel.locator(".verlauf-entry")).toHaveCount(2);
     await page.keyboard.press("Escape");
-    await expect(card.locator(".card-history-link")).toHaveText("Verlauf · 2 Einträge");
+    await expect(card.locator(".card-history-link")).toHaveText(
+      "Verlauf · 2 Einträge",
+    );
   });
 
   test("eigener Update-Grund: einmalig, für diese oder alle Bewerbungen", async ({
     page,
   }) => {
     const panel = page.locator(".verlauf-panel");
-    const reasonChip = (label) => panel.locator(".verlauf-type", { hasText: label });
+    const reasonChip = (label) =>
+      panel.locator(".verlauf-type", { hasText: label });
 
     const addReason = async (label, scope) => {
       await panel.getByRole("button", { name: "Eigener Grund" }).click();
@@ -184,13 +213,20 @@ test.describe("Dashboard @demo", () => {
     };
 
     await openCardMenu(page, "Frontend Developer");
-    await page.locator(".dropdown-item", { hasText: "Update hinzufügen" }).click();
+    await page
+      .locator(".dropdown-item", { hasText: "Update hinzufügen" })
+      .click();
 
     // Einmalig: wird benutzt und verschwindet danach wieder
     await addReason("Messe-Gespräch", "Nur dieses Mal");
-    await expect(reasonChip("Messe-Gespräch")).toHaveAttribute("aria-checked", "true");
+    await expect(reasonChip("Messe-Gespräch")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
     await saveUpdate("Am Stand kennengelernt");
-    await expect(panel.locator(".verlauf-entry").first()).toContainText("Messe-Gespräch");
+    await expect(panel.locator(".verlauf-entry").first()).toContainText(
+      "Messe-Gespräch",
+    );
     await expect(reasonChip("Messe-Gespräch")).toHaveCount(0);
 
     // Für diese Bewerbung und für alle Bewerbungen speichern
@@ -203,29 +239,40 @@ test.describe("Dashboard @demo", () => {
     // Andere Bewerbung: nur der globale Grund ist da
     await page.keyboard.press("Escape");
     await openCardMenu(page, "UX Designer");
-    await page.locator(".dropdown-item", { hasText: "Update hinzufügen" }).click();
+    await page
+      .locator(".dropdown-item", { hasText: "Update hinzufügen" })
+      .click();
     await expect(panel).toContainText("UX Designer");
     await expect(reasonChip("Assessment Center")).toBeVisible();
     await expect(reasonChip("Probearbeiten")).toHaveCount(0);
 
     // Globalen Grund wieder entfernen
-    await panel.getByRole("button", { name: "Grund entfernen: Assessment Center" }).click();
+    await panel
+      .getByRole("button", { name: "Grund entfernen: Assessment Center" })
+      .click();
     await expect(reasonChip("Assessment Center")).toHaveCount(0);
 
     // Karte zeigt den eigenen Grund als Typ des letzten Eintrags
     await page.keyboard.press("Escape");
     await expect(
-      cards(page).filter({ hasText: "Frontend Developer" }).locator(".card-latest-entry"),
+      cards(page)
+        .filter({ hasText: "Frontend Developer" })
+        .locator(".card-latest-entry"),
     ).toContainText("Probearbeiten");
   });
 
   test("Notiz zeigt das Datum der letzten Änderung", async ({ page }) => {
     await openCardMenu(page, "UX Designer");
     await page.getByRole("button", { name: "Bearbeiten" }).click();
-    await page.locator('.modal textarea[name="notizen"]').fill("Zweites Gespräch am Montag");
+    await page
+      .locator('.modal textarea[name="notizen"]')
+      .fill("Zweites Gespräch am Montag");
     await page.locator(".modal .btn-submit").click();
 
-    const notes = cards(page).filter({ hasText: "UX Designer" }).locator(".card-notes-wrap").first();
+    const notes = cards(page)
+      .filter({ hasText: "UX Designer" })
+      .locator(".card-notes-wrap")
+      .first();
     await expect(notes).toContainText("15.04.2026 · Anfangsnotiz");
     await expect(notes).toContainText("Zweites Gespräch am Montag");
   });
@@ -238,13 +285,19 @@ test.describe("Dashboard @demo", () => {
     await page.locator(".delete-confirm-button").click();
 
     await expect(cards(page)).toHaveCount(2);
-    await expect(cards(page).filter({ hasText: "Product Manager Intern" })).toHaveCount(0);
+    await expect(
+      cards(page).filter({ hasText: "Product Manager Intern" }),
+    ).toHaveCount(0);
   });
 
   test("Sprache auf Englisch umstellen", async ({ page }) => {
     await page.locator(".language-toggle").click();
-    await expect(page.locator(".header-title")).toHaveText("Application Tracker");
-    await expect(page.getByPlaceholder("Search company or position...")).toBeVisible();
+    await expect(page.locator(".header-title")).toHaveText(
+      "Application Tracker",
+    );
+    await expect(
+      page.getByPlaceholder("Search company or position..."),
+    ).toBeVisible();
   });
 
   test("Dark Mode umschalten", async ({ page }) => {
@@ -252,7 +305,10 @@ test.describe("Dashboard @demo", () => {
     await expect(html).not.toHaveClass(/dark-mode/);
 
     const darkButton = page.getByRole("button", { name: "Dark mode" });
-    test.skip(!(await darkButton.isVisible()), "Theme-Umschalter ist in dieser Ansicht ausgeblendet");
+    test.skip(
+      !(await darkButton.isVisible()),
+      "Theme-Umschalter ist in dieser Ansicht ausgeblendet",
+    );
 
     await darkButton.click();
     await expect(html).toHaveClass(/dark-mode/);

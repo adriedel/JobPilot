@@ -8,9 +8,17 @@ import { test, expect } from "./fixtures";
  * denn im Demo-Modus gibt es keinen Login. Die API wird im Browser gemockt,
  * ein echtes Backend ist nicht nötig.
  */
-test.skip(!process.env.PLAYWRIGHT_BASE_URL, "Nur ohne Demo-Modus (PLAYWRIGHT_BASE_URL)");
+test.skip(
+  !process.env.PLAYWRIGHT_BASE_URL,
+  "Nur ohne Demo-Modus (PLAYWRIGHT_BASE_URL)",
+);
 
-const USER = { id: 1, email: "e2e@jobpilot.test", name: "E2E Test", role: "user" };
+const USER = {
+  id: 1,
+  email: "e2e@jobpilot.test",
+  name: "E2E Test",
+  role: "user",
+};
 
 /** Baut ein (unsigniertes) JWT mit Ablaufzeit – das Frontend liest nur `exp`. */
 function fakeToken(expSecondsFromNow) {
@@ -39,12 +47,18 @@ async function mockApi(page, { expired }) {
       return route.fulfill({
         status: 401,
         contentType: "application/json",
-        body: JSON.stringify({ error: "Token abgelaufen - bitte neu einloggen" }),
+        body: JSON.stringify({
+          error: "Token abgelaufen - bitte neu einloggen",
+        }),
       });
     }
     const url = route.request().url();
     const body = url.includes("statistiken") ? { gesamt: 0 } : [];
-    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(body),
+    });
   });
 }
 
@@ -56,7 +70,9 @@ test.describe("Session-Ablauf @smoke", () => {
     await expect(page.locator(".header-title")).toBeVisible();
     await page.waitForTimeout(500);
     await expect(page).toHaveURL(/\/dashboard$/);
-    expect(await page.evaluate(() => localStorage.getItem("token"))).not.toBeNull();
+    expect(
+      await page.evaluate(() => localStorage.getItem("token")),
+    ).not.toBeNull();
   });
 
   test("abgelaufenes Token beim Öffnen → Login", async ({ page }) => {
@@ -86,17 +102,23 @@ test.describe("Session-Ablauf @smoke", () => {
       return route.fulfill({
         status: isStats ? 403 : 401,
         contentType: "application/json",
-        body: JSON.stringify({ error: isStats ? "Kein Zugriff" : "Das aktuelle Passwort ist falsch" }),
+        body: JSON.stringify({
+          error: isStats ? "Kein Zugriff" : "Das aktuelle Passwort ist falsch",
+        }),
       });
     });
     await page.goto("/dashboard");
     await expect(page.locator(".header-title")).toBeVisible();
     await page.waitForTimeout(500);
     await expect(page).toHaveURL(/\/dashboard$/);
-    expect(await page.evaluate(() => localStorage.getItem("token"))).not.toBeNull();
+    expect(
+      await page.evaluate(() => localStorage.getItem("token")),
+    ).not.toBeNull();
   });
 
-  test("Token läuft ab, während die App offen ist → Login", async ({ page }) => {
+  test("Token läuft ab, während die App offen ist → Login", async ({
+    page,
+  }) => {
     await page.clock.install();
     await loginWith(page, fakeToken(120));
     await mockApi(page, { expired: false });

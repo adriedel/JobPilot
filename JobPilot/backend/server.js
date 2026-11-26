@@ -42,7 +42,9 @@ const uploadToCloudinary = (buffer, publicId) =>
         folder: "avatars",
         overwrite: true,
         resource_type: "image",
-        transformation: [{ width: 300, height: 300, crop: "fill", gravity: "face" }],
+        transformation: [
+          { width: 300, height: 300, crop: "fill", gravity: "face" },
+        ],
       },
       (error, result) => (error ? reject(error) : resolve(result)),
     );
@@ -68,7 +70,11 @@ function serverError(res, err) {
 function parseUserRow(row) {
   if (!row) return row;
   if (row.avatar_config && typeof row.avatar_config === "string") {
-    try { row.avatar_config = JSON.parse(row.avatar_config); } catch { row.avatar_config = null; }
+    try {
+      row.avatar_config = JSON.parse(row.avatar_config);
+    } catch {
+      row.avatar_config = null;
+    }
   }
   return row;
 }
@@ -172,7 +178,6 @@ if (apiDocsEnabled) {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
 
-
 // ==================== AUTH ROUTES (UNPROTECTED) ====================
 
 // Register
@@ -249,98 +254,133 @@ app.delete("/api/auth/profile/image", authenticateToken, async (req, res) => {
 });
 
 // Change email (PROTECTED)
-app.put("/api/auth/profile/email", authenticateToken, tokenLimiter, async (req, res) => {
-  const { email, currentPassword } = req.body;
-  if (typeof email !== "string" || !email.trim()) {
-    return res.status(400).json({ error: "E-Mail ist erforderlich" });
-  }
-  // Ohne Passwort-Abfrage könnte ein gestohlenes Token die E-Mail umstellen und
-  // über "Passwort vergessen" den Account dauerhaft übernehmen.
-  if (typeof currentPassword !== "string" || !currentPassword) {
-    return res.status(400).json({ error: "Aktuelles Passwort ist erforderlich" });
-  }
-  const newEmail = email.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-    return res.status(400).json({ error: "Ungültige E-Mail-Adresse" });
-  }
-  try {
-    const current = await pool.query("SELECT password_hash FROM users WHERE id = $1", [
-      req.userId,
-    ]);
-    if (current.rows.length === 0) {
-      return res.status(404).json({ error: "User nicht gefunden" });
+app.put(
+  "/api/auth/profile/email",
+  authenticateToken,
+  tokenLimiter,
+  async (req, res) => {
+    const { email, currentPassword } = req.body;
+    if (typeof email !== "string" || !email.trim()) {
+      return res.status(400).json({ error: "E-Mail ist erforderlich" });
     }
-    if (!(await bcrypt.compare(currentPassword, current.rows[0].password_hash))) {
-      return res.status(401).json({ error: "Das aktuelle Passwort ist falsch" });
+    // Ohne Passwort-Abfrage könnte ein gestohlenes Token die E-Mail umstellen und
+    // über "Passwort vergessen" den Account dauerhaft übernehmen.
+    if (typeof currentPassword !== "string" || !currentPassword) {
+      return res
+        .status(400)
+        .json({ error: "Aktuelles Passwort ist erforderlich" });
     }
-    const existing = await pool.query(
-      "SELECT id FROM users WHERE email = $1 AND id != $2",
-      [newEmail, req.userId],
-    );
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ error: "Diese E-Mail-Adresse ist bereits vergeben" });
+    const newEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return res.status(400).json({ error: "Ungültige E-Mail-Adresse" });
     }
-    const result = await pool.query(
-      "UPDATE users SET email = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, email, name, profile_image_url, avatar_config, created_at",
-      [newEmail, req.userId],
-    );
-    res.json({ user: parseUserRow(result.rows[0]) });
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+    try {
+      const current = await pool.query(
+        "SELECT password_hash FROM users WHERE id = $1",
+        [req.userId],
+      );
+      if (current.rows.length === 0) {
+        return res.status(404).json({ error: "User nicht gefunden" });
+      }
+      if (
+        !(await bcrypt.compare(currentPassword, current.rows[0].password_hash))
+      ) {
+        return res
+          .status(401)
+          .json({ error: "Das aktuelle Passwort ist falsch" });
+      }
+      const existing = await pool.query(
+        "SELECT id FROM users WHERE email = $1 AND id != $2",
+        [newEmail, req.userId],
+      );
+      if (existing.rows.length > 0) {
+        return res
+          .status(400)
+          .json({ error: "Diese E-Mail-Adresse ist bereits vergeben" });
+      }
+      const result = await pool.query(
+        "UPDATE users SET email = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, email, name, profile_image_url, avatar_config, created_at",
+        [newEmail, req.userId],
+      );
+      res.json({ user: parseUserRow(result.rows[0]) });
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // Change password (PROTECTED)
-app.put("/api/auth/profile/password", authenticateToken, tokenLimiter, async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ error: "Aktuelles und neues Passwort sind erforderlich" });
-  }
-  if (newPassword.length < 8) {
-    return res.status(400).json({ error: "Das neue Passwort muss mindestens 8 Zeichen lang sein" });
-  }
-  try {
-    const result = await pool.query(
-      "SELECT password_hash FROM users WHERE id = $1",
-      [req.userId],
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "User nicht gefunden" });
+app.put(
+  "/api/auth/profile/password",
+  authenticateToken,
+  tokenLimiter,
+  async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ error: "Aktuelles und neues Passwort sind erforderlich" });
     }
-    const isValid = await bcrypt.compare(currentPassword, result.rows[0].password_hash);
-    if (!isValid) {
-      return res.status(401).json({ error: "Das aktuelle Passwort ist falsch" });
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        error: "Das neue Passwort muss mindestens 8 Zeichen lang sein",
+      });
     }
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(newPassword, salt);
-    // Alle anderen Sitzungen beenden; diese hier bekommt ein frisches Token
-    const updated = await pool.query(
-      `UPDATE users SET password_hash = $1, token_version = token_version + 1,
+    try {
+      const result = await pool.query(
+        "SELECT password_hash FROM users WHERE id = $1",
+        [req.userId],
+      );
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "User nicht gefunden" });
+      }
+      const isValid = await bcrypt.compare(
+        currentPassword,
+        result.rows[0].password_hash,
+      );
+      if (!isValid) {
+        return res
+          .status(401)
+          .json({ error: "Das aktuelle Passwort ist falsch" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      const hashed = await bcrypt.hash(newPassword, salt);
+      // Alle anderen Sitzungen beenden; diese hier bekommt ein frisches Token
+      const updated = await pool.query(
+        `UPDATE users SET password_hash = $1, token_version = token_version + 1,
                         updated_at = CURRENT_TIMESTAMP
        WHERE id = $2
        RETURNING id, email, token_version`,
-      [hashed, req.userId],
-    );
-    res.json({ message: "Passwort erfolgreich geändert", token: signToken(updated.rows[0]) });
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+        [hashed, req.userId],
+      );
+      res.json({
+        message: "Passwort erfolgreich geändert",
+        token: signToken(updated.rows[0]),
+      });
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // Update avatar config (PROTECTED)
-app.put("/api/auth/profile/avatar-config", authenticateToken, async (req, res) => {
-  const { avatar_config } = req.body;
-  try {
-    const configStr = avatar_config ? JSON.stringify(avatar_config) : null;
-    const result = await pool.query(
-      "UPDATE users SET avatar_config = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, email, name, profile_image_url, avatar_config, created_at",
-      [configStr, req.userId],
-    );
-    res.json({ user: parseUserRow(result.rows[0]) });
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+app.put(
+  "/api/auth/profile/avatar-config",
+  authenticateToken,
+  async (req, res) => {
+    const { avatar_config } = req.body;
+    try {
+      const configStr = avatar_config ? JSON.stringify(avatar_config) : null;
+      const result = await pool.query(
+        "UPDATE users SET avatar_config = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, email, name, profile_image_url, avatar_config, created_at",
+        [configStr, req.userId],
+      );
+      res.json({ user: parseUserRow(result.rows[0]) });
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // ==================== BEWERBUNGEN ROUTES (PROTECTED) ====================
 
@@ -606,68 +646,84 @@ app.get("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => {
 });
 
 // POST neuen Verlaufseintrag (Notiz, Gespräch, Mail)
-app.post("/api/bewerbungen/:id/updates", authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  const { typ, datum } = req.body;
-  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+app.post(
+  "/api/bewerbungen/:id/updates",
+  authenticateToken,
+  async (req, res) => {
+    const { id } = req.params;
+    const { typ, datum } = req.body;
+    const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
 
-  if (!MANUAL_UPDATE_TYPES.includes(typ)) {
-    return res
-      .status(400)
-      .json({ error: `Typ muss einer von ${MANUAL_UPDATE_TYPES.join(", ")} sein` });
-  }
-  if (!text) {
-    return res.status(400).json({ error: "Text ist erforderlich" });
-  }
-  const typLabel = typ === "custom" ? normalizeTypLabel(req.body.typ_label) : null;
-  if (typ === "custom" && !typLabel) {
-    return res.status(400).json({
-      error: `Eigener Grund (typ_label) ist erforderlich, max. ${MAX_TYP_LABEL_LENGTH} Zeichen`,
-    });
-  }
-  if (datum !== undefined && datum !== null && datum !== "" && !isIsoDate(datum)) {
-    return res.status(400).json({ error: "Datum muss im Format YYYY-MM-DD sein" });
-  }
-
-  try {
-    if (!(await findOwnBewerbung(pool, id, req.userId))) {
-      return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+    if (!MANUAL_UPDATE_TYPES.includes(typ)) {
+      return res.status(400).json({
+        error: `Typ muss einer von ${MANUAL_UPDATE_TYPES.join(", ")} sein`,
+      });
+    }
+    if (!text) {
+      return res.status(400).json({ error: "Text ist erforderlich" });
+    }
+    const typLabel =
+      typ === "custom" ? normalizeTypLabel(req.body.typ_label) : null;
+    if (typ === "custom" && !typLabel) {
+      return res.status(400).json({
+        error: `Eigener Grund (typ_label) ist erforderlich, max. ${MAX_TYP_LABEL_LENGTH} Zeichen`,
+      });
+    }
+    if (
+      datum !== undefined &&
+      datum !== null &&
+      datum !== "" &&
+      !isIsoDate(datum)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Datum muss im Format YYYY-MM-DD sein" });
     }
 
-    const result = await pool.query(
-      `INSERT INTO bewerbung_updates AS u (bewerbung_id, typ, typ_label, text, datum)
+    try {
+      if (!(await findOwnBewerbung(pool, id, req.userId))) {
+        return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+      }
+
+      const result = await pool.query(
+        `INSERT INTO bewerbung_updates AS u (bewerbung_id, typ, typ_label, text, datum)
        VALUES ($1, $2, $3, $4, COALESCE($5::date, CURRENT_DATE))
        RETURNING ${UPDATE_SELECT_FIELDS}`,
-      [id, typ, typLabel, text, datum || null],
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+        [id, typ, typLabel, text, datum || null],
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // GET gespeicherte eigene Update-Gründe für eine Bewerbung
 // (alle globalen + die nur für diese Bewerbung)
-app.get("/api/bewerbungen/:id/update-typen", authenticateToken, async (req, res) => {
-  const { id } = req.params;
+app.get(
+  "/api/bewerbungen/:id/update-typen",
+  authenticateToken,
+  async (req, res) => {
+    const { id } = req.params;
 
-  try {
-    if (!(await findOwnBewerbung(pool, id, req.userId))) {
-      return res.status(404).json({ error: "Bewerbung nicht gefunden" });
-    }
+    try {
+      if (!(await findOwnBewerbung(pool, id, req.userId))) {
+        return res.status(404).json({ error: "Bewerbung nicht gefunden" });
+      }
 
-    const result = await pool.query(
-      `SELECT id, label, bewerbung_id
+      const result = await pool.query(
+        `SELECT id, label, bewerbung_id
        FROM update_typen
        WHERE user_id = $1 AND (bewerbung_id IS NULL OR bewerbung_id = $2)
        ORDER BY created_at, id`,
-      [req.userId, id],
-    );
-    res.json(result.rows);
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+        [req.userId, id],
+      );
+      res.json(result.rows);
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // POST eigenen Update-Grund speichern
 // bewerbung_id gesetzt → nur für diese Bewerbung, sonst für alle
@@ -676,13 +732,16 @@ app.post("/api/update-typen", authenticateToken, async (req, res) => {
   const bewerbungId = req.body.bewerbung_id ?? null;
 
   if (!label) {
-    return res
-      .status(400)
-      .json({ error: `Label ist erforderlich, max. ${MAX_TYP_LABEL_LENGTH} Zeichen` });
+    return res.status(400).json({
+      error: `Label ist erforderlich, max. ${MAX_TYP_LABEL_LENGTH} Zeichen`,
+    });
   }
 
   try {
-    if (bewerbungId !== null && !(await findOwnBewerbung(pool, bewerbungId, req.userId))) {
+    if (
+      bewerbungId !== null &&
+      !(await findOwnBewerbung(pool, bewerbungId, req.userId))
+    ) {
       return res.status(404).json({ error: "Bewerbung nicht gefunden" });
     }
 
@@ -814,7 +873,9 @@ app.get("/api/statistiken", authenticateToken, async (req, res) => {
 
 async function requireAdmin(req, res, next) {
   try {
-    const result = await pool.query("SELECT role FROM users WHERE id = $1", [req.userId]);
+    const result = await pool.query("SELECT role FROM users WHERE id = $1", [
+      req.userId,
+    ]);
     if (!result.rows[0] || result.rows[0].role !== "admin") {
       return res.status(403).json({ error: "Kein Zugriff" });
     }
@@ -825,9 +886,13 @@ async function requireAdmin(req, res, next) {
 }
 
 // GET alle User mit Bewerbungsanzahl
-app.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const result = await pool.query(`
+app.get(
+  "/api/admin/users",
+  authenticateToken,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
       SELECT u.id, u.email, u.name, u.role, u.created_at, u.email_verified_at,
              COUNT(b.id)::int AS bewerbungen_count
       FROM users u
@@ -835,21 +900,26 @@ app.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) =>
       GROUP BY u.id
       ORDER BY u.created_at DESC
     `);
-    res.json({ users: result.rows });
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+      res.json({ users: result.rows });
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // GET Statistik eines einzelnen Users (nur Zahlen + Firma/Stelle/Status)
-app.get("/api/admin/users/:id/stats", authenticateToken, requireAdmin, async (req, res) => {
-  const targetId = parseInt(req.params.id);
-  if (!Number.isInteger(targetId)) {
-    return res.status(400).json({ error: "Ungültige User-ID" });
-  }
-  try {
-    const userResult = await pool.query(
-      `SELECT u.id, u.email, u.name, u.role, u.created_at,
+app.get(
+  "/api/admin/users/:id/stats",
+  authenticateToken,
+  requireAdmin,
+  async (req, res) => {
+    const targetId = parseInt(req.params.id);
+    if (!Number.isInteger(targetId)) {
+      return res.status(400).json({ error: "Ungültige User-ID" });
+    }
+    try {
+      const userResult = await pool.query(
+        `SELECT u.id, u.email, u.name, u.role, u.created_at,
               COUNT(b.id)::int AS gesamt,
               COUNT(b.id) FILTER (WHERE b.status = 'in_planung')::int AS in_planung,
               COUNT(b.id) FILTER (WHERE b.status = 'beworben')::int AS beworben,
@@ -873,14 +943,15 @@ app.get("/api/admin/users/:id/stats", authenticateToken, requireAdmin, async (re
        LEFT JOIN bewerbungen b ON b.user_id = u.id
        WHERE u.id = $1
        GROUP BY u.id`,
-      [targetId],
-    );
-    if (userResult.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
+        [targetId],
+      );
+      if (userResult.rowCount === 0)
+        return res.status(404).json({ error: "User nicht gefunden" });
 
-    // Bewerbungen pro Woche nach Bewerbungsdatum (letzte 12 Wochen).
-    // datum ist TEXT – nur gültige YYYY-MM-DD-Werte zählen.
-    const weeklyResult = await pool.query(
-      `SELECT to_char(w.woche, 'YYYY-MM-DD') AS woche, COUNT(b.id)::int AS anzahl
+      // Bewerbungen pro Woche nach Bewerbungsdatum (letzte 12 Wochen).
+      // datum ist TEXT – nur gültige YYYY-MM-DD-Werte zählen.
+      const weeklyResult = await pool.query(
+        `SELECT to_char(w.woche, 'YYYY-MM-DD') AS woche, COUNT(b.id)::int AS anzahl
        FROM generate_series(
          date_trunc('week', NOW()) - INTERVAL '11 weeks',
          date_trunc('week', NOW()),
@@ -894,64 +965,83 @@ app.get("/api/admin/users/:id/stats", authenticateToken, requireAdmin, async (re
             ) = w.woche
        GROUP BY w.woche
        ORDER BY w.woche`,
-      [targetId],
-    );
+        [targetId],
+      );
 
-    // Bewerbungen: bewusst nur Firma, Stelle und Status – keine Notizen o. Ä.
-    const bewerbungenResult = await pool.query(
-      `SELECT id, firma, position, status
+      // Bewerbungen: bewusst nur Firma, Stelle und Status – keine Notizen o. Ä.
+      const bewerbungenResult = await pool.query(
+        `SELECT id, firma, position, status
        FROM bewerbungen
        WHERE user_id = $1
        ORDER BY created_at DESC`,
-      [targetId],
-    );
+        [targetId],
+      );
 
-    res.json({
-      user: userResult.rows[0],
-      weekly: weeklyResult.rows,
-      bewerbungen: bewerbungenResult.rows,
-    });
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+      res.json({
+        user: userResult.rows[0],
+        weekly: weeklyResult.rows,
+        bewerbungen: bewerbungenResult.rows,
+      });
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // PATCH Rolle eines Users ändern
-app.patch("/api/admin/users/:id/role", authenticateToken, requireAdmin, async (req, res) => {
-  const { role } = req.body;
-  const targetId = parseInt(req.params.id);
-  if (!["user", "admin"].includes(role)) {
-    return res.status(400).json({ error: "Ungültige Rolle" });
-  }
-  if (targetId === req.userId) {
-    return res.status(400).json({ error: "Eigene Rolle kann nicht geändert werden" });
-  }
-  try {
-    const result = await pool.query(
-      "UPDATE users SET role = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id",
-      [role, targetId],
-    );
-    if (result.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
-    res.json({ message: "Rolle aktualisiert" });
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+app.patch(
+  "/api/admin/users/:id/role",
+  authenticateToken,
+  requireAdmin,
+  async (req, res) => {
+    const { role } = req.body;
+    const targetId = parseInt(req.params.id);
+    if (!["user", "admin"].includes(role)) {
+      return res.status(400).json({ error: "Ungültige Rolle" });
+    }
+    if (targetId === req.userId) {
+      return res
+        .status(400)
+        .json({ error: "Eigene Rolle kann nicht geändert werden" });
+    }
+    try {
+      const result = await pool.query(
+        "UPDATE users SET role = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id",
+        [role, targetId],
+      );
+      if (result.rowCount === 0)
+        return res.status(404).json({ error: "User nicht gefunden" });
+      res.json({ message: "Rolle aktualisiert" });
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // DELETE User löschen
-app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
-  const targetId = parseInt(req.params.id);
-  if (targetId === req.userId) {
-    return res.status(400).json({ error: "Eigener Account kann nicht gelöscht werden" });
-  }
-  try {
-    const result = await pool.query("DELETE FROM users WHERE id = $1", [targetId]);
-    if (result.rowCount === 0) return res.status(404).json({ error: "User nicht gefunden" });
-    res.json({ message: "User gelöscht" });
-  } catch (err) {
-    serverError(res, err);
-  }
-});
+app.delete(
+  "/api/admin/users/:id",
+  authenticateToken,
+  requireAdmin,
+  async (req, res) => {
+    const targetId = parseInt(req.params.id);
+    if (targetId === req.userId) {
+      return res
+        .status(400)
+        .json({ error: "Eigener Account kann nicht gelöscht werden" });
+    }
+    try {
+      const result = await pool.query("DELETE FROM users WHERE id = $1", [
+        targetId,
+      ]);
+      if (result.rowCount === 0)
+        return res.status(404).json({ error: "User nicht gefunden" });
+      res.json({ message: "User gelöscht" });
+    } catch (err) {
+      serverError(res, err);
+    }
+  },
+);
 
 // Zentrale Fehlerbehandlung (Upload, CORS, kaputtes JSON …) statt der
 // Express-Standardseite, die in der Entwicklung Stacktraces ausgibt.
@@ -959,7 +1049,9 @@ app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     const message =
-      err.code === "LIMIT_FILE_SIZE" ? "Das Bild darf maximal 5 MB groß sein" : "Ungültiger Upload";
+      err.code === "LIMIT_FILE_SIZE"
+        ? "Das Bild darf maximal 5 MB groß sein"
+        : "Ungültiger Upload";
     return res.status(400).json({ error: message });
   }
   if (err.message === "Nur JPEG, PNG, GIF und WebP erlaubt") {

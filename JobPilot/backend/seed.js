@@ -126,7 +126,9 @@ const SEED_ACCOUNTS = [
     role: "admin",
     bewerbungen: [
       app("DevOps Engineer", "Telekom", "beworben", 7, { standort: "Bonn" }),
-      app("Cloud Engineer", "IONOS", "stufe_weiter", 14, { standort: "Karlsruhe" }),
+      app("Cloud Engineer", "IONOS", "stufe_weiter", 14, {
+        standort: "Karlsruhe",
+      }),
     ],
   },
   {
@@ -139,14 +141,26 @@ const SEED_ACCOUNTS = [
 ];
 
 const COLUMNS = [
-  "position", "firma", "status", "datum", "standort", "ansprechpartner", "notizen",
-  "bewerbungsart", "startdatum", "link", "gehalt", "waehrung",
+  "position",
+  "firma",
+  "status",
+  "datum",
+  "standort",
+  "ansprechpartner",
+  "notizen",
+  "bewerbungsart",
+  "startdatum",
+  "link",
+  "gehalt",
+  "waehrung",
 ];
 
 async function seedDemoData(pool, { reset = false } = {}) {
   const password = process.env.SEED_PASSWORD;
   if (!password || password.length < 8) {
-    console.warn("[seed] SEED_PASSWORD fehlt oder ist kürzer als 8 Zeichen – übersprungen.");
+    console.warn(
+      "[seed] SEED_PASSWORD fehlt oder ist kürzer als 8 Zeichen – übersprungen.",
+    );
     return;
   }
 
@@ -157,9 +171,10 @@ async function seedDemoData(pool, { reset = false } = {}) {
     await client.query("BEGIN");
 
     for (const account of SEED_ACCOUNTS) {
-      const existing = await client.query("SELECT id FROM users WHERE email = $1", [
-        account.email,
-      ]);
+      const existing = await client.query(
+        "SELECT id FROM users WHERE email = $1",
+        [account.email],
+      );
 
       let userId;
       if (existing.rows.length === 0) {
@@ -183,7 +198,9 @@ async function seedDemoData(pool, { reset = false } = {}) {
              WHERE id = $1`,
             [userId, passwordHash, account.name, account.role],
           );
-          await client.query("DELETE FROM bewerbungen WHERE user_id = $1", [userId]);
+          await client.query("DELETE FROM bewerbungen WHERE user_id = $1", [
+            userId,
+          ]);
           console.log(`[seed] Account zurückgesetzt: ${account.email}`);
         }
       }

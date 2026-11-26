@@ -17,27 +17,219 @@ import "./Profile.css";
 // ── Avatar Customizer Constants ───────────────────────────────────────────────
 
 const AVATAR_PRESETS = [
-  { key: "shortHair", emoji: "✂️", config: { top: "shortFlat", clothing: "blazerAndShirt", eyes: "default", eyebrows: "default", mouth: "smile", accessories: "none", facialHair: "none" } },
-  { key: "longHair",  emoji: "💇", config: { top: "bob", clothing: "shirtCrewNeck", eyes: "default", eyebrows: "defaultNatural", mouth: "smile", accessories: "none", facialHair: "none" } },
-  { key: "beard",     emoji: "🧔", config: { top: "shortFlat", clothing: "blazerAndShirt", eyes: "default", eyebrows: "default", mouth: "default", accessories: "none", facialHair: "beardMedium" } },
-  { key: "hat",       emoji: "🎩", config: { top: "hat", clothing: "hoodie", eyes: "happy", eyebrows: "raisedExcited", mouth: "smile", accessories: "none", facialHair: "none" } },
-  { key: "braids",    emoji: "🎀", config: { top: "froBand", clothing: "shirtScoopNeck", eyes: "default", eyebrows: "defaultNatural", mouth: "twinkle", accessories: "none", facialHair: "none" } },
+  {
+    key: "shortHair",
+    emoji: "✂️",
+    config: {
+      top: "shortFlat",
+      clothing: "blazerAndShirt",
+      eyes: "default",
+      eyebrows: "default",
+      mouth: "smile",
+      accessories: "none",
+      facialHair: "none",
+    },
+  },
+  {
+    key: "longHair",
+    emoji: "💇",
+    config: {
+      top: "bob",
+      clothing: "shirtCrewNeck",
+      eyes: "default",
+      eyebrows: "defaultNatural",
+      mouth: "smile",
+      accessories: "none",
+      facialHair: "none",
+    },
+  },
+  {
+    key: "beard",
+    emoji: "🧔",
+    config: {
+      top: "shortFlat",
+      clothing: "blazerAndShirt",
+      eyes: "default",
+      eyebrows: "default",
+      mouth: "default",
+      accessories: "none",
+      facialHair: "beardMedium",
+    },
+  },
+  {
+    key: "hat",
+    emoji: "🎩",
+    config: {
+      top: "hat",
+      clothing: "hoodie",
+      eyes: "happy",
+      eyebrows: "raisedExcited",
+      mouth: "smile",
+      accessories: "none",
+      facialHair: "none",
+    },
+  },
+  {
+    key: "braids",
+    emoji: "🎀",
+    config: {
+      top: "froBand",
+      clothing: "shirtScoopNeck",
+      eyes: "default",
+      eyebrows: "defaultNatural",
+      mouth: "twinkle",
+      accessories: "none",
+      facialHair: "none",
+    },
+  },
 ];
 
 // Exact parameter names + enum values from api.dicebear.com/7.x/avataaars/schema.json
 const AVATAR_OPTIONS = {
-  top:         { values: ["hat", "hijab", "turban", "winterHat1", "winterHat02", "winterHat03", "winterHat04", "bigHair", "bob", "bun", "curly", "curvy", "dreads", "frida", "fro", "froBand", "longButNotTooLong", "miaWallace", "shavedSides", "straight01", "straight02", "straightAndStrand", "dreads01", "dreads02", "frizzle", "shaggy", "shaggyMullet", "shortCurly", "shortFlat", "shortRound", "shortWaved", "sides", "theCaesar", "theCaesarAndSidePart"] },
-  accessories: { values: ["none", "kurt", "prescription01", "prescription02", "round", "sunglasses", "wayfarers", "eyepatch"] },
-  facialHair:  { values: ["none", "beardLight", "beardMajestic", "beardMedium", "moustacheFancy", "moustacheMagnum"] },
-  clothing:    { values: ["blazerAndShirt", "blazerAndSweater", "collarAndSweater", "graphicShirt", "hoodie", "overall", "shirtCrewNeck", "shirtScoopNeck", "shirtVNeck"] },
-  eyes:        { values: ["closed", "cry", "default", "eyeRoll", "happy", "hearts", "side", "squint", "surprised", "wink", "winkWacky", "xDizzy"] },
-  eyebrows:    { values: ["angry", "angryNatural", "default", "defaultNatural", "flatNatural", "frownNatural", "raisedExcited", "raisedExcitedNatural", "sadConcerned", "sadConcernedNatural", "unibrowNatural", "upDown", "upDownNatural"] },
-  mouth:       { values: ["concerned", "default", "disbelief", "eating", "grimace", "sad", "screamOpen", "serious", "smile", "tongue", "twinkle", "vomit"] },
+  top: {
+    values: [
+      "hat",
+      "hijab",
+      "turban",
+      "winterHat1",
+      "winterHat02",
+      "winterHat03",
+      "winterHat04",
+      "bigHair",
+      "bob",
+      "bun",
+      "curly",
+      "curvy",
+      "dreads",
+      "frida",
+      "fro",
+      "froBand",
+      "longButNotTooLong",
+      "miaWallace",
+      "shavedSides",
+      "straight01",
+      "straight02",
+      "straightAndStrand",
+      "dreads01",
+      "dreads02",
+      "frizzle",
+      "shaggy",
+      "shaggyMullet",
+      "shortCurly",
+      "shortFlat",
+      "shortRound",
+      "shortWaved",
+      "sides",
+      "theCaesar",
+      "theCaesarAndSidePart",
+    ],
+  },
+  accessories: {
+    values: [
+      "none",
+      "kurt",
+      "prescription01",
+      "prescription02",
+      "round",
+      "sunglasses",
+      "wayfarers",
+      "eyepatch",
+    ],
+  },
+  facialHair: {
+    values: [
+      "none",
+      "beardLight",
+      "beardMajestic",
+      "beardMedium",
+      "moustacheFancy",
+      "moustacheMagnum",
+    ],
+  },
+  clothing: {
+    values: [
+      "blazerAndShirt",
+      "blazerAndSweater",
+      "collarAndSweater",
+      "graphicShirt",
+      "hoodie",
+      "overall",
+      "shirtCrewNeck",
+      "shirtScoopNeck",
+      "shirtVNeck",
+    ],
+  },
+  eyes: {
+    values: [
+      "closed",
+      "cry",
+      "default",
+      "eyeRoll",
+      "happy",
+      "hearts",
+      "side",
+      "squint",
+      "surprised",
+      "wink",
+      "winkWacky",
+      "xDizzy",
+    ],
+  },
+  eyebrows: {
+    values: [
+      "angry",
+      "angryNatural",
+      "default",
+      "defaultNatural",
+      "flatNatural",
+      "frownNatural",
+      "raisedExcited",
+      "raisedExcitedNatural",
+      "sadConcerned",
+      "sadConcernedNatural",
+      "unibrowNatural",
+      "upDown",
+      "upDownNatural",
+    ],
+  },
+  mouth: {
+    values: [
+      "concerned",
+      "default",
+      "disbelief",
+      "eating",
+      "grimace",
+      "sad",
+      "screamOpen",
+      "serious",
+      "smile",
+      "tongue",
+      "twinkle",
+      "vomit",
+    ],
+  },
 };
 
 // skinColor uses hex values per schema (not named enum)
-const SKIN_COLORS = ["614335", "ae5d29", "d08b5b", "edb98a", "ffdbb4", "fd9841", "f8d25c"];
-const BG_COLORS = ["b6e3f4", "c0aede", "d1d4f9", "ffd5dc", "ffdfbf", "d1f9c2", "e8e8e8", "ffffff"];
+const SKIN_COLORS = [
+  "614335",
+  "ae5d29",
+  "d08b5b",
+  "edb98a",
+  "ffdbb4",
+  "fd9841",
+  "f8d25c",
+];
+const BG_COLORS = [
+  "b6e3f4",
+  "c0aede",
+  "d1d4f9",
+  "ffd5dc",
+  "ffdfbf",
+  "d1f9c2",
+  "e8e8e8",
+  "ffffff",
+];
 
 const DEFAULT_AVATAR_CONFIG = {
   top: "shortFlat",
@@ -52,7 +244,8 @@ const DEFAULT_AVATAR_CONFIG = {
 };
 
 function buildAvatarConfigUrl(config) {
-  const { backgroundColor, skinColor, accessories, facialHair, ...rest } = config;
+  const { backgroundColor, skinColor, accessories, facialHair, ...rest } =
+    config;
   const parts = ["seed=custom"];
 
   Object.entries(rest).forEach(([key, value]) => {
@@ -79,7 +272,11 @@ function buildAvatarConfigUrl(config) {
 
 function formatLabel(s, noneLabel) {
   if (s === "none") return noneLabel;
-  const spaced = s.replace(/([0-9]+)/g, " $1").replace(/([A-Z])/g, " $1").trim().replace(/\s+/g, " ");
+  const spaced = s
+    .replace(/([0-9]+)/g, " $1")
+    .replace(/([A-Z])/g, " $1")
+    .trim()
+    .replace(/\s+/g, " ");
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
@@ -87,7 +284,12 @@ function formatLabel(s, noneLabel) {
 
 function getInitials(name) {
   if (!name) return "?";
-  return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarUrl(user) {
@@ -96,9 +298,10 @@ function getAvatarUrl(user) {
     return url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
   }
   if (user?.avatar_config) {
-    const cfg = typeof user.avatar_config === "string"
-      ? JSON.parse(user.avatar_config)
-      : user.avatar_config;
+    const cfg =
+      typeof user.avatar_config === "string"
+        ? JSON.parse(user.avatar_config)
+        : user.avatar_config;
     return buildAvatarConfigUrl(cfg);
   }
   const seed = encodeURIComponent(user?.name || user?.email || "user");
@@ -117,12 +320,32 @@ function formatDate(dateStr) {
 
 function EyeIcon({ visible }) {
   return visible ? (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
   ) : (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
       <line x1="1" y1="1" x2="23" y2="23" />
     </svg>
@@ -169,8 +392,10 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
 
   const validate = () => {
     if (!email.trim()) return t("profile.emailRequired");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return t("profile.emailInvalid");
-    if (email.trim().toLowerCase() === currentEmail?.toLowerCase()) return t("profile.emailSameAsCurrent");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      return t("profile.emailInvalid");
+    if (email.trim().toLowerCase() === currentEmail?.toLowerCase())
+      return t("profile.emailSameAsCurrent");
     if (email.trim() !== confirm.trim()) return t("profile.emailMismatch");
     if (!password) return t("profile.currentPasswordRequired");
     return null;
@@ -178,7 +403,10 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
 
   const handleSubmit = async () => {
     const err = validate();
-    if (err) { setError(err); return; }
+    if (err) {
+      setError(err);
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -192,20 +420,46 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
   };
 
   return (
-    <div className="profile-modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="profile-modal" role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
+    <div
+      className="profile-modal-backdrop"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="profile-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="email-modal-title"
+      >
         <div className="profile-modal-header">
-          <h2 id="email-modal-title" className="profile-modal-title">{t("profile.changeEmail")}</h2>
-          <button className="profile-modal-close" onClick={onClose} aria-label={t("profile.cancelEdit")}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          <h2 id="email-modal-title" className="profile-modal-title">
+            {t("profile.changeEmail")}
+          </h2>
+          <button
+            className="profile-modal-close"
+            onClick={onClose}
+            aria-label={t("profile.cancelEdit")}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
 
         <div className="profile-modal-body">
           <div className="profile-modal-current">
-            <span className="profile-modal-current-label">{t("profile.currentEmail")}</span>
+            <span className="profile-modal-current-label">
+              {t("profile.currentEmail")}
+            </span>
             <span className="profile-modal-current-value">{currentEmail}</span>
           </div>
 
@@ -217,7 +471,10 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
               className="profile-input"
               type="email"
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
               placeholder={t("profile.newEmailPlaceholder")}
               autoFocus
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -230,17 +487,25 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
               className="profile-input"
               type="email"
               value={confirm}
-              onChange={(e) => { setConfirm(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                setError("");
+              }}
               placeholder={t("profile.confirmEmailPlaceholder")}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             />
           </div>
 
           <div className="profile-field">
-            <label className="profile-label">{t("profile.currentPassword")}</label>
+            <label className="profile-label">
+              {t("profile.currentPassword")}
+            </label>
             <PasswordInput
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
               placeholder={t("profile.currentPasswordPlaceholder")}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             />
@@ -250,7 +515,11 @@ function ChangeEmailModal({ currentEmail, onClose, onSuccess, t }) {
         </div>
 
         <div className="profile-modal-footer">
-          <button className="profile-btn profile-btn--ghost" onClick={onClose} disabled={saving}>
+          <button
+            className="profile-btn profile-btn--ghost"
+            onClick={onClose}
+            disabled={saving}
+          >
             {t("profile.cancelEdit")}
           </button>
           <button
@@ -285,7 +554,10 @@ function ChangePasswordModal({ onClose, onSuccess, t }) {
 
   const handleSubmit = async () => {
     const err = validate();
-    if (err) { setError(err); return; }
+    if (err) {
+      setError(err);
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -299,13 +571,37 @@ function ChangePasswordModal({ onClose, onSuccess, t }) {
   };
 
   return (
-    <div className="profile-modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="profile-modal" role="dialog" aria-modal="true" aria-labelledby="pw-modal-title">
+    <div
+      className="profile-modal-backdrop"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="profile-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pw-modal-title"
+      >
         <div className="profile-modal-header">
-          <h2 id="pw-modal-title" className="profile-modal-title">{t("profile.changePassword")}</h2>
-          <button className="profile-modal-close" onClick={onClose} aria-label={t("profile.cancelEdit")}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          <h2 id="pw-modal-title" className="profile-modal-title">
+            {t("profile.changePassword")}
+          </h2>
+          <button
+            className="profile-modal-close"
+            onClick={onClose}
+            aria-label={t("profile.cancelEdit")}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -315,7 +611,10 @@ function ChangePasswordModal({ onClose, onSuccess, t }) {
             <div className="profile-modal-error">
               {error}
               <div style={{ marginTop: "6px", fontSize: "0.82rem" }}>
-                <Link to="/forgot-password" style={{ color: "inherit", textDecoration: "underline" }}>
+                <Link
+                  to="/forgot-password"
+                  style={{ color: "inherit", textDecoration: "underline" }}
+                >
                   Passwort vergessen?
                 </Link>
               </div>
@@ -323,10 +622,15 @@ function ChangePasswordModal({ onClose, onSuccess, t }) {
           )}
 
           <div className="profile-field">
-            <label className="profile-label">{t("profile.currentPassword")}</label>
+            <label className="profile-label">
+              {t("profile.currentPassword")}
+            </label>
             <PasswordInput
               value={current}
-              onChange={(e) => { setCurrent(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setCurrent(e.target.value);
+                setError("");
+              }}
               placeholder={t("profile.currentPasswordPlaceholder")}
               autoFocus
             />
@@ -336,16 +640,24 @@ function ChangePasswordModal({ onClose, onSuccess, t }) {
             <label className="profile-label">{t("profile.newPassword")}</label>
             <PasswordInput
               value={next}
-              onChange={(e) => { setNext(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setNext(e.target.value);
+                setError("");
+              }}
               placeholder={t("profile.newPasswordPlaceholder")}
             />
           </div>
 
           <div className="profile-field">
-            <label className="profile-label">{t("profile.confirmPassword")}</label>
+            <label className="profile-label">
+              {t("profile.confirmPassword")}
+            </label>
             <PasswordInput
               value={confirm}
-              onChange={(e) => { setConfirm(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                setError("");
+              }}
               placeholder={t("profile.confirmPasswordPlaceholder")}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             />
@@ -353,7 +665,11 @@ function ChangePasswordModal({ onClose, onSuccess, t }) {
         </div>
 
         <div className="profile-modal-footer">
-          <button className="profile-btn profile-btn--ghost" onClick={onClose} disabled={saving}>
+          <button
+            className="profile-btn profile-btn--ghost"
+            onClick={onClose}
+            disabled={saving}
+          >
             {t("profile.cancelEdit")}
           </button>
           <button
@@ -375,9 +691,10 @@ function AvatarCustomizerModal({ user, onClose, onSave }) {
   const { t } = useTranslation();
   const [config, setConfig] = useState(() => {
     if (user?.avatar_config) {
-      const cfg = typeof user.avatar_config === "string"
-        ? JSON.parse(user.avatar_config)
-        : user.avatar_config;
+      const cfg =
+        typeof user.avatar_config === "string"
+          ? JSON.parse(user.avatar_config)
+          : user.avatar_config;
       return { ...DEFAULT_AVATAR_CONFIG, ...cfg };
     }
     return { ...DEFAULT_AVATAR_CONFIG };
@@ -404,13 +721,37 @@ function AvatarCustomizerModal({ user, onClose, onSave }) {
   };
 
   return (
-    <div className="profile-modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="profile-modal profile-modal--avatar" role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
+    <div
+      className="profile-modal-backdrop"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="profile-modal profile-modal--avatar"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="avatar-modal-title"
+      >
         <div className="profile-modal-header">
-          <h2 id="avatar-modal-title" className="profile-modal-title">{t("profile.avatarCustomizeTitle")}</h2>
-          <button className="profile-modal-close" onClick={onClose} aria-label={t("profile.cancelEdit")}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          <h2 id="avatar-modal-title" className="profile-modal-title">
+            {t("profile.avatarCustomizeTitle")}
+          </h2>
+          <button
+            className="profile-modal-close"
+            onClick={onClose}
+            aria-label={t("profile.cancelEdit")}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -421,7 +762,9 @@ function AvatarCustomizerModal({ user, onClose, onSave }) {
               <button
                 key={preset.key}
                 className="avatar-preset-btn"
-                onClick={() => setConfig((prev) => ({ ...prev, ...preset.config }))}
+                onClick={() =>
+                  setConfig((prev) => ({ ...prev, ...preset.config }))
+                }
                 title={t(`profile.avatarPreset_${preset.key}`)}
               >
                 {preset.emoji} {t(`profile.avatarPreset_${preset.key}`)}
@@ -430,7 +773,11 @@ function AvatarCustomizerModal({ user, onClose, onSave }) {
           </div>
 
           <div className="avatar-preview">
-            <img src={previewUrl} alt={t("profile.avatarPreview")} className="avatar-preview-img" />
+            <img
+              src={previewUrl}
+              alt={t("profile.avatarPreview")}
+              className="avatar-preview-img"
+            />
           </div>
 
           {Object.entries(AVATAR_OPTIONS).map(([key, opt]) => {
@@ -439,33 +786,45 @@ function AvatarCustomizerModal({ user, onClose, onSave }) {
             const safeIdx = idx === -1 ? 0 : idx;
             return (
               <div key={key} className="avatar-option-row">
-                <span className="avatar-option-label">{t(`profile.avatarOption_${key}`)}</span>
+                <span className="avatar-option-label">
+                  {t(`profile.avatarOption_${key}`)}
+                </span>
                 <div className="avatar-option-controls">
                   <button
                     className="avatar-arrow-btn"
                     onClick={() => handleCycle(key, -1)}
                     aria-label={t("profile.avatarPrevious")}
-                  >‹</button>
-                  <span className="avatar-option-value">{formatLabel(vals[safeIdx], t("profile.avatarNone"))}</span>
+                  >
+                    ‹
+                  </button>
+                  <span className="avatar-option-value">
+                    {formatLabel(vals[safeIdx], t("profile.avatarNone"))}
+                  </span>
                   <button
                     className="avatar-arrow-btn"
                     onClick={() => handleCycle(key, 1)}
                     aria-label={t("profile.avatarNext")}
-                  >›</button>
+                  >
+                    ›
+                  </button>
                 </div>
               </div>
             );
           })}
 
           <div className="avatar-option-row">
-            <span className="avatar-option-label">{t("profile.avatarSkinColor")}</span>
+            <span className="avatar-option-label">
+              {t("profile.avatarSkinColor")}
+            </span>
             <div className="avatar-bg-swatches">
               {SKIN_COLORS.map((hex) => (
                 <button
                   key={hex}
                   className={`avatar-bg-swatch${config.skinColor === hex ? " active" : ""}`}
                   style={{ background: `#${hex}` }}
-                  onClick={() => setConfig((prev) => ({ ...prev, skinColor: hex }))}
+                  onClick={() =>
+                    setConfig((prev) => ({ ...prev, skinColor: hex }))
+                  }
                   title={`#${hex}`}
                   aria-label={t("profile.avatarSkinColorLabel", { hex })}
                 />
@@ -474,14 +833,22 @@ function AvatarCustomizerModal({ user, onClose, onSave }) {
           </div>
 
           <div className="avatar-option-row">
-            <span className="avatar-option-label">{t("profile.avatarBackground")}</span>
+            <span className="avatar-option-label">
+              {t("profile.avatarBackground")}
+            </span>
             <div className="avatar-bg-swatches">
               {BG_COLORS.map((color) => (
                 <button
                   key={color}
                   className={`avatar-bg-swatch${config.backgroundColor === color ? " active" : ""}`}
-                  style={{ background: `#${color}`, border: color === "ffffff" ? "1.5px solid #d1d5db" : undefined }}
-                  onClick={() => setConfig((prev) => ({ ...prev, backgroundColor: color }))}
+                  style={{
+                    background: `#${color}`,
+                    border:
+                      color === "ffffff" ? "1.5px solid #d1d5db" : undefined,
+                  }}
+                  onClick={() =>
+                    setConfig((prev) => ({ ...prev, backgroundColor: color }))
+                  }
                   title={`#${color}`}
                   aria-label={t("profile.avatarBgColorLabel", { hex: color })}
                 />
@@ -500,7 +867,11 @@ function AvatarCustomizerModal({ user, onClose, onSave }) {
             {t("profile.avatarReset")}
           </button>
           <div style={{ flex: 1 }} />
-          <button className="profile-btn profile-btn--ghost" onClick={onClose} disabled={saving}>
+          <button
+            className="profile-btn profile-btn--ghost"
+            onClick={onClose}
+            disabled={saving}
+          >
             {t("profile.cancelEdit")}
           </button>
           <button
@@ -605,7 +976,11 @@ export default function Profile() {
       const updated = await updateAvatarConfig(config);
       updateLocalUser(updated);
       setShowAvatarCustomizer(false);
-      showFeedback(config ? t("profile.avatarSaveSuccess") : t("profile.avatarResetSuccess"));
+      showFeedback(
+        config
+          ? t("profile.avatarSaveSuccess")
+          : t("profile.avatarResetSuccess"),
+      );
     } catch (err) {
       showFeedback(err.message, "error");
     }
@@ -630,8 +1005,21 @@ export default function Profile() {
   return (
     <div className="profile-page">
       <div className="profile-container">
-        <button className="profile-back-btn" onClick={() => navigate("/dashboard")}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <button
+          className="profile-back-btn"
+          onClick={() => navigate("/dashboard")}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           {t("profile.backToDashboard")}
@@ -639,7 +1027,9 @@ export default function Profile() {
 
         <div className="profile-card">
           {feedback && (
-            <div className={`profile-feedback profile-feedback--${feedback.type}`}>
+            <div
+              className={`profile-feedback profile-feedback--${feedback.type}`}
+            >
               {feedback.msg}
             </div>
           )}
@@ -648,7 +1038,9 @@ export default function Profile() {
           <div className="profile-avatar-section">
             <div className="profile-avatar-wrapper">
               {imgError ? (
-                <div className="profile-avatar-initials">{getInitials(user?.name)}</div>
+                <div className="profile-avatar-initials">
+                  {getInitials(user?.name)}
+                </div>
               ) : (
                 <img
                   src={avatarUrl}
@@ -678,9 +1070,20 @@ export default function Profile() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
                 {uploading ? t("profile.uploading") : t("profile.uploadImage")}
               </button>
@@ -690,7 +1093,17 @@ export default function Profile() {
                   onClick={handleDeleteImage}
                   disabled={uploading}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                     <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
@@ -704,7 +1117,17 @@ export default function Profile() {
                   onClick={() => setShowAvatarCustomizer(true)}
                   disabled={uploading}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
                     <circle cx="12" cy="12" r="3" />
                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
                   </svg>
@@ -716,14 +1139,16 @@ export default function Profile() {
               {user?.profile_image_url
                 ? t("profile.customAvatar")
                 : user?.avatar_config
-                ? t("profile.customizedAvatar")
-                : t("profile.autoAvatar")}
+                  ? t("profile.customizedAvatar")
+                  : t("profile.autoAvatar")}
             </p>
           </div>
 
           {/* ── Profil-Infos ── */}
           <div className="profile-section">
-            <h3 className="profile-section-title">{t("profile.sectionProfile")}</h3>
+            <h3 className="profile-section-title">
+              {t("profile.sectionProfile")}
+            </h3>
 
             <div className="profile-field">
               <label className="profile-label">{t("profile.name")}</label>
@@ -764,7 +1189,17 @@ export default function Profile() {
                     title={t("profile.editName")}
                     aria-label={t("profile.editName")}
                   >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
@@ -774,20 +1209,28 @@ export default function Profile() {
             </div>
 
             <div className="profile-field">
-              <label className="profile-label">{t("profile.memberSince")}</label>
-              <span className="profile-value profile-value--muted">{formatDate(user?.created_at)}</span>
+              <label className="profile-label">
+                {t("profile.memberSince")}
+              </label>
+              <span className="profile-value profile-value--muted">
+                {formatDate(user?.created_at)}
+              </span>
             </div>
           </div>
 
           {/* ── Konto & Sicherheit ── */}
           <div className="profile-section">
-            <h3 className="profile-section-title">{t("profile.sectionSecurity")}</h3>
+            <h3 className="profile-section-title">
+              {t("profile.sectionSecurity")}
+            </h3>
 
             {/* E-Mail */}
             <div className="profile-field">
               <label className="profile-label">{t("profile.email")}</label>
               <div className="profile-value-row">
-                <span className="profile-value profile-value--muted">{user?.email || "–"}</span>
+                <span className="profile-value profile-value--muted">
+                  {user?.email || "–"}
+                </span>
                 <button
                   className="profile-change-btn"
                   onClick={() => setShowEmailModal(true)}
@@ -811,14 +1254,18 @@ export default function Profile() {
                   </button>
                   <button
                     className="profile-change-btn"
-                    disabled={resetStatus === "sending" || resetStatus === "sent"}
+                    disabled={
+                      resetStatus === "sending" || resetStatus === "sent"
+                    }
                     onClick={async () => {
                       if (!user?.email) return;
                       setResetStatus("sending");
                       try {
                         await forgotPassword(user.email);
                         setResetStatus("sent");
-                        showFeedback("Reset-Link wurde an deine E-Mail gesendet.");
+                        showFeedback(
+                          "Reset-Link wurde an deine E-Mail gesendet.",
+                        );
                         setTimeout(() => setResetStatus("idle"), 10000);
                       } catch {
                         setResetStatus("error");
@@ -830,8 +1277,8 @@ export default function Profile() {
                     {resetStatus === "sending"
                       ? "Wird gesendet…"
                       : resetStatus === "sent"
-                      ? "Link gesendet ✓"
-                      : "Per E-Mail zurücksetzen"}
+                        ? "Link gesendet ✓"
+                        : "Per E-Mail zurücksetzen"}
                   </button>
                 </div>
               </div>

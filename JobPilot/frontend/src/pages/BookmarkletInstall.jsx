@@ -66,14 +66,30 @@ function BookmarkletInstall() {
   };
 
   const steps = [
-    { num: "1", title: t("bookmarklet.step1"), text: t("bookmarklet.step1Hint") },
-    { num: "2", title: t("bookmarklet.step2"), text: t("bookmarklet.step2Hint") },
-    { num: "3", title: t("bookmarklet.step3"), text: t("bookmarklet.step3Hint") },
+    {
+      num: "1",
+      title: t("bookmarklet.step1"),
+      text: t("bookmarklet.step1Hint"),
+    },
+    {
+      num: "2",
+      title: t("bookmarklet.step2"),
+      text: t("bookmarklet.step2Hint"),
+    },
+    {
+      num: "3",
+      title: t("bookmarklet.step3"),
+      text: t("bookmarklet.step3Hint"),
+    },
   ];
 
   return (
     <div className="bm-page">
-      <button className="bm-back" onClick={() => navigate(-1)} title={t("bookmarklet.back")}>
+      <button
+        className="bm-back"
+        onClick={() => navigate(-1)}
+        title={t("bookmarklet.back")}
+      >
         <ArrowLeftIcon className="bm-back-icon" aria-hidden="true" />
       </button>
 
@@ -140,7 +156,8 @@ function BookmarkletInstall() {
                 ) : (
                   <>
                     <span className="bm-site-dot bm-site-dot--manual" />
-                    {t("bookmarklet.allOthers")} — {t("bookmarklet.urlCaptured")}
+                    {t("bookmarklet.allOthers")} —{" "}
+                    {t("bookmarklet.urlCaptured")}
                   </>
                 )}
               </div>

@@ -23,7 +23,8 @@ function getInitials(name) {
 }
 
 function buildAvatarConfigUrl(config) {
-  const { backgroundColor, skinColor, accessories, facialHair, ...rest } = config;
+  const { backgroundColor, skinColor, accessories, facialHair, ...rest } =
+    config;
   const parts = ["seed=custom"];
   Object.entries(rest).forEach(([key, value]) => {
     parts.push(`${key}=${encodeURIComponent(value)}`);
@@ -49,9 +50,10 @@ function getAvatarUrl(user) {
     return url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
   }
   if (user?.avatar_config) {
-    const cfg = typeof user.avatar_config === "string"
-      ? JSON.parse(user.avatar_config)
-      : user.avatar_config;
+    const cfg =
+      typeof user.avatar_config === "string"
+        ? JSON.parse(user.avatar_config)
+        : user.avatar_config;
     return buildAvatarConfigUrl(cfg);
   }
   const seed = encodeURIComponent(user?.name || user?.email || "user");
@@ -84,7 +86,13 @@ function UserAvatar({ user, size = 36 }) {
   );
 }
 
-function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user }) {
+function Header({
+  darkMode,
+  toggleDarkMode,
+  onNewBewerbung,
+  onExportPdf,
+  user,
+}) {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { t } = useTranslation();
@@ -234,7 +242,10 @@ function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user })
                 {/* Neue Bewerbung — mobile only */}
                 <button
                   className="user-dropdown-item user-dropdown-new user-dropdown-item--mobile"
-                  onClick={() => { setIsUserMenuOpen(false); onNewBewerbung(); }}
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    onNewBewerbung();
+                  }}
                   role="menuitem"
                 >
                   <span className="user-dropdown-new-plus">+</span>
@@ -267,7 +278,10 @@ function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user })
                 {/* Bookmarklet — mobile only */}
                 <button
                   className="user-dropdown-item user-dropdown-item--mobile"
-                  onClick={() => { setIsUserMenuOpen(false); navigate("/bookmarklet"); }}
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    navigate("/bookmarklet");
+                  }}
                   role="menuitem"
                 >
                   <ExternalIcon width="16" height="16" aria-hidden="true" />
@@ -277,7 +291,10 @@ function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user })
                 {/* PDF Export — mobile only */}
                 <button
                   className="user-dropdown-item user-dropdown-item--mobile"
-                  onClick={() => { setIsUserMenuOpen(false); onExportPdf(); }}
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    onExportPdf();
+                  }}
                   role="menuitem"
                 >
                   <svg
@@ -301,7 +318,10 @@ function Header({ darkMode, toggleDarkMode, onNewBewerbung, onExportPdf, user })
                 {user?.role === "admin" && (
                   <button
                     className="user-dropdown-item"
-                    onClick={() => { setIsUserMenuOpen(false); navigate("/admin"); }}
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      navigate("/admin");
+                    }}
                     role="menuitem"
                   >
                     <svg

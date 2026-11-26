@@ -14,8 +14,10 @@ export const test = base.extend({
     }
 
     await page.addInitScript(() => {
-      if (!localStorage.getItem("language")) localStorage.setItem("language", "de");
-      if (!localStorage.getItem("darkMode")) localStorage.setItem("darkMode", "false");
+      if (!localStorage.getItem("language"))
+        localStorage.setItem("language", "de");
+      if (!localStorage.getItem("darkMode"))
+        localStorage.setItem("darkMode", "false");
     });
 
     const pageErrors = [];

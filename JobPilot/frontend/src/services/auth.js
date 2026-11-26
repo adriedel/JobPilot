@@ -88,7 +88,9 @@ export async function register(email, password, name) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || data.error || "Registrierung fehlgeschlagen");
+    throw new Error(
+      data.message || data.error || "Registrierung fehlgeschlagen",
+    );
   }
 
   return data; // { message, email }
@@ -226,7 +228,8 @@ export async function changeEmail(email, currentPassword) {
     body: JSON.stringify({ email, currentPassword }),
   });
   const data = await parseJSON(response);
-  if (!response.ok) throw new Error(data.error || "Fehler beim Ändern der E-Mail");
+  if (!response.ok)
+    throw new Error(data.error || "Fehler beim Ändern der E-Mail");
   return data.user;
 }
 
@@ -242,7 +245,8 @@ export async function changePassword(currentPassword, newPassword) {
     body: JSON.stringify({ currentPassword, newPassword }),
   });
   const data = await parseJSON(response);
-  if (!response.ok) throw new Error(data.error || "Fehler beim Ändern des Passworts");
+  if (!response.ok)
+    throw new Error(data.error || "Fehler beim Ändern des Passworts");
   // Der Server beendet beim Passwortwechsel alle Sitzungen und schickt für
   // diese hier ein neues Token mit
   if (data.token) localStorage.setItem("token", data.token);
@@ -295,7 +299,8 @@ export async function getAdminUserStats(userId) {
     headers: { Authorization: `Bearer ${token}` },
   });
   const data = await parseJSON(response);
-  if (!response.ok) throw new Error(data.error || "Fehler beim Laden der Statistik");
+  if (!response.ok)
+    throw new Error(data.error || "Fehler beim Laden der Statistik");
   return data; // { user, weekly, bewerbungen }
 }
 
@@ -303,11 +308,15 @@ export async function updateUserRole(userId, role) {
   const token = getToken();
   const response = await authFetch(`${API_URL}/admin/users/${userId}/role`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({ role }),
   });
   const data = await parseJSON(response);
-  if (!response.ok) throw new Error(data.error || "Fehler beim Ändern der Rolle");
+  if (!response.ok)
+    throw new Error(data.error || "Fehler beim Ändern der Rolle");
   return data;
 }
 
@@ -328,7 +337,8 @@ export async function verifyEmail(token) {
     `${API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`,
   );
   const data = await parseJSON(response);
-  if (!response.ok) throw new Error(data.error || "Verifizierung fehlgeschlagen");
+  if (!response.ok)
+    throw new Error(data.error || "Verifizierung fehlgeschlagen");
   return data;
 }
 
@@ -340,7 +350,8 @@ export async function resendVerification(email) {
     body: JSON.stringify({ email }),
   });
   const data = await parseJSON(response);
-  if (!response.ok) throw new Error(data.error || "Fehler beim erneuten Senden");
+  if (!response.ok)
+    throw new Error(data.error || "Fehler beim erneuten Senden");
   return data;
 }
 

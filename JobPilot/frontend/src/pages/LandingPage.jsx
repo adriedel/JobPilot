@@ -85,9 +85,18 @@ function getFeatures(t) {
 
 function getSteps(t) {
   return [
-    { title: t("landing.steps.accountTitle"), description: t("landing.steps.accountText") },
-    { title: t("landing.steps.addTitle"), description: t("landing.steps.addText") },
-    { title: t("landing.steps.trackTitle"), description: t("landing.steps.trackText") },
+    {
+      title: t("landing.steps.accountTitle"),
+      description: t("landing.steps.accountText"),
+    },
+    {
+      title: t("landing.steps.addTitle"),
+      description: t("landing.steps.addText"),
+    },
+    {
+      title: t("landing.steps.trackTitle"),
+      description: t("landing.steps.trackText"),
+    },
   ];
 }
 
@@ -264,7 +273,9 @@ function LandingPage({ onEnterApp }) {
       <section className="landing-section landing-features" id="funktionen">
         <div className="landing-section-content">
           <p className="landing-eyebrow">{t("landing.features.eyebrow")}</p>
-          <h2 className="landing-section-title">{t("landing.features.title")}</h2>
+          <h2 className="landing-section-title">
+            {t("landing.features.title")}
+          </h2>
           <p className="landing-section-subtitle">
             {t("landing.features.subtitle")}
           </p>

@@ -37,7 +37,11 @@ function VerifyEmail() {
       <div className="auth-box">
         <div className="auth-header">
           <div className="auth-brand">
-            <img className="auth-logo" src="/Logo-JobPilot.svg" alt="JobPilot Logo" />
+            <img
+              className="auth-logo"
+              src="/Logo-JobPilot.svg"
+              alt="JobPilot Logo"
+            />
             <h1 className="auth-title">JobPilot</h1>
           </div>
           <p>Dein Bewerbungstracker</p>
@@ -45,20 +49,48 @@ function VerifyEmail() {
 
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "3rem", marginBottom: "16px" }}>📬</div>
-          <h2 style={{ fontSize: "1.3rem", fontWeight: 700, marginBottom: "12px", color: "var(--text-primary)" }}>
+          <h2
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 700,
+              marginBottom: "12px",
+              color: "var(--text-primary)",
+            }}
+          >
             Schau in dein Postfach!
           </h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: "8px" }}>
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "0.95rem",
+              lineHeight: 1.6,
+              marginBottom: "8px",
+            }}
+          >
             Wir haben eine Bestätigungs-E-Mail an
           </p>
           {email && (
-            <p style={{ fontWeight: 600, color: "var(--text-primary)", marginBottom: "16px", wordBreak: "break-all" }}>
+            <p
+              style={{
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                marginBottom: "16px",
+                wordBreak: "break-all",
+              }}
+            >
               {email}
             </p>
           )}
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "32px" }}>
-            gesendet. Klicke auf den Link in der E-Mail, um deinen Account zu aktivieren.
-            Der Link ist 24 Stunden gültig.
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "0.9rem",
+              lineHeight: 1.6,
+              marginBottom: "32px",
+            }}
+          >
+            gesendet. Klicke auf den Link in der E-Mail, um deinen Account zu
+            aktivieren. Der Link ist 24 Stunden gültig.
           </p>
 
           {status === "sent" && (
@@ -90,8 +122,8 @@ function VerifyEmail() {
             {status === "sending"
               ? "Wird gesendet..."
               : cooldown > 0
-              ? `Erneut senden (${cooldown}s)`
-              : "E-Mail erneut senden"}
+                ? `Erneut senden (${cooldown}s)`
+                : "E-Mail erneut senden"}
           </button>
 
           <p className="auth-switch">

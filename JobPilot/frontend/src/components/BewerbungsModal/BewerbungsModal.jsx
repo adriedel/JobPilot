@@ -282,7 +282,9 @@ function BewerbungsModal({
                   aria-expanded={isBewerbungsartOpen}
                 >
                   <span className="custom-select-value">
-                    {t(`applicationMethod.${(formData.bewerbungsart || BEWERBUNGSARTEN[0]).toLowerCase()}`)}
+                    {t(
+                      `applicationMethod.${(formData.bewerbungsart || BEWERBUNGSARTEN[0]).toLowerCase()}`,
+                    )}
                   </span>
                   <ChevronDownIcon
                     className={`custom-select-chevron ${isBewerbungsartOpen ? "open" : ""}`}
@@ -309,7 +311,9 @@ function BewerbungsModal({
                           role="option"
                           aria-selected={isSelected}
                         >
-                          <span>{t(`applicationMethod.${art.toLowerCase()}`)}</span>
+                          <span>
+                            {t(`applicationMethod.${art.toLowerCase()}`)}
+                          </span>
                           {isSelected ? (
                             <span className="custom-select-check">✓</span>
                           ) : null}

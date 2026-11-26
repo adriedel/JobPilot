@@ -24,11 +24,17 @@ function ResetPassword() {
         <div className="auth-box">
           <div className="auth-header">
             <div className="auth-brand">
-              <img className="auth-logo" src="/Logo-JobPilot.svg" alt="JobPilot Logo" />
+              <img
+                className="auth-logo"
+                src="/Logo-JobPilot.svg"
+                alt="JobPilot Logo"
+              />
               <h1 className="auth-title">JobPilot</h1>
             </div>
           </div>
-          <div className="error-message">Ungültiger oder fehlender Reset-Token.</div>
+          <div className="error-message">
+            Ungültiger oder fehlender Reset-Token.
+          </div>
           <p className="auth-switch" style={{ marginTop: "20px" }}>
             <Link to="/forgot-password">Neuen Link anfordern</Link>
           </p>
@@ -42,7 +48,8 @@ function ResetPassword() {
     if (!password) errs.password = "Bitte gib ein neues Passwort ein.";
     else if (password.length < 8) errs.password = "Mindestens 8 Zeichen.";
     if (!confirmPassword) errs.confirm = "Bitte bestätige dein Passwort.";
-    else if (password !== confirmPassword) errs.confirm = "Die Passwörter stimmen nicht überein.";
+    else if (password !== confirmPassword)
+      errs.confirm = "Die Passwörter stimmen nicht überein.";
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -68,7 +75,11 @@ function ResetPassword() {
       <div className="auth-box">
         <div className="auth-header">
           <div className="auth-brand">
-            <img className="auth-logo" src="/Logo-JobPilot.svg" alt="JobPilot Logo" />
+            <img
+              className="auth-logo"
+              src="/Logo-JobPilot.svg"
+              alt="JobPilot Logo"
+            />
             <h1 className="auth-title">JobPilot</h1>
           </div>
           <p>Dein Bewerbungstracker</p>
@@ -79,44 +90,90 @@ function ResetPassword() {
 
           {error && <div className="error-message">{error}</div>}
 
-          <div className={`form-group ${fieldErrors.password ? "has-error" : ""}`}>
+          <div
+            className={`form-group ${fieldErrors.password ? "has-error" : ""}`}
+          >
             <label htmlFor="password">Neues Passwort</label>
             <div className="password-wrapper">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setFieldErrors((p) => ({ ...p, password: "" })); }}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setFieldErrors((p) => ({ ...p, password: "" }));
+                }}
                 placeholder="Mindestens 8 Zeichen"
                 autoComplete="new-password"
                 aria-invalid={Boolean(fieldErrors.password)}
               />
-              <button type="button" className="password-toggle" onClick={() => setShowPassword((p) => !p)}
-                aria-label={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}>
-                {showPassword ? <EyeOffIcon className="password-toggle-icon" aria-hidden="true" /> : <EyeIcon className="password-toggle-icon" aria-hidden="true" />}
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((p) => !p)}
+                aria-label={
+                  showPassword ? "Passwort verbergen" : "Passwort anzeigen"
+                }
+              >
+                {showPassword ? (
+                  <EyeOffIcon
+                    className="password-toggle-icon"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <EyeIcon
+                    className="password-toggle-icon"
+                    aria-hidden="true"
+                  />
+                )}
               </button>
             </div>
-            {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
+            {fieldErrors.password && (
+              <p className="field-error">{fieldErrors.password}</p>
+            )}
           </div>
 
-          <div className={`form-group ${fieldErrors.confirm ? "has-error" : ""}`}>
+          <div
+            className={`form-group ${fieldErrors.confirm ? "has-error" : ""}`}
+          >
             <label htmlFor="confirmPassword">Passwort bestätigen</label>
             <div className="password-wrapper">
               <input
                 id="confirmPassword"
                 type={showConfirm ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrors((p) => ({ ...p, confirm: "" })); }}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setFieldErrors((p) => ({ ...p, confirm: "" }));
+                }}
                 placeholder="••••••••••"
                 autoComplete="new-password"
                 aria-invalid={Boolean(fieldErrors.confirm)}
               />
-              <button type="button" className="password-toggle" onClick={() => setShowConfirm((p) => !p)}
-                aria-label={showConfirm ? "Passwort verbergen" : "Passwort anzeigen"}>
-                {showConfirm ? <EyeOffIcon className="password-toggle-icon" aria-hidden="true" /> : <EyeIcon className="password-toggle-icon" aria-hidden="true" />}
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirm((p) => !p)}
+                aria-label={
+                  showConfirm ? "Passwort verbergen" : "Passwort anzeigen"
+                }
+              >
+                {showConfirm ? (
+                  <EyeOffIcon
+                    className="password-toggle-icon"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <EyeIcon
+                    className="password-toggle-icon"
+                    aria-hidden="true"
+                  />
+                )}
               </button>
             </div>
-            {fieldErrors.confirm && <p className="field-error">{fieldErrors.confirm}</p>}
+            {fieldErrors.confirm && (
+              <p className="field-error">{fieldErrors.confirm}</p>
+            )}
           </div>
 
           <button type="submit" className="auth-button" disabled={loading}>

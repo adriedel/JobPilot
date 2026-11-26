@@ -56,10 +56,15 @@ test.describe("Smoke @smoke", () => {
     expect(await response.json()).toEqual({ status: "ok" });
   });
 
-  test("Login und Bewerbung anlegen/löschen (echtes Backend)", async ({ page }) => {
+  test("Login und Bewerbung anlegen/löschen (echtes Backend)", async ({
+    page,
+  }) => {
     const email = process.env.E2E_USER_EMAIL;
     const password = process.env.E2E_USER_PASSWORD;
-    test.skip(!isExternal || !email || !password, "Nur gegen Staging mit Test-Account");
+    test.skip(
+      !isExternal || !email || !password,
+      "Nur gegen Staging mit Test-Account",
+    );
     test.setTimeout(180_000);
 
     await page.goto("/login");
@@ -77,7 +82,9 @@ test.describe("Smoke @smoke", () => {
       await page.locator(".user-dropdown-new").click();
     }
     await page.locator('.modal input[name="firma"]').fill(firma);
-    await page.locator('.modal input[name="position"]').fill("Playwright Smoke Test");
+    await page
+      .locator('.modal input[name="position"]')
+      .fill("Playwright Smoke Test");
     await page.locator(".modal .btn-submit").click();
 
     const card = page.locator(".bewerbung-card").filter({ hasText: firma });

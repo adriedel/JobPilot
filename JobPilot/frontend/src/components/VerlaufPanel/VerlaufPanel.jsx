@@ -219,7 +219,9 @@ function VerlaufPanel({ bewerbung, onClose, onChanged }) {
 
   const timeline = buildTimeline(entries, bewerbung);
   const isToday = datum === todayIso();
-  const meta = [bewerbung.firma, bewerbung.standort].filter(Boolean).join(" · ");
+  const meta = [bewerbung.firma, bewerbung.standort]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <>

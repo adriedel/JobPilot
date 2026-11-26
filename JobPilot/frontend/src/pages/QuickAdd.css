@@ -106,7 +106,9 @@
   color: var(--text-primary);
   font-family: inherit;
   box-sizing: border-box;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .qa-field input::placeholder,
@@ -139,7 +141,9 @@
   background: var(--bg-app);
   border: 1px solid var(--border);
   border-radius: 8px;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .qa-pw-wrap:focus-within {
@@ -208,7 +212,10 @@
   font-family: inherit;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
-  transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    filter 0.15s,
+    box-shadow 0.15s;
 }
 
 .qa-btn-primary:hover:not(:disabled) {
@@ -236,7 +243,10 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .qa-btn-secondary:hover {

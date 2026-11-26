@@ -24,7 +24,9 @@ test.describe("Aussehen @demo @visual", () => {
   });
 
   test("Dashboard hell", async ({ page }) => {
-    await expect(page).toHaveScreenshot("dashboard-light.png", { fullPage: true });
+    await expect(page).toHaveScreenshot("dashboard-light.png", {
+      fullPage: true,
+    });
   });
 
   test("Dashboard dunkel", async ({ page }) => {
@@ -32,7 +34,9 @@ test.describe("Aussehen @demo @visual", () => {
     await page.reload();
     await expect(page.locator("html")).toHaveClass(/dark-mode/);
     await expect(cards(page)).toHaveCount(3);
-    await expect(page).toHaveScreenshot("dashboard-dark.png", { fullPage: true });
+    await expect(page).toHaveScreenshot("dashboard-dark.png", {
+      fullPage: true,
+    });
   });
 
   test("Modal 'Neue Bewerbung'", async ({ page }) => {

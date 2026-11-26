@@ -61,10 +61,10 @@
   --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.2);
 
   /* Danger / Destructive Actions (Logout, Löschen) */
-  --danger: #dc2626;          /* Haupt-Rot — Schrift & Gradient-Ende */
-  --danger-light: #ef4444;    /* Hell-Rot — Gradient-Start */
-  --danger-bg: #fef2f2;       /* Sehr heller Rot-Hintergrund — Hover-Fläche */
-  --danger-border: #fecaca;   /* Heller Rot-Rahmen — Standard-Zustand bei Danger-Items */
+  --danger: #dc2626; /* Haupt-Rot — Schrift & Gradient-Ende */
+  --danger-light: #ef4444; /* Hell-Rot — Gradient-Start */
+  --danger-bg: #fef2f2; /* Sehr heller Rot-Hintergrund — Hover-Fläche */
+  --danger-border: #fecaca; /* Heller Rot-Rahmen — Standard-Zustand bei Danger-Items */
   --danger-shadow: rgba(220, 38, 38, 0.18); /* Schatten für Danger-Buttons */
 }
 

@@ -28,7 +28,10 @@ async function authenticateToken(req, res, next) {
   if (!token) {
     return res
       .status(401)
-      .json({ error: "Kein Token - Zugriff verweigert", code: "TOKEN_MISSING" });
+      .json({
+        error: "Kein Token - Zugriff verweigert",
+        code: "TOKEN_MISSING",
+      });
   }
 
   let decoded;
@@ -38,19 +41,30 @@ async function authenticateToken(req, res, next) {
     if (err.name === "TokenExpiredError") {
       return res
         .status(401)
-        .json({ error: "Token abgelaufen - bitte neu einloggen", code: "TOKEN_EXPIRED" });
+        .json({
+          error: "Token abgelaufen - bitte neu einloggen",
+          code: "TOKEN_EXPIRED",
+        });
     }
-    return res.status(401).json({ error: "Ungültiger Token", code: "TOKEN_INVALID" });
+    return res
+      .status(401)
+      .json({ error: "Ungültiger Token", code: "TOKEN_INVALID" });
   }
 
   try {
     // Gelöschte User und widerrufene Tokens (token_version erhöht) abweisen.
     // Tokens von vor dieser Prüfung haben kein `tv` und zählen als Version 0.
-    const result = await pool.query("SELECT token_version FROM users WHERE id = $1", [
-      decoded.userId,
-    ]);
-    if (result.rows.length === 0 || (decoded.tv ?? 0) !== result.rows[0].token_version) {
-      return res.status(401).json({ error: "Ungültiger Token", code: "TOKEN_INVALID" });
+    const result = await pool.query(
+      "SELECT token_version FROM users WHERE id = $1",
+      [decoded.userId],
+    );
+    if (
+      result.rows.length === 0 ||
+      (decoded.tv ?? 0) !== result.rows[0].token_version
+    ) {
+      return res
+        .status(401)
+        .json({ error: "Ungültiger Token", code: "TOKEN_INVALID" });
     }
   } catch (err) {
     console.error(err);

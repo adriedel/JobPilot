@@ -52,7 +52,12 @@ async function sendEmail({ to, subject, html, link }) {
 [email] Link: ${link}`);
     return;
   }
-  await resend.emails.send({ from: `JobPilot <${FROM_EMAIL}>`, to, subject, html });
+  await resend.emails.send({
+    from: `JobPilot <${FROM_EMAIL}>`,
+    to,
+    subject,
+    html,
+  });
 }
 
 async function sendVerificationEmail(toEmail, name, token) {
@@ -192,4 +197,8 @@ async function sendAccountExistsEmail(toEmail, name) {
   });
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendAccountExistsEmail };
+module.exports = {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendAccountExistsEmail,
+};

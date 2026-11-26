@@ -55,7 +55,7 @@ function AdminPage() {
     try {
       await updateUserRole(targetUser.id, newRole);
       setUsers((prev) =>
-        prev.map((u) => (u.id === targetUser.id ? { ...u, role: newRole } : u))
+        prev.map((u) => (u.id === targetUser.id ? { ...u, role: newRole } : u)),
       );
     } catch (err) {
       setActionError(err.message);
@@ -63,7 +63,12 @@ function AdminPage() {
   };
 
   const handleDelete = async (targetUser) => {
-    if (!window.confirm(`User "${targetUser.email}" wirklich löschen? Alle Bewerbungen werden ebenfalls gelöscht.`)) return;
+    if (
+      !window.confirm(
+        `User "${targetUser.email}" wirklich löschen? Alle Bewerbungen werden ebenfalls gelöscht.`,
+      )
+    )
+      return;
     setActionError("");
     setDeletingId(targetUser.id);
     try {
@@ -76,13 +81,19 @@ function AdminPage() {
     }
   };
 
-  const totalBewerbungen = users.reduce((sum, u) => sum + (u.bewerbungen_count || 0), 0);
+  const totalBewerbungen = users.reduce(
+    (sum, u) => sum + (u.bewerbungen_count || 0),
+    0,
+  );
   const adminCount = users.filter((u) => u.role === "admin").length;
 
   return (
     <div className="admin-page">
       <div className="admin-header">
-        <button className="admin-back-btn" onClick={() => navigate("/dashboard")}>
+        <button
+          className="admin-back-btn"
+          onClick={() => navigate("/dashboard")}
+        >
           ← Dashboard
         </button>
         <div className="admin-header-title">
@@ -127,11 +138,18 @@ function AdminPage() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className={u.id === user?.id ? "admin-table-row--self" : ""}>
-                  <td data-label="Name">{u.name || <span className="admin-empty">—</span>}</td>
+                <tr
+                  key={u.id}
+                  className={u.id === user?.id ? "admin-table-row--self" : ""}
+                >
+                  <td data-label="Name">
+                    {u.name || <span className="admin-empty">—</span>}
+                  </td>
                   <td data-label="E-Mail">{u.email}</td>
                   <td data-label="Rolle">
-                    <span className={`admin-role-badge admin-role-badge--${u.role}`}>
+                    <span
+                      className={`admin-role-badge admin-role-badge--${u.role}`}
+                    >
                       {u.role === "admin" ? "Admin" : "User"}
                     </span>
                   </td>
@@ -157,7 +175,11 @@ function AdminPage() {
                         <button
                           className="admin-btn admin-btn--role"
                           onClick={() => handleRoleToggle(u)}
-                          title={u.role === "admin" ? "Zu User degradieren" : "Zum Admin befördern"}
+                          title={
+                            u.role === "admin"
+                              ? "Zu User degradieren"
+                              : "Zum Admin befördern"
+                          }
                         >
                           {u.role === "admin" ? "→ User" : "→ Admin"}
                         </button>

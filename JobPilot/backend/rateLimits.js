@@ -10,7 +10,8 @@ function limiter({ windowMinutes, limit, skipSuccessfulRequests = false }) {
     standardHeaders: "draft-7",
     legacyHeaders: false,
     message: {
-      error: "Zu viele Anfragen – bitte versuche es in ein paar Minuten erneut.",
+      error:
+        "Zu viele Anfragen – bitte versuche es in ein paar Minuten erneut.",
       code: "RATE_LIMITED",
     },
   });
@@ -18,7 +19,11 @@ function limiter({ windowMinutes, limit, skipSuccessfulRequests = false }) {
 
 module.exports = {
   // Nur fehlgeschlagene Logins zählen, normales Anmelden bleibt unbegrenzt
-  loginLimiter: limiter({ windowMinutes: 15, limit: 10, skipSuccessfulRequests: true }),
+  loginLimiter: limiter({
+    windowMinutes: 15,
+    limit: 10,
+    skipSuccessfulRequests: true,
+  }),
   registerLimiter: limiter({ windowMinutes: 60, limit: 10 }),
   // Endpunkte, die E-Mails verschicken
   emailLimiter: limiter({ windowMinutes: 60, limit: 5 }),

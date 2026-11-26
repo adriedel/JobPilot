@@ -24,16 +24,22 @@ function DeleteConfirmModal({ bewerbung, onConfirm, onCancel }) {
 
           <div className="delete-bewerbung-info">
             <div className="delete-info-item">
-              <span className="delete-info-label">{t("deleteModal.positionLabel")}:</span>
+              <span className="delete-info-label">
+                {t("deleteModal.positionLabel")}:
+              </span>
               <span className="delete-info-value">{bewerbung.position}</span>
             </div>
             <div className="delete-info-item">
-              <span className="delete-info-label">{t("deleteModal.companyLabel")}:</span>
+              <span className="delete-info-label">
+                {t("deleteModal.companyLabel")}:
+              </span>
               <span className="delete-info-value">{bewerbung.firma}</span>
             </div>
             {bewerbung.standort && (
               <div className="delete-info-item">
-                <span className="delete-info-label">{t("deleteModal.locationLabel")}:</span>
+                <span className="delete-info-label">
+                  {t("deleteModal.locationLabel")}:
+                </span>
                 <span className="delete-info-value">{bewerbung.standort}</span>
               </div>
             )}
