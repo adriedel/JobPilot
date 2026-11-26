@@ -901,7 +901,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT aus /api/auth/login, gesendet als "Authorization: Bearer <token>"
+      description: 'JWT aus /api/auth/login, gesendet als "Authorization: Bearer <token>"'
 
   schemas:
     User:
