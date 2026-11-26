@@ -7,9 +7,17 @@ import { test, expect } from "./fixtures";
  * Läuft nur gegen Builds ohne Demo-Modus (PLAYWRIGHT_BASE_URL gesetzt),
  * denn im Demo-Modus gibt es keinen Login. Die API wird im Browser gemockt.
  */
-test.skip(!process.env.PLAYWRIGHT_BASE_URL, "Nur ohne Demo-Modus (PLAYWRIGHT_BASE_URL)");
+test.skip(
+  !process.env.PLAYWRIGHT_BASE_URL,
+  "Nur ohne Demo-Modus (PLAYWRIGHT_BASE_URL)",
+);
 
-const ADMIN = { id: 1, email: "admin@jobpilot.test", name: "Admin", role: "admin" };
+const ADMIN = {
+  id: 1,
+  email: "admin@jobpilot.test",
+  name: "Admin",
+  role: "admin",
+};
 
 function fakeToken() {
   const b64 = (obj) => Buffer.from(JSON.stringify(obj)).toString("base64url");
@@ -17,7 +25,8 @@ function fakeToken() {
   return `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ userId: 1, email: ADMIN.email, exp })}.sig`;
 }
 
-const daysAgo = (n) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
+const daysAgo = (n) =>
+  new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
 
 const LENA = {
   id: 2,
@@ -49,7 +58,12 @@ const LENA_STATS = {
     anzahl: [0, 1, 3, 2, 0, 4, 1, 2, 5, 3, 1, 2][i],
   })),
   bewerbungen: [
-    { id: 11, firma: "SAP", position: "Frontend Developer", status: "stufe_weiter" },
+    {
+      id: 11,
+      firma: "SAP",
+      position: "Frontend Developer",
+      status: "stufe_weiter",
+    },
     { id: 12, firma: "adidas", position: "UX Designer", status: "angenommen" },
   ],
 };
@@ -58,19 +72,27 @@ async function mockApi(page) {
   await page.route("**/api/**", (route) => {
     const url = route.request().url();
     const json = (body) =>
-      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(body),
+      });
 
-    if (url.includes("/auth/login")) return json({ token: fakeToken(), user: ADMIN });
+    if (url.includes("/auth/login"))
+      return json({ token: fakeToken(), user: ADMIN });
     if (url.includes("/auth/me")) return json({ user: ADMIN });
     if (url.includes("/admin/users/2/stats")) return json(LENA_STATS);
-    if (url.includes("/admin/users")) return json({ users: [{ ...ADMIN, created_at: daysAgo(100) }, LENA] });
+    if (url.includes("/admin/users"))
+      return json({ users: [{ ...ADMIN, created_at: daysAgo(100) }, LENA] });
     if (url.includes("statistiken")) return json({ gesamt: 0 });
     return json([]);
   });
 }
 
 test.describe("Admin-Bereich @smoke", () => {
-  test("Admin-Seite ist direkt nach dem Login ohne Reload erreichbar", async ({ page }) => {
+  test("Admin-Seite ist direkt nach dem Login ohne Reload erreichbar", async ({
+    page,
+  }) => {
     await mockApi(page);
     await page.goto("/login");
     await page.locator("#email").fill(ADMIN.email);
@@ -82,10 +104,14 @@ test.describe("Admin-Bereich @smoke", () => {
     await page.getByRole("menuitem", { name: "Admin" }).click();
 
     await expect(page).toHaveURL(/\/admin$/);
-    await expect(page.getByRole("heading", { name: "Admin-Bereich" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Admin-Bereich" }),
+    ).toBeVisible();
   });
 
-  test("Statistik eines Users zeigt Kennzahlen und Bewerbungen", async ({ page }) => {
+  test("Statistik eines Users zeigt Kennzahlen und Bewerbungen", async ({
+    page,
+  }) => {
     await mockApi(page);
     await page.addInitScript(
       ([t, u]) => {
@@ -101,11 +127,17 @@ test.describe("Admin-Bereich @smoke", () => {
       .click();
 
     await expect(page).toHaveURL(/\/admin\/users\/2\/statistik$/);
-    await expect(page.getByRole("heading", { name: "Statistik: Lena Fleißig" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Statistik: Lena Fleißig" }),
+    ).toBeVisible();
 
     const cards = page.locator(".admin-stat-card");
-    await expect(cards.filter({ hasText: "Rückmeldequote" })).toContainText("60 %");
-    await expect(cards.filter({ hasText: "Letzte Aktivität" })).toContainText("vor 2 Tagen");
+    await expect(cards.filter({ hasText: "Rückmeldequote" })).toContainText(
+      "60 %",
+    );
+    await expect(cards.filter({ hasText: "Letzte Aktivität" })).toContainText(
+      "vor 2 Tagen",
+    );
 
     const sap = page.locator("tbody tr", { hasText: "SAP" });
     await expect(sap).toContainText("Frontend Developer");

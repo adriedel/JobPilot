@@ -12,7 +12,9 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const { version } = JSON.parse(
-  readFileSync(new URL("../node_modules/@playwright/test/package.json", import.meta.url)),
+  readFileSync(
+    new URL("../node_modules/@playwright/test/package.json", import.meta.url),
+  ),
 );
 const image = `mcr.microsoft.com/playwright:v${version}-noble`;
 const cwd = process.cwd();
@@ -22,14 +24,21 @@ console.log(`→ Erzeuge Screenshots in ${image}`);
 const result = spawnSync(
   "docker",
   [
-    "run", "--rm", "--ipc=host",
+    "run",
+    "--rm",
+    "--ipc=host",
     // eigenes node_modules im Container (Linux-Binaries), Projekt-Dateien gemountet
-    "-v", `${cwd}:/work`,
-    "-v", "/work/node_modules",
-    "-w", "/work",
-    "-e", "CI=1",
+    "-v",
+    `${cwd}:/work`,
+    "-v",
+    "/work/node_modules",
+    "-w",
+    "/work",
+    "-e",
+    "CI=1",
     image,
-    "sh", "-c",
+    "sh",
+    "-c",
     "npm ci --no-audit --no-fund && npx playwright test --grep @visual --update-snapshots",
   ],
   { stdio: "inherit" },
